@@ -163,9 +163,7 @@ exports.ExpenseSplitScalarFieldEnum = {
 exports.BudgetScalarFieldEnum = {
     id: 'id',
     userId: 'userId',
-    categoryId: 'categoryId',
     amount: 'amount',
-    spent: 'spent',
     month: 'month',
     year: 'year',
     warningAt: 'warningAt',
@@ -281,8 +279,7 @@ exports.ExpenseSplitOrderByRelevanceFieldEnum = {
 };
 exports.BudgetOrderByRelevanceFieldEnum = {
     id: 'id',
-    userId: 'userId',
-    categoryId: 'categoryId'
+    userId: 'userId'
 };
 exports.JsonNullValueFilter = {
     DbNull: exports.DbNull,

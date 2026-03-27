@@ -131,6 +131,7 @@ let ExpenseService = class ExpenseService {
             throw new common_1.BadRequestException("amount phải > 0");
         const splits = this.buildSplits(amount, dto.splitType, dto.participants, dto.customSplits);
         const created = await this.prisma.$transaction(async (tx) => {
+            const expenseDate = dto.date ? new Date(dto.date) : new Date();
             const expense = await tx.expense.create({
                 data: {
                     tripId,
@@ -140,7 +141,7 @@ let ExpenseService = class ExpenseService {
                     description: dto.description,
                     paidById: dto.paidById,
                     type: dto.participants.length > 1 ? "SHARED" : "PERSONAL",
-                    date: dto.date ? new Date(dto.date) : new Date(),
+                    date: expenseDate,
                     receipt: dto.receipt,
                 },
             });

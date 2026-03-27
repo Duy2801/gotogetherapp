@@ -220,9 +220,7 @@ export type ExpenseSplitScalarFieldEnum = (typeof ExpenseSplitScalarFieldEnum)[k
 export const BudgetScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
-  categoryId: 'categoryId',
   amount: 'amount',
-  spent: 'spent',
   month: 'month',
   year: 'year',
   warningAt: 'warningAt',
@@ -410,8 +408,7 @@ export type ExpenseSplitOrderByRelevanceFieldEnum = (typeof ExpenseSplitOrderByR
 
 export const BudgetOrderByRelevanceFieldEnum = {
   id: 'id',
-  userId: 'userId',
-  categoryId: 'categoryId'
+  userId: 'userId'
 } as const
 
 export type BudgetOrderByRelevanceFieldEnum = (typeof BudgetOrderByRelevanceFieldEnum)[keyof typeof BudgetOrderByRelevanceFieldEnum]

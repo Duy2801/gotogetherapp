@@ -14,8 +14,17 @@ import FontAwesome6 from '@react-native-vector-icons/fontawesome6';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../reducers/store';
 import { PRIMARY_COLOR } from '../../../constants/color';
-import { tripDetailApi, TripDetail, Expense, Member } from '../../tripdetail/api';
-import { formatMoney, formatDate, formatCompactMoney } from '../../../utils/format';
+import {
+  tripDetailApi,
+  TripDetail,
+  Expense,
+  Member,
+} from '../../tripdetail/api';
+import {
+  formatMoney,
+  formatDate,
+  formatCompactMoney,
+} from '../../../utils/format';
 
 type TabType = 'info' | 'expenses' | 'settlement';
 
@@ -26,7 +35,13 @@ interface SettlementItem {
   status: 'UNPAID' | 'PAID' | 'CONFIRMED';
 }
 
-const SpendingDetail = ({ navigation, route }: { navigation: any; route: any }) => {
+const SpendingDetail = ({
+  navigation,
+  route,
+}: {
+  navigation: any;
+  route: any;
+}) => {
   const tripId = route.params?.tripId;
   const currentUser = useSelector((state: RootState) => state.login.user);
 
@@ -73,7 +88,9 @@ const SpendingDetail = ({ navigation, route }: { navigation: any; route: any }) 
         if (split.userId !== expense.paidBy.id) {
           const key = `${split.userId}-${expense.paidBy.id}`;
           const from = tripData?.members.find(m => m.userId === split.userId);
-          const to = tripData?.members.find(m => m.userId === expense.paidBy.id);
+          const to = tripData?.members.find(
+            m => m.userId === expense.paidBy.id,
+          );
 
           if (from && to) {
             if (settledMap.has(key)) {
@@ -84,7 +101,11 @@ const SpendingDetail = ({ navigation, route }: { navigation: any; route: any }) 
                 from,
                 to,
                 amount: split.amount,
-                status: split.confirmed ? 'CONFIRMED' : split.isPaid ? 'PAID' : 'UNPAID',
+                status: split.confirmed
+                  ? 'CONFIRMED'
+                  : split.isPaid
+                  ? 'PAID'
+                  : 'UNPAID',
               });
             }
           }
@@ -95,11 +116,17 @@ const SpendingDetail = ({ navigation, route }: { navigation: any; route: any }) 
     return Array.from(settledMap.values()).sort((a, b) => b.amount - a.amount);
   }, [expenses, tripData?.members]);
 
-  const totalSpent = useMemo(() => expenses.reduce((sum, e) => sum + e.amount, 0), [expenses]);
+  const totalSpent = useMemo(
+    () => expenses.reduce((sum, e) => sum + e.amount, 0),
+    [expenses],
+  );
 
   // Tính toán per-member breakdown
   const memberBreakdown = useMemo(() => {
-    const breakdown: Record<string, { paid: number; owes: number; member: Member }> = {};
+    const breakdown: Record<
+      string,
+      { paid: number; owes: number; member: Member }
+    > = {};
 
     tripData?.members.forEach(member => {
       breakdown[member.userId] = { paid: 0, owes: 0, member };
@@ -144,35 +171,20 @@ const SpendingDetail = ({ navigation, route }: { navigation: any; route: any }) 
     <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
       {/* Header */}
       <View style={styles.headerRow}>
-        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-          <FontAwesome6 name="chevron-left" size={20} color="#111827" iconStyle="solid" />
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <FontAwesome6
+            name="chevron-left"
+            size={20}
+            color="#111827"
+            iconStyle="solid"
+          />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{tripData.name}</Text>
         <View style={styles.headerPlaceholder} />
       </View>
-
-      {/* Summary Cards */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.summaryScroll}
-        contentContainerStyle={styles.summaryContent}
-      >
-        <View style={styles.summaryCard}>
-          <Text style={styles.summaryLabel}>Tổng chi tiêu</Text>
-          <Text style={styles.summaryValue}>{formatCompactMoney(totalSpent)}</Text>
-        </View>
-        <View style={styles.summaryCard}>
-          <Text style={styles.summaryLabel}>Ngân sách</Text>
-          <Text style={styles.summaryValue}>
-            {formatCompactMoney(tripData.totalBudget || 0)}
-          </Text>
-        </View>
-        <View style={styles.summaryCard}>
-          <Text style={styles.summaryLabel}>Thành viên</Text>
-          <Text style={styles.summaryValue}>{tripData.memberCount}</Text>
-        </View>
-      </ScrollView>
 
       {/* Tab Bar */}
       <View style={styles.tabBar}>
@@ -182,7 +194,12 @@ const SpendingDetail = ({ navigation, route }: { navigation: any; route: any }) 
             style={[styles.tab, selectedTab === tab && styles.tabActive]}
             onPress={() => setSelectedTab(tab)}
           >
-            <Text style={[styles.tabText, selectedTab === tab && styles.tabTextActive]}>
+            <Text
+              style={[
+                styles.tabText,
+                selectedTab === tab && styles.tabTextActive,
+              ]}
+            >
               {tab === 'info' && 'Thông tin'}
               {tab === 'expenses' && 'Chi phí'}
               {tab === 'settlement' && 'Chia tiền'}
@@ -194,11 +211,21 @@ const SpendingDetail = ({ navigation, route }: { navigation: any; route: any }) 
       {/* Content */}
       <ScrollView
         contentContainerStyle={styles.contentContainer}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[PRIMARY_COLOR]} />}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={[PRIMARY_COLOR]}
+          />
+        }
       >
-        {selectedTab === 'info' && <TripInfoTab trip={tripData} memberBreakdown={memberBreakdown} />}
+        {selectedTab === 'info' && (
+          <TripInfoTab trip={tripData} memberBreakdown={memberBreakdown} />
+        )}
         {selectedTab === 'expenses' && <ExpensesTab expenses={expenses} />}
-        {selectedTab === 'settlement' && <SettlementTab items={settledItems} totalSpent={totalSpent} />}
+        {selectedTab === 'settlement' && (
+          <SettlementTab items={settledItems} totalSpent={totalSpent} />
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -213,10 +240,8 @@ const TripInfoTab = ({
   memberBreakdown: Array<{ paid: number; owes: number; member: Member }>;
 }) => (
   <View style={styles.tabContent}>
-    {/* Trip Info Card */}
     <View style={styles.card}>
       <View style={styles.cardHeader}>
-        <FontAwesome6 name="info-circle" size={16} color={PRIMARY_COLOR} iconStyle="solid" />
         <Text style={styles.cardTitle}>Thông tin chuyến đi</Text>
       </View>
       <View style={styles.cardBody}>
@@ -232,13 +257,22 @@ const TripInfoTab = ({
         </View>
         <View style={styles.infoRow}>
           <Text style={styles.infoLabel}>Trạng thái:</Text>
-          <View style={[styles.statusBadge, { backgroundColor: getStatusColor(trip.status) }]}>
-            <Text style={styles.statusText}>{translateStatus(trip.status)}</Text>
+          <View
+            style={[
+              styles.statusBadge,
+              { backgroundColor: getStatusColor(trip.status) },
+            ]}
+          >
+            <Text style={styles.statusText}>
+              {translateStatus(trip.status)}
+            </Text>
           </View>
         </View>
         <View style={styles.infoRow}>
           <Text style={styles.infoLabel}>Tổng ngân sách:</Text>
-          <Text style={styles.infoValue}>{formatMoney(trip.totalBudget || 0)}</Text>
+          <Text style={styles.infoValue}>
+            {formatMoney(trip.totalBudget || 0)}
+          </Text>
         </View>
       </View>
     </View>
@@ -246,8 +280,15 @@ const TripInfoTab = ({
     {/* Members Breakdown */}
     <View style={styles.card}>
       <View style={styles.cardHeader}>
-        <FontAwesome6 name="users" size={16} color={PRIMARY_COLOR} iconStyle="solid" />
-        <Text style={styles.cardTitle}>Thành viên & Tính toán ({trip.memberCount})</Text>
+        <FontAwesome6
+          name="users"
+          size={16}
+          color={PRIMARY_COLOR}
+          iconStyle="solid"
+        />
+        <Text style={styles.cardTitle}>
+          Thành viên & Tính toán ({trip.memberCount})
+        </Text>
       </View>
       <View style={styles.cardBody}>
         <View style={styles.breakdownHeader}>
@@ -261,21 +302,44 @@ const TripInfoTab = ({
           const balance = item.paid - item.owes;
           const isPositive = balance > 0;
           return (
-            <View key={item.member.id} style={[styles.breakdownRow, idx > 0 && styles.breakdownRowBorder]}>
+            <View
+              key={item.member.id}
+              style={[
+                styles.breakdownRow,
+                idx > 0 && styles.breakdownRowBorder,
+              ]}
+            >
               <View style={styles.memberCol}>
                 {item.member.avatar ? (
-                  <Image source={{ uri: item.member.avatar }} style={styles.memberAvatar} />
+                  <Image
+                    source={{ uri: item.member.avatar }}
+                    style={styles.memberAvatar}
+                  />
                 ) : (
                   <View style={[styles.memberAvatar, styles.avatarFallback]}>
-                    <Text style={styles.avatarText}>{item.member.fullName.charAt(0).toUpperCase()}</Text>
+                    <Text style={styles.avatarText}>
+                      {item.member.fullName.charAt(0).toUpperCase()}
+                    </Text>
                   </View>
                 )}
-                <Text style={styles.memberNameSmall}>{item.member.fullName}</Text>
+                <Text style={styles.memberNameSmall}>
+                  {item.member.fullName}
+                </Text>
               </View>
-              <Text style={styles.breakdownValue}>{formatMoney(item.paid)}</Text>
-              <Text style={styles.breakdownValue}>{formatMoney(item.owes)}</Text>
-              <Text style={[styles.balanceValue, { color: isPositive ? '#10B981' : '#EF4444' }]}>
-                {isPositive ? '+' : ''}{formatMoney(balance)}
+              <Text style={styles.breakdownValue}>
+                {formatMoney(item.paid)}
+              </Text>
+              <Text style={styles.breakdownValue}>
+                {formatMoney(item.owes)}
+              </Text>
+              <Text
+                style={[
+                  styles.balanceValue,
+                  { color: isPositive ? '#10B981' : '#EF4444' },
+                ]}
+              >
+                {isPositive ? '+' : ''}
+                {formatMoney(balance)}
               </Text>
             </View>
           );
@@ -290,7 +354,12 @@ const ExpensesTab = ({ expenses }: { expenses: Expense[] }) => (
   <View style={styles.tabContent}>
     {expenses.length === 0 ? (
       <View style={styles.emptyCard}>
-        <FontAwesome6 name="receipt" size={32} color="#D1D5DB" iconStyle="solid" />
+        <FontAwesome6
+          name="receipt"
+          size={32}
+          color="#D1D5DB"
+          iconStyle="solid"
+        />
         <Text style={styles.emptyText}>Chưa có chi phí nào</Text>
       </View>
     ) : (
@@ -298,10 +367,19 @@ const ExpensesTab = ({ expenses }: { expenses: Expense[] }) => (
         <View key={expense.id} style={styles.expenseCard}>
           <View style={styles.expenseHeader}>
             <View style={styles.expenseCategory}>
-              <FontAwesome6 name="tag" size={12} color={PRIMARY_COLOR} iconStyle="solid" />
-              <Text style={styles.expenseCategoryText}>{expense.category?.name || 'Khác'}</Text>
+              <FontAwesome6
+                name="tag"
+                size={12}
+                color={PRIMARY_COLOR}
+                iconStyle="solid"
+              />
+              <Text style={styles.expenseCategoryText}>
+                {expense.category?.name || 'Khác'}
+              </Text>
             </View>
-            <Text style={styles.expenseAmount}>{formatMoney(expense.amount)}</Text>
+            <Text style={styles.expenseAmount}>
+              {formatMoney(expense.amount)}
+            </Text>
           </View>
           <Text style={styles.expenseDesc}>{expense.description}</Text>
           <Text style={styles.expenseDate}>{formatDate(expense.date)}</Text>
@@ -309,10 +387,15 @@ const ExpensesTab = ({ expenses }: { expenses: Expense[] }) => (
           {/* Payer info */}
           <View style={styles.payerRow}>
             {expense.paidBy.avatar ? (
-              <Image source={{ uri: expense.paidBy.avatar }} style={styles.payerAvatar} />
+              <Image
+                source={{ uri: expense.paidBy.avatar }}
+                style={styles.payerAvatar}
+              />
             ) : (
               <View style={[styles.payerAvatar, styles.avatarFallback]}>
-                <Text style={styles.avatarText}>{expense.paidBy.fullName.charAt(0).toUpperCase()}</Text>
+                <Text style={styles.avatarText}>
+                  {expense.paidBy.fullName.charAt(0).toUpperCase()}
+                </Text>
               </View>
             )}
             <View style={styles.payerInfo}>
@@ -325,22 +408,30 @@ const ExpensesTab = ({ expenses }: { expenses: Expense[] }) => (
           {expense.splits && expense.splits.length > 0 && (
             <View style={styles.splitsContainer}>
               <Text style={styles.splitsTitle}>
-                Chia cho {expense.splits.length} người (mỗi {formatMoney(expense.amount / expense.splits.length)}):
+                Chia cho {expense.splits.length} người (mỗi{' '}
+                {formatMoney(expense.amount / expense.splits.length)}):
               </Text>
               {expense.splits.map((split, i) => (
                 <View key={split.id} style={styles.splitRow}>
                   <View style={styles.splitUserInfo}>
                     {split.user.avatar ? (
-                      <Image source={{ uri: split.user.avatar }} style={styles.splitAvatar} />
+                      <Image
+                        source={{ uri: split.user.avatar }}
+                        style={styles.splitAvatar}
+                      />
                     ) : (
                       <View style={[styles.splitAvatar, styles.avatarFallback]}>
-                        <Text style={styles.avatarSmall}>{split.user.fullName.charAt(0).toUpperCase()}</Text>
+                        <Text style={styles.avatarSmall}>
+                          {split.user.fullName.charAt(0).toUpperCase()}
+                        </Text>
                       </View>
                     )}
                     <Text style={styles.splitUser}>{split.user.fullName}</Text>
                   </View>
                   <View style={styles.splitStatusCol}>
-                    <Text style={styles.splitAmount}>{formatMoney(split.amount)}</Text>
+                    <Text style={styles.splitAmount}>
+                      {formatMoney(split.amount)}
+                    </Text>
                     <View
                       style={[
                         styles.splitStatusBadge,
@@ -348,8 +439,8 @@ const ExpensesTab = ({ expenses }: { expenses: Expense[] }) => (
                           backgroundColor: split.confirmed
                             ? '#ECFDF5'
                             : split.isPaid
-                              ? '#FEF3C7'
-                              : '#FEE2E2',
+                            ? '#FEF3C7'
+                            : '#FEE2E2',
                         },
                       ]}
                     >
@@ -357,11 +448,19 @@ const ExpensesTab = ({ expenses }: { expenses: Expense[] }) => (
                         style={[
                           styles.splitStatusText,
                           {
-                            color: split.confirmed ? '#059669' : split.isPaid ? '#92400E' : '#DC2626',
+                            color: split.confirmed
+                              ? '#059669'
+                              : split.isPaid
+                              ? '#92400E'
+                              : '#DC2626',
                           },
                         ]}
                       >
-                        {split.confirmed ? 'Đã xác nhận' : split.isPaid ? 'Đã trả' : 'Chưa trả'}
+                        {split.confirmed
+                          ? 'Đã xác nhận'
+                          : split.isPaid
+                          ? 'Đã trả'
+                          : 'Chưa trả'}
                       </Text>
                     </View>
                   </View>
@@ -376,15 +475,28 @@ const ExpensesTab = ({ expenses }: { expenses: Expense[] }) => (
 );
 
 // Settlement Tab - bảng tính toán ai nợ ai
-const SettlementTab = ({ items, totalSpent }: { items: SettlementItem[]; totalSpent: number }) => (
+const SettlementTab = ({
+  items,
+  totalSpent,
+}: {
+  items: SettlementItem[];
+  totalSpent: number;
+}) => (
   <View style={styles.tabContent}>
     <View style={styles.card}>
       <View style={styles.cardHeader}>
-        <FontAwesome6 name="scale-balanced" size={16} color={PRIMARY_COLOR} iconStyle="solid" />
+        <FontAwesome6
+          name="scale-balanced"
+          size={16}
+          color={PRIMARY_COLOR}
+          iconStyle="solid"
+        />
         <Text style={styles.cardTitle}>Bảng tính toán chia tiền</Text>
       </View>
       <View style={styles.cardBody}>
-        <Text style={styles.settlementSummary}>Tổng chi tiêu: {formatMoney(totalSpent)}</Text>
+        <Text style={styles.settlementSummary}>
+          Tổng chi tiêu: {formatMoney(totalSpent)}
+        </Text>
 
         {items.length === 0 ? (
           <Text style={styles.emptySettlement}>✓ Đã hoàn tất thanh toán</Text>
@@ -397,13 +509,22 @@ const SettlementTab = ({ items, totalSpent }: { items: SettlementItem[]; totalSp
               <View key={idx} style={styles.settlementRow}>
                 <View style={styles.settlementPeople}>
                   {item.from.avatar ? (
-                    <Image source={{ uri: item.from.avatar }} style={styles.settlementAvatar} />
+                    <Image
+                      source={{ uri: item.from.avatar }}
+                      style={styles.settlementAvatar}
+                    />
                   ) : (
-                    <View style={[styles.settlementAvatar, styles.avatarFallback]}>
-                      <Text style={styles.avatarSmall}>{item.from.fullName.charAt(0).toUpperCase()}</Text>
+                    <View
+                      style={[styles.settlementAvatar, styles.avatarFallback]}
+                    >
+                      <Text style={styles.avatarSmall}>
+                        {item.from.fullName.charAt(0).toUpperCase()}
+                      </Text>
                     </View>
                   )}
-                  <Text style={styles.settlementFromName}>{item.from.fullName}</Text>
+                  <Text style={styles.settlementFromName}>
+                    {item.from.fullName}
+                  </Text>
 
                   <FontAwesome6
                     name="arrow-right"
@@ -414,21 +535,40 @@ const SettlementTab = ({ items, totalSpent }: { items: SettlementItem[]; totalSp
                   />
 
                   {item.to.avatar ? (
-                    <Image source={{ uri: item.to.avatar }} style={styles.settlementAvatar} />
+                    <Image
+                      source={{ uri: item.to.avatar }}
+                      style={styles.settlementAvatar}
+                    />
                   ) : (
-                    <View style={[styles.settlementAvatar, styles.avatarFallback]}>
-                      <Text style={styles.avatarSmall}>{item.to.fullName.charAt(0).toUpperCase()}</Text>
+                    <View
+                      style={[styles.settlementAvatar, styles.avatarFallback]}
+                    >
+                      <Text style={styles.avatarSmall}>
+                        {item.to.fullName.charAt(0).toUpperCase()}
+                      </Text>
                     </View>
                   )}
-                  <Text style={styles.settlementToName}>{item.to.fullName}</Text>
+                  <Text style={styles.settlementToName}>
+                    {item.to.fullName}
+                  </Text>
                 </View>
 
                 <View style={styles.settlementRight}>
-                  <Text style={[styles.settlementAmount, { color: getStatusColor(item.status) }]}>
+                  <Text
+                    style={[
+                      styles.settlementAmount,
+                      { color: getStatusColor(item.status) },
+                    ]}
+                  >
                     {formatMoney(item.amount)}
                   </Text>
                   <View style={styles.statusRow}>
-                    <View style={[styles.statusDot, { backgroundColor: getStatusColor(item.status) }]} />
+                    <View
+                      style={[
+                        styles.statusDot,
+                        { backgroundColor: getStatusColor(item.status) },
+                      ]}
+                    />
                     <Text
                       style={[
                         styles.statusLabel,

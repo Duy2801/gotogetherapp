@@ -13,6 +13,7 @@ import FontAwesome6 from '@react-native-vector-icons/fontawesome6';
 import { PRIMARY_COLOR } from '../../constants/color';
 import { SCREEN_NAME } from '../../constants/screenName';
 import { spendingApi } from './api';
+import { formatCurrency, formatCompactMoney } from '../../utils/format';
 
 type SpendingOverview = {
   quantity: number;
@@ -84,24 +85,7 @@ const SpendingScreen = ({ navigation }: { navigation: any }) => {
     );
   }, [overview.totalBudget, overview.totalSpent]);
 
-  const formatCurrency = (value: number) =>
-    `${Math.round(value).toLocaleString('vi-VN')} đ`;
 
-  const formatCompactMoney = (value: number) => {
-    const abs = Math.abs(value);
-
-    if (abs >= 1000000000) {
-      return `${(value / 1000000000).toFixed(1).replace('.0', '')}B`;
-    }
-    if (abs >= 1000000) {
-      return `${(value / 1000000).toFixed(1).replace('.0', '')}M`;
-    }
-    if (abs >= 1000) {
-      return `${(value / 1000).toFixed(0)}k`;
-    }
-
-    return `${Math.round(value)}`;
-  };
 
   return (
     <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>

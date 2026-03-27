@@ -6,7 +6,7 @@ import { Image, View } from 'react-native';
 import { SCREEN_NAME } from '../../constants/screenName';
 import HomeStack from './HomeStack';
 import CelebrateStack from './CelebrateStack';
-import SpendingScreen from '../../features/spending/SpedingScreen';
+import BudgetScreen from '../../features/budget/BudgetScreen';
 import SettingStack from './SettingStack';
 import CusTomTabar from './CusTomTabar';
 import SettingScreen from '../../features/setting/SettingScreen';
@@ -23,7 +23,7 @@ const Tab = createBottomTabNavigator();
 const ICON_MAP = {
   HomeTab: ICONTAB.HOME_ACTIVE,
   CelebrateTab: ICONTAB.CELEBRATE,
-  SpendingTab: ICONTAB.SPENDING,
+  BudgetTab: ICONTAB.SPENDING,
   SettingTab: ICONTAB.SETTING,
 };
 const TabNavigator = () => {
@@ -80,9 +80,9 @@ const TabNavigator = () => {
         options={{ tabBarLabel: 'Kỷ niệm' }}
       />
       <Tab.Screen
-        name="SpendingTab"
-        component={SpendingScreen}
-        options={{ tabBarLabel: 'Chi tiêu' }}
+        name="BudgetTab"
+        component={BudgetScreen}
+        options={{ tabBarLabel: 'Ngân sách' }}
       />
       <Tab.Screen
         name="SettingTab"

@@ -64,67 +64,6 @@ export const PaymentFilter: React.FC<PaymentFilterProps> = ({
           </TouchableOpacity>
         ))}
       </View>
-
-      {/* Trip Filter Scroll */}
-      {!loading && allTrips.length > 0 && (
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.tripFilterScroll}
-          contentContainerStyle={styles.tripFilterContent}
-        >
-          <TouchableOpacity
-            style={[
-              styles.tripFilterChip,
-              !selectedTripId && styles.tripFilterChipActive,
-            ]}
-            onPress={() => setSelectedTripId(null)}
-          >
-            <FontAwesome6
-              name="globe"
-              size={11}
-              color={!selectedTripId ? '#FFFFFF' : '#6B7280'}
-              iconStyle="solid"
-            />
-            <Text
-              style={[
-                styles.tripFilterChipText,
-                !selectedTripId && styles.tripFilterChipTextActive,
-              ]}
-            >
-              Tất cả chuyến
-            </Text>
-          </TouchableOpacity>
-          {allTrips.map(trip => (
-            <TouchableOpacity
-              key={trip.id}
-              style={[
-                styles.tripFilterChip,
-                selectedTripId === trip.id && styles.tripFilterChipActive,
-              ]}
-              onPress={() =>
-                setSelectedTripId(selectedTripId === trip.id ? null : trip.id)
-              }
-            >
-              <FontAwesome6
-                name="location-dot"
-                size={11}
-                color={selectedTripId === trip.id ? '#FFFFFF' : '#6B7280'}
-                iconStyle="solid"
-              />
-              <Text
-                style={[
-                  styles.tripFilterChipText,
-                  selectedTripId === trip.id && styles.tripFilterChipTextActive,
-                ]}
-                numberOfLines={1}
-              >
-                {trip.name}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-      )}
     </View>
   );
 };

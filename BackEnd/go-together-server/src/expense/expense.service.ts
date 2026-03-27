@@ -161,6 +161,7 @@ export class ExpenseService {
     );
 
     const created = await this.prisma.$transaction(async (tx) => {
+      const expenseDate = dto.date ? new Date(dto.date) : new Date();
       const expense = await tx.expense.create({
         data: {
           tripId,
@@ -170,7 +171,7 @@ export class ExpenseService {
           description: dto.description,
           paidById: dto.paidById,
           type: dto.participants.length > 1 ? "SHARED" : "PERSONAL",
-          date: dto.date ? new Date(dto.date) : new Date(),
+          date: expenseDate,
           receipt: dto.receipt,
         },
       });

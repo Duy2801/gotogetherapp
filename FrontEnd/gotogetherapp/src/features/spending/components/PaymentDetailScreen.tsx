@@ -243,7 +243,6 @@ const PaymentDetailScreen = ({ navigation }: { navigation: any }) => {
               </TouchableOpacity>
             </View>
 
-            {/* Counterparty info */}
             <View style={styles.modalPersonRow}>
               {group.counterpartyAvatar ? (
                 <Image
@@ -358,8 +357,6 @@ const PaymentDetailScreen = ({ navigation }: { navigation: any }) => {
                 </Text>
               </View>
             </ScrollView>
-
-            {/* Modal Footer */}
             <TouchableOpacity
               style={styles.modalViewDetailsBtn}
               onPress={() => {
@@ -370,8 +367,15 @@ const PaymentDetailScreen = ({ navigation }: { navigation: any }) => {
                 }
               }}
             >
-              <FontAwesome6 name="receipt" size={14} color={PRIMARY_COLOR} iconStyle="solid" />
-              <Text style={styles.modalViewDetailsText}>Xem chi tiết chia tiền chuyến đi</Text>
+              <FontAwesome6
+                name="receipt"
+                size={14}
+                color={PRIMARY_COLOR}
+                iconStyle="solid"
+              />
+              <Text style={styles.modalViewDetailsText}>
+                Xem chi tiết chia tiền chuyến đi
+              </Text>
             </TouchableOpacity>
           </Pressable>
         </Pressable>
@@ -384,7 +388,6 @@ const PaymentDetailScreen = ({ navigation }: { navigation: any }) => {
     const canConfirm = type === 'receivable' && primaryItem?.isPaid;
     const actionLoading = actionLoadingId === primaryItem?.splitId;
 
-    // Unique trips in this group
     const tripIds = [
       ...new Set(group.items.map((i: any) => i.tripId)),
     ] as string[];
@@ -949,7 +952,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   confirmActionButtonDisabled: {
-    opacity: 0.5,
+    // opacity: 0.5,
   },
   confirmActionText: {
     fontSize: 13,
@@ -1147,7 +1150,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: SECONDARY_COLOR,
     borderRadius: 12,
     borderWidth: 1,
     borderColor: '#E5E7EB',
@@ -1155,7 +1158,7 @@ const styles = StyleSheet.create({
   modalViewDetailsText: {
     fontSize: 13,
     fontWeight: '700',
-    color: PRIMARY_COLOR,
+    color: '#FFFFFF',
   },
 });
 

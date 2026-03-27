@@ -2,7 +2,7 @@
 CREATE TABLE `users` (
     `id` VARCHAR(191) NOT NULL,
     `email` VARCHAR(191) NOT NULL,
-    `fullName` VARCHAR(191) NOT NULL,
+    `fullName` VARCHAR(191) NULL,
     `password` VARCHAR(191) NULL,
     `dateOfBirth` DATETIME(3) NULL,
     `gender` INTEGER NULL,
@@ -11,7 +11,7 @@ CREATE TABLE `users` (
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
     `googleId` VARCHAR(191) NULL,
-    `avatar` VARCHAR(191) NOT NULL,
+    `avatar` VARCHAR(191) NULL,
 
     UNIQUE INDEX `users_email_key`(`email`),
     UNIQUE INDEX `users_googleId_key`(`googleId`),
@@ -60,14 +60,13 @@ CREATE TABLE `role_permissions` (
 CREATE TABLE `trips` (
     `id` VARCHAR(191) NOT NULL,
     `name` VARCHAR(191) NOT NULL,
-    `destination` VARCHAR(191) NOT NULL,
     `startDate` DATETIME(3) NOT NULL,
     `endDate` DATETIME(3) NOT NULL,
     `totalBudget` DECIMAL(15, 2) NULL,
-    `defaultCurrency` VARCHAR(191) NOT NULL DEFAULT 'VND',
     `status` ENUM('UPCOMING', 'ONGOING', 'COMPLETED', 'ARCHIVED') NOT NULL DEFAULT 'UPCOMING',
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
+    `images` VARCHAR(191) NULL,
 
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -82,6 +81,7 @@ CREATE TABLE `trip_members` (
     `joinedAt` DATETIME(3) NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
+    `leftAt` DATETIME(3) NULL,
 
     INDEX `trip_members_userId_fkey`(`userId`),
     UNIQUE INDEX `trip_members_tripId_userId_key`(`tripId`, `userId`),
@@ -133,6 +133,8 @@ CREATE TABLE `expense_splits` (
     `splitType` ENUM('EQUAL', 'PERCENTAGE', 'AMOUNT') NOT NULL DEFAULT 'EQUAL',
     `isPaid` BOOLEAN NOT NULL DEFAULT false,
     `paidAt` DATETIME(3) NULL,
+    `confirmed` BOOLEAN NOT NULL DEFAULT false,
+    `confirmedAt` DATETIME(3) NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
@@ -144,16 +146,16 @@ CREATE TABLE `expense_splits` (
 -- CreateTable
 CREATE TABLE `budgets` (
     `id` VARCHAR(191) NOT NULL,
-    `tripId` VARCHAR(191) NOT NULL,
-    `categoryId` VARCHAR(191) NULL,
+    `userId` VARCHAR(191) NOT NULL,
     `amount` DECIMAL(15, 2) NOT NULL,
-    `spent` DECIMAL(15, 2) NOT NULL DEFAULT 0.00,
+    `month` INTEGER NOT NULL,
+    `year` INTEGER NOT NULL,
     `warningAt` INTEGER NOT NULL DEFAULT 80,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
-    INDEX `budgets_categoryId_fkey`(`categoryId`),
-    UNIQUE INDEX `budgets_tripId_categoryId_key`(`tripId`, `categoryId`),
+    INDEX `budgets_userId_idx`(`userId`),
+    UNIQUE INDEX `budgets_userId_month_year_key`(`userId`, `month`, `year`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -191,18 +193,38 @@ CREATE TABLE `notifications` (
 
 -- CreateTable
 CREATE TABLE `devices` (
-    `id` VARCHAR(191) NOT NULL,
-    `userId` VARCHAR(191) NOT NULL,
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `deviceId` VARCHAR(191) NOT NULL,
     `fcmToken` VARCHAR(191) NOT NULL,
-    `deviceName` VARCHAR(191) NULL,
-    `deviceType` VARCHAR(191) NULL,
-    `isActive` BOOLEAN NOT NULL DEFAULT true,
-    `lastActiveAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `userId` VARCHAR(191) NOT NULL,
+    `platform` VARCHAR(191) NULL,
+    `locale` VARCHAR(191) NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
-    UNIQUE INDEX `devices_fcmToken_key`(`fcmToken`),
-    INDEX `devices_userId_fkey`(`userId`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `celebrates` (
+    `id` VARCHAR(191) NOT NULL,
+    `tripId` VARCHAR(191) NOT NULL,
+    `userId` VARCHAR(191) NOT NULL,
+    `description` TEXT NULL,
+    `date` DATETIME(3) NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `celebrate_images` (
+    `id` VARCHAR(191) NOT NULL,
+    `celebrateId` VARCHAR(191) NOT NULL,
+    `imageUrl` VARCHAR(191) NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    INDEX `celebrate_images_celebrateId_idx`(`celebrateId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -240,10 +262,7 @@ ALTER TABLE `expense_splits` ADD CONSTRAINT `expense_splits_expenseId_fkey` FORE
 ALTER TABLE `expense_splits` ADD CONSTRAINT `expense_splits_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `users`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `budgets` ADD CONSTRAINT `budgets_categoryId_fkey` FOREIGN KEY (`categoryId`) REFERENCES `categories`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE `budgets` ADD CONSTRAINT `budgets_tripId_fkey` FOREIGN KEY (`tripId`) REFERENCES `trips`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `budgets` ADD CONSTRAINT `budgets_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `users`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `itineraries` ADD CONSTRAINT `itineraries_tripId_fkey` FOREIGN KEY (`tripId`) REFERENCES `trips`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
@@ -253,3 +272,12 @@ ALTER TABLE `notifications` ADD CONSTRAINT `notifications_userId_fkey` FOREIGN K
 
 -- AddForeignKey
 ALTER TABLE `devices` ADD CONSTRAINT `devices_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `users`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `celebrates` ADD CONSTRAINT `celebrates_tripId_fkey` FOREIGN KEY (`tripId`) REFERENCES `trips`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `celebrates` ADD CONSTRAINT `celebrates_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `users`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `celebrate_images` ADD CONSTRAINT `celebrate_images_celebrateId_fkey` FOREIGN KEY (`celebrateId`) REFERENCES `celebrates`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;

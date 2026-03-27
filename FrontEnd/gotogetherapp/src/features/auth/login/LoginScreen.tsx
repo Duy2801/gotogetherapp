@@ -60,7 +60,6 @@ const LoginScreen = () => {
     }
     try {
       const response = await apiLogin({ email, password });
-
       if (response.status) {
         Toast.show({ type: 'success', text1: 'Đăng nhập thành công' });
         dispatch(
