@@ -8,14 +8,17 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ExpenseSplitModule = void 0;
 const common_1 = require("@nestjs/common");
+const prisma_module_1 = require("../prisma/prisma.module");
+const expense_split_controller_1 = require("./expense-split.controller");
+const expense_split_service_1 = require("./expense-split.service");
 let ExpenseSplitModule = class ExpenseSplitModule {
 };
 exports.ExpenseSplitModule = ExpenseSplitModule;
 exports.ExpenseSplitModule = ExpenseSplitModule = __decorate([
     (0, common_1.Module)({
-        imports: [],
-        controllers: [],
-        providers: [],
+        imports: [prisma_module_1.PrismaModule],
+        controllers: [expense_split_controller_1.ExpenseSplitController],
+        providers: [expense_split_service_1.ExpenseSplitService],
     })
 ], ExpenseSplitModule);
 //# sourceMappingURL=expense-split.module.js.map

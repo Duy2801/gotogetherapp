@@ -12,10 +12,10 @@ export class ExpenseSplitController {
 
   @Post(":id/pay")
   markAsPaid(@Param("id") splitId: string, @Req() req: any) {
-    return this.expenseSplitService.markAsPaid(req.user.id, splitId);
+    return this.expenseSplitService.markAsPaid(req.user.userId, splitId);
   }
   @Post(":id/confirm")
   confirmReceived(@Param("id") splitId: string, @Req() req: any) {
-    return this.expenseSplitService.comfirmReceived(req.user.id, splitId);
+    return this.expenseSplitService.confirmReceived(req.user.userId, splitId);
   }
 }

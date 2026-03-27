@@ -25,6 +25,7 @@ let ExpenseSplitService = class ExpenseSplitService {
             throw new common_1.NotFoundException("Khoản chia tiền không tồn tại");
         }
         if (split.userId !== userId) {
+            console.log(split.userId, userId);
             throw new common_1.ForbiddenException("Bạn không thể thanh toán khoản này");
         }
         if (split.isPaid) {
@@ -38,9 +39,10 @@ let ExpenseSplitService = class ExpenseSplitService {
             },
         });
     }
-    async comfirmReceived(userId, splitId) {
+    async confirmReceived(userId, splitId) {
         const split = await this.prisma.expenseSplit.findUnique({
             where: { id: splitId },
+            include: { expense: true },
         });
         if (!split) {
             throw new common_1.NotFoundException("Khoản chia tiền không tồn tại");
@@ -50,6 +52,9 @@ let ExpenseSplitService = class ExpenseSplitService {
         }
         if (split.confirmed) {
             throw new common_1.BadRequestException("Khoản này đã được xác nhận rồi");
+        }
+        if (String(split.expense.paidById) !== String(userId)) {
+            throw new common_1.ForbiddenException("Bạn không có quyền xác nhận khoản này");
         }
         return this.prisma.expenseSplit.update({
             where: { id: splitId },

@@ -23,10 +23,10 @@ let ExpenseSplitController = class ExpenseSplitController {
         this.expenseSplitService = expenseSplitService;
     }
     markAsPaid(splitId, req) {
-        return this.expenseSplitService.markAsPaid(req.user.id, splitId);
+        return this.expenseSplitService.markAsPaid(req.user.userId, splitId);
     }
     confirmReceived(splitId, req) {
-        return this.expenseSplitService.comfirmReceived(req.user.id, splitId);
+        return this.expenseSplitService.confirmReceived(req.user.userId, splitId);
     }
 };
 exports.ExpenseSplitController = ExpenseSplitController;

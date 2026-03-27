@@ -952,7 +952,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   confirmActionButtonDisabled: {
-    // opacity: 0.5,
+    backgroundColor: PRIMARY_COLOR,
+    opacity: 0.5,
   },
   confirmActionText: {
     fontSize: 13,

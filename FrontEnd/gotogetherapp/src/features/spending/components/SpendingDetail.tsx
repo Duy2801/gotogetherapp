@@ -13,7 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import FontAwesome6 from '@react-native-vector-icons/fontawesome6';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../reducers/store';
-import { PRIMARY_COLOR } from '../../../constants/color';
+import { PRIMARY_COLOR, SECONDARY_COLOR } from '../../../constants/color';
 import {
   tripDetailApi,
   TripDetail,
@@ -283,7 +283,7 @@ const TripInfoTab = ({
         <FontAwesome6
           name="users"
           size={16}
-          color={PRIMARY_COLOR}
+          color={SECONDARY_COLOR}
           iconStyle="solid"
         />
         <Text style={styles.cardTitle}>
@@ -698,7 +698,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F3F4F6',
   },
   tabActive: {
-    backgroundColor: '#111827',
+    backgroundColor: SECONDARY_COLOR,
   },
   tabText: {
     fontSize: 13,
