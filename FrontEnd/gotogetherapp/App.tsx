@@ -8,7 +8,8 @@ import { PaperProvider } from "react-native-paper";
 import Toast from "react-native-toast-message";
 import Layout from "./src/components/Layout/Layout";
 import ApplicationNavigator from "./src/routers";
-import NotificationToast, { CustomNotificationToast } from "./src/components/NotificationToast";
+import NotificationToast from "./src/components/NotificationToast";
+import { CustomToastComponent } from "./src/config/Toast";
 import { socketService } from "./src/services/socket.service";
 
 const queryClient = new QueryClient();
@@ -49,7 +50,7 @@ const App = () => {
             <Layout>
               <NotificationToast />
               <ApplicationNavigator />
-              <Toast config={{ notification: CustomNotificationToast as any }} />
+              <Toast config={{ notification: CustomToastComponent as any }} />
             </Layout>
           </SocketWrapper>
         </PaperProvider>

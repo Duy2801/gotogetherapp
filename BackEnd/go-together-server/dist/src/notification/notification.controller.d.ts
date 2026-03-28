@@ -35,4 +35,10 @@ export declare class NotificationController {
         readAt: Date | null;
         createdAt: Date;
     }>;
+    deleteNotification(notificationId: string): Promise<{
+        message: string;
+    }>;
+    clearAllNotifications(req: any): Promise<{
+        message: string;
+    }>;
 }

@@ -52,6 +52,16 @@ let NotificationService = class NotificationService {
             },
         });
     }
+    async deleteNotification(notificationId) {
+        return this.prisma.notification.delete({
+            where: { id: notificationId },
+        });
+    }
+    async clearAllNotifications(userId) {
+        return this.prisma.notification.deleteMany({
+            where: { userId },
+        });
+    }
     async getUserNotifications(userId, limit = 20, offset = 0) {
         const [notifications, total] = await Promise.all([
             this.prisma.notification.findMany({

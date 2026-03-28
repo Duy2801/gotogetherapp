@@ -60,6 +60,24 @@ export class NotificationService {
   }
 
   /**
+   * Delete a single notification
+   */
+  async deleteNotification(notificationId: string) {
+    return this.prisma.notification.delete({
+      where: { id: notificationId },
+    });
+  }
+
+  /**
+   * Clear all notifications for a user
+   */
+  async clearAllNotifications(userId: string) {
+    return this.prisma.notification.deleteMany({
+      where: { userId },
+    });
+  }
+
+  /**
    * Get user notifications
    */
   async getUserNotifications(userId: string, limit = 20, offset = 0) {

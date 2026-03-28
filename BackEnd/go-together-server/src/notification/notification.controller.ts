@@ -7,6 +7,7 @@ import {
   Req,
   Get,
   Query,
+  Delete,
 } from "@nestjs/common";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { JwtAuthGuard } from "src/auth/guards/jwt-auth.guard";
@@ -97,5 +98,25 @@ export class NotificationController {
   @Post(":id/read")
   async markAsRead(@Param("id") notificationId: string) {
     return this.notificationService.markAsRead(notificationId);
+  }
+
+  /**
+   * Delete a single notification
+   * DELETE /api/v1/notification/:id
+   */
+  @Delete(":id")
+  async deleteNotification(@Param("id") notificationId: string) {
+    await this.notificationService.deleteNotification(notificationId);
+    return { message: "Notification deleted successfully" };
+  }
+
+  /**
+   * Clear all notifications for current user
+   * DELETE /api/v1/notification
+   */
+  @Delete()
+  async clearAllNotifications(@Req() req: any) {
+    await this.notificationService.clearAllNotifications(req.user.userId);
+    return { message: "All notifications cleared" };
   }
 }

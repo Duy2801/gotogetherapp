@@ -58,6 +58,14 @@ let NotificationController = class NotificationController {
     async markAsRead(notificationId) {
         return this.notificationService.markAsRead(notificationId);
     }
+    async deleteNotification(notificationId) {
+        await this.notificationService.deleteNotification(notificationId);
+        return { message: "Notification deleted successfully" };
+    }
+    async clearAllNotifications(req) {
+        await this.notificationService.clearAllNotifications(req.user.userId);
+        return { message: "All notifications cleared" };
+    }
 };
 exports.NotificationController = NotificationController;
 __decorate([
@@ -85,6 +93,20 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], NotificationController.prototype, "markAsRead", null);
+__decorate([
+    (0, common_1.Delete)(":id"),
+    __param(0, (0, common_1.Param)("id")),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], NotificationController.prototype, "deleteNotification", null);
+__decorate([
+    (0, common_1.Delete)(),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], NotificationController.prototype, "clearAllNotifications", null);
 exports.NotificationController = NotificationController = __decorate([
     (0, common_1.Controller)("notification"),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
