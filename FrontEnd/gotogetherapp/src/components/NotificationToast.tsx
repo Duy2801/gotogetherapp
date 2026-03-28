@@ -1,24 +1,32 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { View, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { useDispatch } from 'react-redux';
 import Toast from 'react-native-toast-message';
 import FontAwesome6 from '@react-native-vector-icons/fontawesome6';
-import { addNotification, removeNotification } from '../reducers/notificationSlice';
-import { socketService } from '../services/socket.service';
+import {
+  addNotification,
+  removeNotification,
+} from '../reducers/notificationSlice';
 import { getToastConfig } from '../config';
+import { useSocket } from '../services/useSocket';
 
 /**
  * Global notification toast component
- * Listen to Socket events and display them
+ * Listens to Socket.IO events and displays notifications
  */
 const NotificationToast = () => {
   const dispatch = useDispatch();
+  const { socket } = useSocket();
 
   useEffect(() => {
-    // Register socket listeners
+    if (!socket) return;
+
+    /**
+     * Handle incoming notification from socket
+     */
     const handleNotification = (data: any) => {
       const notification = {
-        id: `${Date.now()}`,
+        id: `${Date.now()}-${Math.random()}`,
         type: data.type,
         title: data.title,
         message: data.message,
@@ -26,61 +34,70 @@ const NotificationToast = () => {
         timestamp: new Date(),
         isRead: false,
       };
+
+      // Add to Redux store
       dispatch(addNotification(notification));
+
+      // Show toast
       showNotificationToast(notification);
     };
 
     // Subscribe to all notification events
-    socketService.on('trip:payment-marked', handleNotification);
-    socketService.on('trip:payment-confirmed', handleNotification);
-    socketService.on('trip:user-invited', handleNotification);
-    socketService.on('trip:member-joined', handleNotification);
-    socketService.on('trip:invite-rejected', handleNotification);
-    socketService.on('trip:expense-created', handleNotification);
-    socketService.on('trip:reminder', handleNotification);
+    const events = [
+      'trip:payment-marked',
+      'trip:payment-confirmed',
+      'trip:user-invited',
+      'trip:member-joined',
+      'trip:invite-rejected',
+      'trip:expense-created',
+      'trip:reminder',
+    ];
+
+    events.forEach(event => {
+      socket.on(event, handleNotification);
+    });
 
     return () => {
       // Cleanup
-      socketService.off('trip:payment-marked', handleNotification);
-      socketService.off('trip:payment-confirmed', handleNotification);
-      socketService.off('trip:user-invited', handleNotification);
-      socketService.off('trip:member-joined', handleNotification);
-      socketService.off('trip:invite-rejected', handleNotification);
-      socketService.off('trip:expense-created', handleNotification);
-      socketService.off('trip:reminder', handleNotification);
+      events.forEach(event => {
+        socket.off(event, handleNotification);
+      });
     };
-  }, [dispatch]);
+  }, [socket, dispatch]);
 
   /**
    * Show toast based on notification type using config
    */
-  const showNotificationToast = useCallback((notification: any) => {
-    const { type, title, message, id } = notification;
-    const config = getToastConfig(type);
+  const showNotificationToast = useCallback(
+    (notification: any) => {
+      const { type, title, message, id } = notification;
+      const config = getToastConfig(type);
 
-    // Show Toast
-    Toast.show({
-      type: 'custom',
-      position: 'top',
-      duration: config.duration,
-      text1: title,
-      text2: message,
-      topOffset: 40,
-      props: {
-        backgroundColor: config.backgroundColor,
-        icon: config.icon,
-        notificationId: id,
-        onClose: () => {
-          dispatch(removeNotification(id));
+      // Show Toast
+      Toast.show({
+        type: 'custom',
+        position: 'top',
+        visibilityTime: config.duration,
+        text1: title,
+        text2: message,
+        topOffset: 40,
+        props: {
+          backgroundColor: config.backgroundColor,
+          icon: config.icon,
+          notificationId: id,
+          onClose: () => {
+            dispatch(removeNotification(id));
+          },
         },
-      },
-    });
+      });
 
-    // Auto-dismiss from Redux after display duration
-    setTimeout(() => {
-      dispatch(removeNotification(id));
-    }, config.duration + 500);
-  }, [dispatch]);
+      // Auto-dismiss from Redux after display duration
+      setTimeout(() => {
+        dispatch(removeNotification(id));
+      }, config.duration + 500);
+    },
+    [dispatch],
+  );
 
   return null;
 };
@@ -89,7 +106,8 @@ const NotificationToast = () => {
  * Custom Toast component for notifications
  */
 export const CustomNotificationToast = ({ props }: any) => {
-  const { backgroundColor, icon, text1, text2, notificationId, onClose } = props;
+  const { backgroundColor, icon, text1, text2, notificationId, onClose } =
+    props;
 
   return (
     <View style={[styles.container, { backgroundColor }]}>

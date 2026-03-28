@@ -14,7 +14,13 @@ interface AuthenticatedSocket extends Socket {
 }
 
 @WebSocketGateway({
-  cors: { origin: "*" },
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"],
+    credentials: false,
+  },
+  transports: ["websocket", "polling"],
+  path: "/socket.io/",
 })
 export class NotificationGateway
   implements OnGatewayConnection, OnGatewayDisconnect
@@ -32,10 +38,7 @@ export class NotificationGateway
    */
   async handleConnection(client: AuthenticatedSocket) {
     try {
-      // Try to get token from handshake auth first, then headers
       let token: string | undefined;
-
-      // Method 1: From auth object (socket.io client usually sends here)
       if (
         client.handshake &&
         typeof client.handshake === "object" &&
@@ -52,20 +55,16 @@ export class NotificationGateway
       }
 
       if (!token) {
-        console.warn("No token found in socket handshake, disconnecting");
         client.disconnect(true);
         return;
       }
-
       const payload = this.jwtService.verify(token, {
         secret: process.env.JWT_SECRET,
       });
       client.userId = payload.sub || payload.id;
-
       this.connectedUsers.set(client.userId as string, client);
-      console.log(`✓ User connected: ${client.userId} (socket: ${client.id})`);
     } catch (error: any) {
-      console.error("Socket authentication failed:", error.message);
+      console.error("Full error:", error);
       client.disconnect(true);
     }
   }
@@ -88,7 +87,6 @@ export class NotificationGateway
     if (!tripId) return;
     const room = SocketRooms.trip(tripId);
     client.join(room);
-    console.log(`✓ ${client.userId} joined trip room: ${tripId}`);
   }
 
   /**

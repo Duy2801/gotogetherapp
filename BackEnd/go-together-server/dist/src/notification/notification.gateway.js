@@ -35,7 +35,6 @@ let NotificationGateway = class NotificationGateway {
                 token = headers?.authorization?.split(" ")[1];
             }
             if (!token) {
-                console.warn("No token found in socket handshake, disconnecting");
                 client.disconnect(true);
                 return;
             }
@@ -44,10 +43,9 @@ let NotificationGateway = class NotificationGateway {
             });
             client.userId = payload.sub || payload.id;
             this.connectedUsers.set(client.userId, client);
-            console.log(`✓ User connected: ${client.userId} (socket: ${client.id})`);
         }
         catch (error) {
-            console.error("Socket authentication failed:", error.message);
+            console.error("Full error:", error);
             client.disconnect(true);
         }
     }
@@ -62,7 +60,6 @@ let NotificationGateway = class NotificationGateway {
             return;
         const room = socket_events_enum_1.SocketRooms.trip(tripId);
         client.join(room);
-        console.log(`✓ ${client.userId} joined trip room: ${tripId}`);
     }
     handleLeaveTrip(client, tripId) {
         if (!tripId)
@@ -124,7 +121,13 @@ __decorate([
 ], NotificationGateway.prototype, "handleLeaveTrip", null);
 exports.NotificationGateway = NotificationGateway = __decorate([
     (0, websockets_1.WebSocketGateway)({
-        cors: { origin: "*" },
+        cors: {
+            origin: "*",
+            methods: ["GET", "POST"],
+            credentials: false,
+        },
+        transports: ["websocket", "polling"],
+        path: "/socket.io/",
     }),
     __metadata("design:paramtypes", [jwt_1.JwtService])
 ], NotificationGateway);

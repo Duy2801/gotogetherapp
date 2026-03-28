@@ -13,8 +13,12 @@ async function bootstrap() {
         defaultVersion: "1",
     });
     app.enableCors({
-        origin: process.env.FRONTEND_URL || "http://localhost:3001",
+        origin: function (origin, callback) {
+            callback(null, true);
+        },
         credentials: true,
+        allowedHeaders: ["Content-Type", "Authorization"],
+        methods: ["GET", "POST", "OPTIONS"],
     });
     const config = new swagger_1.DocumentBuilder()
         .setTitle("GoToGeTher API")

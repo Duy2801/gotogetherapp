@@ -32,10 +32,10 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
   onClose,
 }) => {
   const {
-    notifications,
+    notifications = [],
     loading,
     refreshing,
-    totalNotifications,
+    totalNotifications = 0,
     hasMore,
     markAsReadHandler,
     deleteHandler,
@@ -44,7 +44,9 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
     loadMore,
   } = useNotifications();
 
-  const [selectedForDelete, setSelectedForDelete] = useState<string | null>(null);
+  const [selectedForDelete, setSelectedForDelete] = useState<string | null>(
+    null,
+  );
 
   /**
    * Handle delete with confirmation
@@ -123,7 +125,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
           ]}
         >
           <FontAwesome6
-            name={getIcon(item.type)}
+            name={getIcon(item.type) as any}
             size={16}
             color="#FFFFFF"
             iconStyle="solid"
@@ -134,10 +136,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
         <View style={styles.contentSection}>
           <View>
             <Text
-              style={[
-                styles.title,
-                !item.isRead && styles.titleUnread,
-              ]}
+              style={[styles.title, !item.isRead && styles.titleUnread]}
               numberOfLines={1}
             >
               {item.title}
@@ -146,15 +145,11 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
               {item.message}
             </Text>
           </View>
-          <Text style={styles.timestamp}>
-            {formatDate(item.createdAt)}
-          </Text>
+          <Text style={styles.timestamp}>{formatDate(item.createdAt)}</Text>
         </View>
 
         {/* Unread indicator */}
-        {!item.isRead && (
-          <View style={styles.unreadBadge} />
-        )}
+        {!item.isRead && <View style={styles.unreadBadge} />}
 
         {/* Actions */}
         <View style={styles.actions}>
@@ -199,7 +194,9 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
         iconStyle="solid"
       />
       <Text style={styles.emptyText}>Không có thông báo</Text>
-      <Text style={styles.emptySubtext}>Tất cả thông báo sẽ xuất hiện ở đây</Text>
+      <Text style={styles.emptySubtext}>
+        Tất cả thông báo sẽ xuất hiện ở đây
+      </Text>
     </View>
   );
 
@@ -210,10 +207,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
       animationType="slide"
       onRequestClose={onClose}
     >
-      <Pressable
-        style={styles.overlay}
-        onPress={onClose}
-      >
+      <Pressable style={styles.overlay} onPress={onClose}>
         <Pressable
           style={styles.modalContent}
           onPress={e => e.stopPropagation()}
@@ -222,10 +216,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
           <View style={styles.header}>
             <View style={styles.dragHandle} />
             <Text style={styles.headerTitle}>Thông báo</Text>
-            <TouchableOpacity
-              onPress={onClose}
-              style={styles.closeButton}
-            >
+            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
               <FontAwesome6
                 name="xmark"
                 size={18}

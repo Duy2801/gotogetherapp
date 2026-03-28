@@ -172,6 +172,9 @@ let ExpenseService = class ExpenseService {
                 },
             });
         });
+        if (!created) {
+            throw new common_1.BadRequestException("Failed to create expense");
+        }
         this.notificationGateway.emitExpenseCreated(tripId, {
             type: "EXPENSE_CREATED",
             title: "Chi phí mới",

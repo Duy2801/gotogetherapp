@@ -18,10 +18,11 @@ import TripCard from './components/TripCard';
 import EmptyTrips from './components/EmptyTrips';
 import TripFilter from './components/TripFilter';
 import { useNavigation } from '@react-navigation/native';
-import { HELLO, Notification } from '../../assets';
+import { HELLO } from '../../assets';
 import { SCREEN_NAME } from '../../constants/screenName';
 import AddTripScreen from './components/AddTripScreen';
 import SimpleFloatingButton from '../../components/SimpleFloatingButton';
+import NotificationButton from '../../components/NotificationButton';
 
 const HomeScreen = () => {
   const navigation = useNavigation();
@@ -142,12 +143,7 @@ const HomeScreen = () => {
           </View>
           <Text style={styles.userName}>{user?.fullName || 'Người dùng'}</Text>
         </View>
-        <TouchableOpacity onPress={() => console.log('Notifications')}>
-          <Image
-            source={Notification.NOTIFI}
-            style={{ width: 20, height: 20 }}
-          />
-        </TouchableOpacity>
+        <NotificationButton />
       </View>
 
       <View style={styles.bodyContainer}>

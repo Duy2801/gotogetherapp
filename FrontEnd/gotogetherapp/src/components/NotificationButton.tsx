@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { TouchableOpacity, StyleSheet, View, Text, Animated } from 'react-native';
 import { useSelector } from 'react-redux';
 import FontAwesome6 from '@react-native-vector-icons/fontawesome6';
-import { RootState } from '../../reducers/store';
+import { RootState } from '../reducers/store';
 import { NotificationCenter } from '../features/notification/NotificationCenter';
-import { PRIMARY_COLOR } from '../../constants/color';
+import { PRIMARY_COLOR } from '../constants/color';
 
 /**
  * Notification Button Component

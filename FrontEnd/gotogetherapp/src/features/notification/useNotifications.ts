@@ -152,8 +152,15 @@ export const useNotifications = (pageSize = 20): UseNotificationsReturn => {
 
   // Fetch notifications on mount
   useEffect(() => {
-    fetchNotifications(1);
-  }, []);
+    const loadInitialNotifications = async () => {
+      try {
+        await fetchNotifications(1);
+      } catch (error) {
+        console.error('Failed to load initial notifications:', error);
+      }
+    };
+    loadInitialNotifications();
+  }, [fetchNotifications]);
 
   return {
     notifications,

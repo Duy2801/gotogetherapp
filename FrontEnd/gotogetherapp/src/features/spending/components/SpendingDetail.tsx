@@ -25,7 +25,7 @@ import {
   formatDate,
   formatCompactMoney,
 } from '../../../utils/format';
-import { socketService } from '../../../services/socket.service';
+import { useSocket } from '../../../services/useSocket';
 
 type TabType = 'info' | 'expenses' | 'settlement';
 
@@ -46,6 +46,7 @@ const SpendingDetail = ({
   const tripId = route.params?.tripId;
   const tripIds = route.params?.tripIds;
   const currentUser = useSelector((state: RootState) => state.login.user);
+  const { socket } = useSocket();
 
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -88,22 +89,26 @@ const SpendingDetail = ({
 
   // Join trip rooms on mount
   useEffect(() => {
+    if (!socket) return;
+
     const ids = tripIds || (tripId ? [tripId] : []);
-    ids.forEach(id => {
+    ids.forEach((id: string) => {
       if (id) {
-        socketService.joinTrip(id);
+        socket.emit('join:trip', id);
+        console.log('🚀 Joined trip room:', id);
       }
     });
 
     return () => {
       // Leave rooms on unmount
-      ids.forEach(id => {
+      ids.forEach((id: string) => {
         if (id) {
-          socketService.leaveTrip(id);
+          socket.emit('leave:trip', id);
+          console.log('✓ Left trip room:', id);
         }
       });
     };
-  }, [tripIds, tripId]);
+  }, [socket, tripIds, tripId]);
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);

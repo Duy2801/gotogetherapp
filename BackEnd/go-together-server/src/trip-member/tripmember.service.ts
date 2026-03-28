@@ -89,6 +89,14 @@ export class TripMemberService {
       select: { fullName: true },
     });
 
+    if (!trip) {
+      throw new NotFoundException("Trip not found");
+    }
+
+    if (!owner) {
+      throw new NotFoundException("User not found");
+    }
+
     const member = await this.prisma.tripMember.create({
       data: {
         tripId,

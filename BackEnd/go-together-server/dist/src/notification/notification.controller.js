@@ -49,7 +49,7 @@ let NotificationController = class NotificationController {
             where: { id: currentUserId },
             select: { fullName: true },
         });
-        await this.notificationService.sendReminder(toUserId, currentUser.fullName, 0, dto.message);
+        await this.notificationService.sendReminder(toUserId, currentUser?.fullName || "Unknown", 0, dto.message);
         return { message: "Reminder sent successfully" };
     }
     async getNotifications(req, limit = "20", offset = "0") {

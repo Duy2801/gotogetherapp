@@ -76,6 +76,12 @@ let TripMemberService = class TripMemberService {
             where: { id: ownerId },
             select: { fullName: true },
         });
+        if (!trip) {
+            throw new common_1.NotFoundException("Trip not found");
+        }
+        if (!owner) {
+            throw new common_1.NotFoundException("User not found");
+        }
         const member = await this.prisma.tripMember.create({
             data: {
                 tripId,

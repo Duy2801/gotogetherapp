@@ -66,7 +66,7 @@ export class NotificationController {
     // Send reminder
     await this.notificationService.sendReminder(
       toUserId,
-      currentUser.fullName,
+      currentUser?.fullName || "Unknown",
       0,
       dto.message,
     );

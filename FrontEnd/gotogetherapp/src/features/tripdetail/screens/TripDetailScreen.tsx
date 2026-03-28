@@ -23,7 +23,7 @@ import AddMemberModal from '../components/AddMemberModal';
 import { tripDetailApi, TripDetail, Expense, Member } from '../api';
 import SimpleFloatingButton from '../../../components/SimpleFloatingButton';
 import { RootState } from '../../../reducers/store';
-import { socketService } from '../../../services/socket.service';
+import { useSocket } from '../../../services/useSocket';
 
 interface TripDetailScreenProps {
   route: any;
@@ -36,6 +36,7 @@ const TripDetailScreen: React.FC<TripDetailScreenProps> = ({
 }) => {
   const { tripId } = route.params;
   const currentUser = useSelector((state: RootState) => state.login.user);
+  const { socket } = useSocket();
 
   const [tripDetail, setTripDetail] = useState<TripDetail | null>(null);
   const [expenses, setExpenses] = useState<Expense[]>([]);
@@ -79,18 +80,16 @@ const TripDetailScreen: React.FC<TripDetailScreenProps> = ({
 
   // Join and leave trip room for socket events
   useEffect(() => {
-    if (tripId) {
-      socketService.joinTrip(tripId);
-      console.log('✓ Joined trip room:', tripId);
-    }
+    if (!socket || !tripId) return;
+
+    socket.emit('join:trip', tripId);
+    console.log('✓ Joined trip room:', tripId);
 
     return () => {
-      if (tripId) {
-        socketService.leaveTrip(tripId);
-        console.log('✗ Left trip room:', tripId);
-      }
+      socket.emit('leave:trip', tripId);
+      console.log('✗ Left trip room:', tripId);
     };
-  }, [tripId]);
+  }, [socket, tripId]);
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);

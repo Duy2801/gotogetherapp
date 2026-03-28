@@ -204,6 +204,10 @@ export class ExpenseService {
       });
     });
 
+    if (!created) {
+      throw new BadRequestException("Failed to create expense");
+    }
+
     // Emit expense created notification
     this.notificationGateway.emitExpenseCreated(tripId, {
       type: "EXPENSE_CREATED",

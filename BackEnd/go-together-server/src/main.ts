@@ -15,8 +15,13 @@ async function bootstrap() {
 
   // Enable CORS for Socket.IO
   app.enableCors({
-    origin: process.env.FRONTEND_URL || "http://localhost:3001",
+    origin: function (origin, callback) {
+      // Allow requests from any origin for Socket.IO
+      callback(null, true);
+    },
     credentials: true,
+    allowedHeaders: ["Content-Type", "Authorization"],
+    methods: ["GET", "POST", "OPTIONS"],
   });
 
   const config = new DocumentBuilder()

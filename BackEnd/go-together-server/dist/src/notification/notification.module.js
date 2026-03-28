@@ -8,6 +8,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.NotificationModule = void 0;
 const common_1 = require("@nestjs/common");
+const jwt_1 = require("@nestjs/jwt");
+const config_1 = require("@nestjs/config");
 const notification_service_1 = require("./notification.service");
 const notification_gateway_1 = require("./notification.gateway");
 const notification_controller_1 = require("./notification.controller");
@@ -16,7 +18,16 @@ let NotificationModule = class NotificationModule {
 exports.NotificationModule = NotificationModule;
 exports.NotificationModule = NotificationModule = __decorate([
     (0, common_1.Module)({
-        imports: [],
+        imports: [
+            jwt_1.JwtModule.registerAsync({
+                imports: [config_1.ConfigModule],
+                inject: [config_1.ConfigService],
+                useFactory: (configService) => ({
+                    secret: configService.get("JWT_SECRET"),
+                    signOptions: { expiresIn: "7d" },
+                }),
+            }),
+        ],
         controllers: [notification_controller_1.NotificationController],
         providers: [notification_service_1.NotificationService, notification_gateway_1.NotificationGateway],
         exports: [notification_service_1.NotificationService, notification_gateway_1.NotificationGateway],

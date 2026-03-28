@@ -25,10 +25,11 @@ import {
 } from '../../../utils/format';
 import { PaymentFilter, FilterType } from './PaymentFilter';
 import { SCREEN_NAME } from '../../../constants/screenName';
-import { socketService } from '../../../services/socket.service';
+import { useSocket } from '../../../services/useSocket';
 
 const PaymentDetailScreen = ({ navigation }: { navigation: any }) => {
   const currentUser = useSelector((state: RootState) => state.login.user);
+  const { socket } = useSocket();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
@@ -217,28 +218,6 @@ const PaymentDetailScreen = ({ navigation }: { navigation: any }) => {
     if (!detailModalGroup) return null;
     const { group, type } = detailModalGroup;
     const tripBreakdowns = groupItemsByTrip(group.items);
-
-    // Join trip rooms when modal opens
-    React.useEffect(() => {
-      tripBreakdowns.forEach(trip => {
-        if (trip.tripName) {
-          const tripId = group.items.find(item => item.tripName === trip.tripName)?.tripId;
-          if (tripId) {
-            socketService.joinTrip(tripId);
-          }
-        }
-      });
-
-      return () => {
-        // Leave trip rooms when modal closes
-        tripBreakdowns.forEach(trip => {
-          const tripId = group.items.find(item => item.tripName === trip.tripName)?.tripId;
-          if (tripId) {
-            socketService.leaveTrip(tripId);
-          }
-        });
-      };
-    }, [detailModalGroup]);
 
     return (
       <Modal
