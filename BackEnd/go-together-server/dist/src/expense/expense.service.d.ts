@@ -1,10 +1,12 @@
 import { PrismaService } from "src/prisma/prisma.service";
 import { TripMemberService } from "src/trip-member/tripmember.service";
+import { NotificationGateway } from "src/notification/notification.gateway";
 import { CreateExpense } from "./dto/create-Expense.dto";
 export declare class ExpenseService {
     private prisma;
     private tripMember;
-    constructor(prisma: PrismaService, tripMember: TripMemberService);
+    private notificationGateway;
+    constructor(prisma: PrismaService, tripMember: TripMemberService, notificationGateway: NotificationGateway);
     getExpenseCategories(userId: string, tripId: string): Promise<{
         id: string;
         name: string;

@@ -23,6 +23,7 @@ import AddMemberModal from '../components/AddMemberModal';
 import { tripDetailApi, TripDetail, Expense, Member } from '../api';
 import SimpleFloatingButton from '../../../components/SimpleFloatingButton';
 import { RootState } from '../../../reducers/store';
+import { socketService } from '../../../services/socket.service';
 
 interface TripDetailScreenProps {
   route: any;
@@ -74,6 +75,21 @@ const TripDetailScreen: React.FC<TripDetailScreenProps> = ({
 
   useEffect(() => {
     fetchTripDetail();
+  }, [tripId]);
+
+  // Join and leave trip room for socket events
+  useEffect(() => {
+    if (tripId) {
+      socketService.joinTrip(tripId);
+      console.log('✓ Joined trip room:', tripId);
+    }
+
+    return () => {
+      if (tripId) {
+        socketService.leaveTrip(tripId);
+        console.log('✗ Left trip room:', tripId);
+      }
+    };
   }, [tripId]);
 
   const onRefresh = useCallback(() => {

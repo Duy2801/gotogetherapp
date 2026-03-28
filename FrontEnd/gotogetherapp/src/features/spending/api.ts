@@ -262,4 +262,18 @@ export const spendingApi = {
       throw error as ApiError;
     }
   },
+
+  sendReminder: async (
+    toUserId: string,
+    message: string,
+  ): Promise<{ message: string }> => {
+    try {
+      const response = await api.post(`/notification/remind/${toUserId}`, {
+        message,
+      });
+      return response as unknown as { message: string };
+    } catch (error) {
+      throw error as ApiError;
+    }
+  },
 };

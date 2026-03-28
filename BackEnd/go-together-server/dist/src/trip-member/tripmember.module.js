@@ -8,6 +8,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TripMemberModule = void 0;
 const common_1 = require("@nestjs/common");
+const notification_module_1 = require("../notification/notification.module");
 const tripmember_service_1 = require("./tripmember.service");
 const tripmember_controller_1 = require("./tripmember.controller");
 let TripMemberModule = class TripMemberModule {
@@ -15,7 +16,7 @@ let TripMemberModule = class TripMemberModule {
 exports.TripMemberModule = TripMemberModule;
 exports.TripMemberModule = TripMemberModule = __decorate([
     (0, common_1.Module)({
-        imports: [],
+        imports: [notification_module_1.NotificationModule],
         controllers: [tripmember_controller_1.TripMemberController],
         providers: [tripmember_service_1.TripMemberService],
         exports: [tripmember_service_1.TripMemberService],

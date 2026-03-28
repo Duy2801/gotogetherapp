@@ -4,30 +4,30 @@ export declare class ExpenseSplitController {
     constructor(expenseSplitService: ExpenseSplitService);
     markAsPaid(splitId: string, req: any): Promise<{
         id: string;
-        expenseId: string;
         userId: string;
+        createdAt: Date;
+        updatedAt: Date;
         amount: import("@prisma/client-runtime-utils").Decimal;
+        expenseId: string;
         percentage: import("@prisma/client-runtime-utils").Decimal | null;
         splitType: import("../../prisma/generated/enums").SplitType;
         isPaid: boolean;
         paidAt: Date | null;
         confirmed: boolean;
         confirmedAt: Date | null;
-        createdAt: Date;
-        updatedAt: Date;
     }>;
     confirmReceived(splitId: string, req: any): Promise<{
         id: string;
-        expenseId: string;
         userId: string;
+        createdAt: Date;
+        updatedAt: Date;
         amount: import("@prisma/client-runtime-utils").Decimal;
+        expenseId: string;
         percentage: import("@prisma/client-runtime-utils").Decimal | null;
         splitType: import("../../prisma/generated/enums").SplitType;
         isPaid: boolean;
         paidAt: Date | null;
         confirmed: boolean;
         confirmedAt: Date | null;
-        createdAt: Date;
-        updatedAt: Date;
     }>;
 }

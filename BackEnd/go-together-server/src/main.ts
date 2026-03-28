@@ -13,6 +13,12 @@ async function bootstrap() {
     defaultVersion: "1",
   });
 
+  // Enable CORS for Socket.IO
+  app.enableCors({
+    origin: process.env.FRONTEND_URL || "http://localhost:3001",
+    credentials: true,
+  });
+
   const config = new DocumentBuilder()
     .setTitle("GoToGeTher API")
     .setDescription("API documentation for GoToGeTher Backend")

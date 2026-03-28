@@ -9,6 +9,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ExpenseSplitModule = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_module_1 = require("../prisma/prisma.module");
+const notification_module_1 = require("../notification/notification.module");
 const expense_split_controller_1 = require("./expense-split.controller");
 const expense_split_service_1 = require("./expense-split.service");
 let ExpenseSplitModule = class ExpenseSplitModule {
@@ -16,7 +17,7 @@ let ExpenseSplitModule = class ExpenseSplitModule {
 exports.ExpenseSplitModule = ExpenseSplitModule;
 exports.ExpenseSplitModule = ExpenseSplitModule = __decorate([
     (0, common_1.Module)({
-        imports: [prisma_module_1.PrismaModule],
+        imports: [prisma_module_1.PrismaModule, notification_module_1.NotificationModule],
         controllers: [expense_split_controller_1.ExpenseSplitController],
         providers: [expense_split_service_1.ExpenseSplitService],
     })

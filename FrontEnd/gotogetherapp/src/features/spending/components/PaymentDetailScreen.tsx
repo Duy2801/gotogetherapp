@@ -25,6 +25,7 @@ import {
 } from '../../../utils/format';
 import { PaymentFilter, FilterType } from './PaymentFilter';
 import { SCREEN_NAME } from '../../../constants/screenName';
+import { socketService } from '../../../services/socket.service';
 
 const PaymentDetailScreen = ({ navigation }: { navigation: any }) => {
   const currentUser = useSelector((state: RootState) => state.login.user);
@@ -174,13 +175,19 @@ const PaymentDetailScreen = ({ navigation }: { navigation: any }) => {
     }
   };
 
-  const handleRemind = async (name: string, amount: number) => {
-    const message = `Nhac ban chuyen minh ${formatMoney(
-      amount,
-    )} cho khoan chi phi chuyen di. Cam on ${name}.`;
+  const handleRemind = async (userData: { name: string; userId: string; amount: number }) => {
+    const message = `Nhắc bạn chuyển cho tôi ${formatMoney(userData.amount)} cho khoản chi phí chuyến đi. Cảm ơn ${userData.name}.`;
     try {
-    } catch {
-      Alert.alert('Gợi ý nhắc nợ', message);
+      setActionLoadingId(`remind-${userData.userId}`);
+      await spendingApi.sendReminder(userData.userId, message);
+      Alert.alert('Thành công', 'Đã gửi nhắc nhở cho ' + userData.name);
+    } catch (error: any) {
+      Alert.alert(
+        'Không thể gửi nhắc nhở',
+        error?.error || error?.message || 'Vui lòng thử lại sau.',
+      );
+    } finally {
+      setActionLoadingId(null);
     }
   };
 
@@ -210,6 +217,28 @@ const PaymentDetailScreen = ({ navigation }: { navigation: any }) => {
     if (!detailModalGroup) return null;
     const { group, type } = detailModalGroup;
     const tripBreakdowns = groupItemsByTrip(group.items);
+
+    // Join trip rooms when modal opens
+    React.useEffect(() => {
+      tripBreakdowns.forEach(trip => {
+        if (trip.tripName) {
+          const tripId = group.items.find(item => item.tripName === trip.tripName)?.tripId;
+          if (tripId) {
+            socketService.joinTrip(tripId);
+          }
+        }
+      });
+
+      return () => {
+        // Leave trip rooms when modal closes
+        tripBreakdowns.forEach(trip => {
+          const tripId = group.items.find(item => item.tripName === trip.tripName)?.tripId;
+          if (tripId) {
+            socketService.leaveTrip(tripId);
+          }
+        });
+      };
+    }, [detailModalGroup]);
 
     return (
       <Modal
@@ -361,9 +390,10 @@ const PaymentDetailScreen = ({ navigation }: { navigation: any }) => {
               style={styles.modalViewDetailsBtn}
               onPress={() => {
                 setDetailModalGroup(null);
-                const tripId = group.items[0]?.tripId;
-                if (tripId) {
-                  navigation.navigate(SCREEN_NAME.SPENDING_DETAIL, { tripId });
+                // Get all unique trip IDs from items
+                const tripIds = [...new Set(group.items.map((item: any) => item.tripId))];
+                if (tripIds.length > 0) {
+                  navigation.navigate(SCREEN_NAME.SPENDING_DETAIL, { tripIds });
                 }
               }}
             >
@@ -516,7 +546,11 @@ const PaymentDetailScreen = ({ navigation }: { navigation: any }) => {
               <TouchableOpacity
                 style={styles.secondaryActionButton}
                 onPress={() =>
-                  handleRemind(group.counterpartyName, group.totalAmount)
+                  handleRemind({
+                    name: group.counterpartyName,
+                    userId: group.counterpartyId || '',
+                    amount: group.totalAmount,
+                  })
                 }
               >
                 <Text style={styles.secondaryActionText}>Nhắc nhở</Text>

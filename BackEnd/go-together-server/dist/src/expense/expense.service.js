@@ -13,12 +13,15 @@ exports.ExpenseService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const tripmember_service_1 = require("../trip-member/tripmember.service");
+const notification_gateway_1 = require("../notification/notification.gateway");
 let ExpenseService = class ExpenseService {
     prisma;
     tripMember;
-    constructor(prisma, tripMember) {
+    notificationGateway;
+    constructor(prisma, tripMember, notificationGateway) {
         this.prisma = prisma;
         this.tripMember = tripMember;
+        this.notificationGateway = notificationGateway;
     }
     async getExpenseCategories(userId, tripId) {
         await this.tripMember.ensureTripMember(userId, tripId);
@@ -169,6 +172,15 @@ let ExpenseService = class ExpenseService {
                 },
             });
         });
+        this.notificationGateway.emitExpenseCreated(tripId, {
+            type: "EXPENSE_CREATED",
+            title: "Chi phí mới",
+            message: `${created.paidBy.fullName} đã thêm chi phí: ${created.description}`,
+            expenseDescription: created.description,
+            amount: created.amount,
+            paidBy: created.paidBy.fullName,
+            timestamp: new Date(),
+        });
         return this.toExpenseResponse(created);
     }
     toExpenseResponse(expense) {
@@ -251,6 +263,7 @@ exports.ExpenseService = ExpenseService;
 exports.ExpenseService = ExpenseService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
-        tripmember_service_1.TripMemberService])
+        tripmember_service_1.TripMemberService,
+        notification_gateway_1.NotificationGateway])
 ], ExpenseService);
 //# sourceMappingURL=expense.service.js.map

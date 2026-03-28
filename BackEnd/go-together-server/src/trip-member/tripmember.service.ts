@@ -5,10 +5,14 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
+import { NotificationGateway } from "src/notification/notification.gateway";
 
 @Injectable()
 export class TripMemberService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private notificationGateway: NotificationGateway,
+  ) {}
 
   async ensureTripMember(userId: string, tripId: string) {
     const member = await this.prisma.tripMember.findUnique({
@@ -75,6 +79,16 @@ export class TripMemberService {
       }
     }
 
+    const trip = await this.prisma.trip.findUnique({
+      where: { id: tripId },
+      select: { name: true },
+    });
+
+    const owner = await this.prisma.user.findUnique({
+      where: { id: ownerId },
+      select: { fullName: true },
+    });
+
     const member = await this.prisma.tripMember.create({
       data: {
         tripId,
@@ -94,6 +108,17 @@ export class TripMemberService {
       },
     });
 
+    // Emit invitation notification to invited user
+    this.notificationGateway.emitUserInvited(inviteUser.id, {
+      type: "TRIP_INVITE",
+      title: `Lời mời từ ${owner.fullName}`,
+      message: `${owner.fullName} đã mời bạn tham gia chuyến đi "${trip.name}"`,
+      tripId,
+      tripName: trip.name,
+      invitedBy: owner.fullName,
+      timestamp: new Date(),
+    });
+
     console.log(
       `[InviteMember] Successfully created invitation for ${inviteUser.email}`,
     );
@@ -106,6 +131,18 @@ export class TripMemberService {
   ) {
     const member = await this.prisma.tripMember.findUnique({
       where: { tripId_userId: { tripId, userId } },
+      include: {
+        user: { select: { fullName: true } },
+        trip: {
+          select: {
+            name: true,
+            members: {
+              where: { role: "OWNER" },
+              select: { userId: true },
+            },
+          },
+        },
+      },
     });
 
     if (!member) {
@@ -114,6 +151,7 @@ export class TripMemberService {
     if (member.inviteStatus !== "PENDING") {
       throw new BadRequestException("Lời mời đã được xử lý");
     }
+
     if (status === "ACCEPTED") {
       const updated = await this.prisma.tripMember.update({
         where: { tripId_userId: { tripId, userId } },
@@ -122,11 +160,37 @@ export class TripMemberService {
           joinedAt: new Date(),
         },
       });
+
+      // Emit member joined notification to all trip members
+      this.notificationGateway.emitMemberJoined(tripId, {
+        type: "MEMBER_JOINED",
+        title: "Thành viên mới",
+        message: `${member.user.fullName} đã chấp nhận lời mời tham gia chuyến đi`,
+        memberName: member.user.fullName,
+        tripName: member.trip.name,
+        timestamp: new Date(),
+      });
+
       return updated;
     } else {
-      return await this.prisma.tripMember.delete({
+      const deleted = await this.prisma.tripMember.delete({
         where: { tripId_userId: { tripId, userId } },
       });
+
+      // Emit invite rejected notification to trip owner
+      const ownerId = member.trip.members[0]?.userId;
+      if (ownerId) {
+        this.notificationGateway.emitInviteRejected(ownerId, {
+          type: "INVITE_REJECTED",
+          title: "Lời mời bị từ chối",
+          message: `${member.user.fullName} đã từ chối lời mời tham gia chuyến đi "${member.trip.name}"`,
+          memberName: member.user.fullName,
+          tripName: member.trip.name,
+          timestamp: new Date(),
+        });
+      }
+
+      return deleted;
     }
   }
   async getTripMembers(userId: string, tripId: string) {

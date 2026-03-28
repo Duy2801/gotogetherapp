@@ -12,10 +12,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.TripMemberService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
+const notification_gateway_1 = require("../notification/notification.gateway");
 let TripMemberService = class TripMemberService {
     prisma;
-    constructor(prisma) {
+    notificationGateway;
+    constructor(prisma, notificationGateway) {
         this.prisma = prisma;
+        this.notificationGateway = notificationGateway;
     }
     async ensureTripMember(userId, tripId) {
         const member = await this.prisma.tripMember.findUnique({
@@ -65,6 +68,14 @@ let TripMemberService = class TripMemberService {
                 throw new common_1.BadRequestException("Lời mời đã được gửi trước đó");
             }
         }
+        const trip = await this.prisma.trip.findUnique({
+            where: { id: tripId },
+            select: { name: true },
+        });
+        const owner = await this.prisma.user.findUnique({
+            where: { id: ownerId },
+            select: { fullName: true },
+        });
         const member = await this.prisma.tripMember.create({
             data: {
                 tripId,
@@ -83,12 +94,33 @@ let TripMemberService = class TripMemberService {
                 },
             },
         });
+        this.notificationGateway.emitUserInvited(inviteUser.id, {
+            type: "TRIP_INVITE",
+            title: `Lời mời từ ${owner.fullName}`,
+            message: `${owner.fullName} đã mời bạn tham gia chuyến đi "${trip.name}"`,
+            tripId,
+            tripName: trip.name,
+            invitedBy: owner.fullName,
+            timestamp: new Date(),
+        });
         console.log(`[InviteMember] Successfully created invitation for ${inviteUser.email}`);
         return member;
     }
     async repondInitation(userId, tripId, status) {
         const member = await this.prisma.tripMember.findUnique({
             where: { tripId_userId: { tripId, userId } },
+            include: {
+                user: { select: { fullName: true } },
+                trip: {
+                    select: {
+                        name: true,
+                        members: {
+                            where: { role: "OWNER" },
+                            select: { userId: true },
+                        },
+                    },
+                },
+            },
         });
         if (!member) {
             throw new common_1.NotFoundException("Không tìm thấy lời mời");
@@ -104,12 +136,32 @@ let TripMemberService = class TripMemberService {
                     joinedAt: new Date(),
                 },
             });
+            this.notificationGateway.emitMemberJoined(tripId, {
+                type: "MEMBER_JOINED",
+                title: "Thành viên mới",
+                message: `${member.user.fullName} đã chấp nhận lời mời tham gia chuyến đi`,
+                memberName: member.user.fullName,
+                tripName: member.trip.name,
+                timestamp: new Date(),
+            });
             return updated;
         }
         else {
-            return await this.prisma.tripMember.delete({
+            const deleted = await this.prisma.tripMember.delete({
                 where: { tripId_userId: { tripId, userId } },
             });
+            const ownerId = member.trip.members[0]?.userId;
+            if (ownerId) {
+                this.notificationGateway.emitInviteRejected(ownerId, {
+                    type: "INVITE_REJECTED",
+                    title: "Lời mời bị từ chối",
+                    message: `${member.user.fullName} đã từ chối lời mời tham gia chuyến đi "${member.trip.name}"`,
+                    memberName: member.user.fullName,
+                    tripName: member.trip.name,
+                    timestamp: new Date(),
+                });
+            }
+            return deleted;
         }
     }
     async getTripMembers(userId, tripId) {
@@ -198,6 +250,7 @@ let TripMemberService = class TripMemberService {
 exports.TripMemberService = TripMemberService;
 exports.TripMemberService = TripMemberService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        notification_gateway_1.NotificationGateway])
 ], TripMemberService);
 //# sourceMappingURL=tripmember.service.js.map

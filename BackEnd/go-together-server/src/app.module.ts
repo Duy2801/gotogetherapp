@@ -13,6 +13,8 @@ import { TripMemberModule } from "./trip-member/tripmember.module";
 import { StorageModule } from "./storage/storage.module";
 import { ExpenseSplitModule } from "./expense-split/expense-split.module";
 import { BudgetModule } from "./budget/budget.module";
+import { NotificationModule } from "./notification/notification.module";
+
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -32,6 +34,7 @@ import { BudgetModule } from "./budget/budget.module";
     StorageModule,
     ExpenseSplitModule,
     BudgetModule,
+    NotificationModule,
   ],
   controllers: [AppController],
   providers: [],

@@ -25,6 +25,7 @@ import {
   formatDate,
   formatCompactMoney,
 } from '../../../utils/format';
+import { socketService } from '../../../services/socket.service';
 
 type TabType = 'info' | 'expenses' | 'settlement';
 
@@ -43,54 +44,96 @@ const SpendingDetail = ({
   route: any;
 }) => {
   const tripId = route.params?.tripId;
+  const tripIds = route.params?.tripIds;
   const currentUser = useSelector((state: RootState) => state.login.user);
 
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedTab, setSelectedTab] = useState<TabType>('info');
-  const [tripData, setTripData] = useState<TripDetail | null>(null);
+  const [tripDataList, setTripDataList] = useState<TripDetail[]>([]);
   const [expenses, setExpenses] = useState<Expense[]>([]);
 
   const fetchData = useCallback(async () => {
-    if (!tripId || !currentUser?.id) return;
+    const ids = tripIds || (tripId ? [tripId] : []);
+    if (ids.length === 0 || !currentUser?.id) return;
     try {
-      const [tripRes, expensesRes] = await Promise.all([
-        tripDetailApi.getTripDetail(tripId),
-        tripDetailApi.getTripExpenses(tripId, { page: 1, limit: 100 }),
-      ]);
-      setTripData(tripRes.data);
-      setExpenses(expensesRes.data.expenses || []);
+      const tripRequests = ids.map((id: string) =>
+        tripDetailApi.getTripDetail(id),
+      );
+      const expenseRequests = ids.map((id: string) =>
+        tripDetailApi.getTripExpenses(id, { page: 1, limit: 100 }),
+      );
+
+      const tripResults = await Promise.all(tripRequests);
+      const expenseResults = await Promise.all(expenseRequests);
+
+      setTripDataList(tripResults.map(res => res.data));
+
+      // Combine expenses from all trips
+      const allExpenses = expenseResults.flatMap(
+        res => res.data.expenses || [],
+      );
+      setExpenses(allExpenses);
     } catch (error) {
       console.error('Failed to fetch trip data:', error);
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [tripId, currentUser?.id]);
+  }, [tripIds, tripId, currentUser?.id]);
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  // Join trip rooms on mount
+  useEffect(() => {
+    const ids = tripIds || (tripId ? [tripId] : []);
+    ids.forEach(id => {
+      if (id) {
+        socketService.joinTrip(id);
+      }
+    });
+
+    return () => {
+      // Leave rooms on unmount
+      ids.forEach(id => {
+        if (id) {
+          socketService.leaveTrip(id);
+        }
+      });
+    };
+  }, [tripIds, tripId]);
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
     fetchData();
   }, [fetchData]);
 
-  // Calculate settlement matrix - tính toán ai nợ ai
+  // Calculate settlement matrix from all trips
   const settledItems = useMemo(() => {
     const items: SettlementItem[] = [];
     const settledMap = new Map<string, SettlementItem>();
 
+    // Get all members from all trips
+    const allMembers: Member[] = [];
+    const memberMap = new Map<string, Member>();
+    tripDataList.forEach(trip => {
+      trip.members?.forEach(member => {
+        if (!memberMap.has(member.userId)) {
+          memberMap.set(member.userId, member);
+          allMembers.push(member);
+        }
+      });
+    });
+
     expenses.forEach(expense => {
       expense.splits?.forEach(split => {
-        // Nếu người dùng không phải là người trả tiền, thì họ nợ tiền
+        // If user is not the payer, they owe money
         if (split.userId !== expense.paidBy.id) {
           const key = `${split.userId}-${expense.paidBy.id}`;
-          const from = tripData?.members.find(m => m.userId === split.userId);
-          const to = tripData?.members.find(
-            m => m.userId === expense.paidBy.id,
-          );
+          const from = memberMap.get(split.userId);
+          const to = memberMap.get(expense.paidBy.id);
 
           if (from && to) {
             if (settledMap.has(key)) {
@@ -114,31 +157,37 @@ const SpendingDetail = ({
     });
 
     return Array.from(settledMap.values()).sort((a, b) => b.amount - a.amount);
-  }, [expenses, tripData?.members]);
+  }, [expenses, tripDataList]);
 
   const totalSpent = useMemo(
     () => expenses.reduce((sum, e) => sum + e.amount, 0),
     [expenses],
   );
 
-  // Tính toán per-member breakdown
+  // Calculate per-member breakdown from all trips
   const memberBreakdown = useMemo(() => {
     const breakdown: Record<
       string,
       { paid: number; owes: number; member: Member }
     > = {};
 
-    tripData?.members.forEach(member => {
-      breakdown[member.userId] = { paid: 0, owes: 0, member };
+    // Initialize all members from all trips
+    tripDataList.forEach(trip => {
+      trip.members?.forEach(member => {
+        if (!breakdown[member.userId]) {
+          breakdown[member.userId] = { paid: 0, owes: 0, member };
+        }
+      });
     });
 
+    // Aggregate from all expenses
     expenses.forEach(expense => {
-      // Người trả tiền
+      // Payer
       if (breakdown[expense.paidBy.id]) {
         breakdown[expense.paidBy.id].paid += expense.amount;
       }
 
-      // Người chia tiền
+      // Splits
       expense.splits?.forEach(split => {
         if (breakdown[split.userId]) {
           breakdown[split.userId].owes += split.amount;
@@ -147,7 +196,7 @@ const SpendingDetail = ({
     });
 
     return Object.values(breakdown);
-  }, [expenses, tripData?.members]);
+  }, [expenses, tripDataList]);
 
   if (loading) {
     return (
@@ -159,13 +208,17 @@ const SpendingDetail = ({
     );
   }
 
-  if (!tripData) {
+  if (!tripDataList || tripDataList.length === 0) {
     return (
       <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
         <Text style={styles.errorText}>Không thể tải dữ liệu chuyến đi</Text>
       </SafeAreaView>
     );
   }
+
+  // For header display
+  const primaryTrip = tripDataList[0];
+  const tripCount = tripDataList.length;
 
   return (
     <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
@@ -182,7 +235,9 @@ const SpendingDetail = ({
             iconStyle="solid"
           />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>{tripData.name}</Text>
+        <Text style={styles.headerTitle}>
+          {tripCount > 1 ? `${tripCount} chuyến đi` : primaryTrip.name}
+        </Text>
         <View style={styles.headerPlaceholder} />
       </View>
 
@@ -220,7 +275,10 @@ const SpendingDetail = ({
         }
       >
         {selectedTab === 'info' && (
-          <TripInfoTab trip={tripData} memberBreakdown={memberBreakdown} />
+          <MultiTripInfoTab
+            tripDataList={tripDataList}
+            memberBreakdown={memberBreakdown}
+          />
         )}
         {selectedTab === 'expenses' && <ExpensesTab expenses={expenses} />}
         {selectedTab === 'settlement' && (
@@ -231,7 +289,7 @@ const SpendingDetail = ({
   );
 };
 
-// Trip Info Tab - hiển thị thông tin chuyến đi và thành viên
+// Trip Info Tab - display single or multiple trip info
 const TripInfoTab = ({
   trip,
   memberBreakdown,
@@ -349,7 +407,122 @@ const TripInfoTab = ({
   </View>
 );
 
-// Expenses Tab - danh sách chi phí chi tiết
+// Multi Trip Info Tab - display info for multiple trips
+const MultiTripInfoTab = ({
+  tripDataList,
+  memberBreakdown,
+}: {
+  tripDataList: TripDetail[];
+  memberBreakdown: Array<{ paid: number; owes: number; member: Member }>;
+}) => (
+  <View style={styles.tabContent}>
+    {/* Trip list */}
+    {tripDataList.map(trip => (
+      <View key={trip.id} style={styles.card}>
+        <View style={styles.cardHeader}>
+          <Text style={styles.cardTitle}>{trip.name}</Text>
+        </View>
+        <View style={styles.cardBody}>
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Thời gian:</Text>
+            <Text style={styles.infoValue}>
+              {formatDate(trip.startDate)} - {formatDate(trip.endDate)}
+            </Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Trạng thái:</Text>
+            <View
+              style={[
+                styles.statusBadge,
+                { backgroundColor: getStatusColor(trip.status) },
+              ]}
+            >
+              <Text style={styles.statusText}>
+                {translateStatus(trip.status)}
+              </Text>
+            </View>
+          </View>
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Tổng ngân sách:</Text>
+            <Text style={styles.infoValue}>
+              {formatMoney(trip.totalBudget || 0)}
+            </Text>
+          </View>
+        </View>
+      </View>
+    ))}
+
+    {/* Members Breakdown across all trips */}
+    <View style={styles.card}>
+      <View style={styles.cardHeader}>
+        <FontAwesome6
+          name="users"
+          size={16}
+          color={SECONDARY_COLOR}
+          iconStyle="solid"
+        />
+        <Text style={styles.cardTitle}>Tổng hợp tất cả chuyến đi</Text>
+      </View>
+      <View style={styles.cardBody}>
+        <View style={styles.breakdownHeader}>
+          <Text style={styles.breakdownLabel}>Người</Text>
+          <Text style={styles.breakdownLabel}>Đã trả</Text>
+          <Text style={styles.breakdownLabel}>Nợ</Text>
+          <Text style={styles.breakdownLabel}>Chênh lệch</Text>
+        </View>
+
+        {memberBreakdown.map((item, idx) => {
+          const balance = item.paid - item.owes;
+          const isPositive = balance > 0;
+          return (
+            <View
+              key={item.member.id}
+              style={[
+                styles.breakdownRow,
+                idx > 0 && styles.breakdownRowBorder,
+              ]}
+            >
+              <View style={styles.memberCol}>
+                {item.member.avatar ? (
+                  <Image
+                    source={{ uri: item.member.avatar }}
+                    style={styles.memberAvatar}
+                  />
+                ) : (
+                  <View style={[styles.memberAvatar, styles.avatarFallback]}>
+                    <Text style={styles.avatarText}>
+                      {item.member.fullName.charAt(0).toUpperCase()}
+                    </Text>
+                  </View>
+                )}
+                <Text style={styles.memberNameSmall}>
+                  {item.member.fullName}
+                </Text>
+              </View>
+              <Text style={styles.breakdownValue}>
+                {formatMoney(item.paid)}
+              </Text>
+              <Text style={styles.breakdownValue}>
+                {formatMoney(item.owes)}
+              </Text>
+              <Text
+                style={[
+                  styles.balanceValue,
+                  { color: isPositive ? '#10B981' : '#EF4444' },
+                ]}
+              >
+                {isPositive ? '+' : ''}
+                {formatMoney(balance)}
+              </Text>
+            </View>
+          );
+        })}
+      </View>
+    </View>
+  </View>
+);
+
+// Expenses Tab - display detailed expense list
 const ExpensesTab = ({ expenses }: { expenses: Expense[] }) => (
   <View style={styles.tabContent}>
     {expenses.length === 0 ? (
@@ -474,7 +647,7 @@ const ExpensesTab = ({ expenses }: { expenses: Expense[] }) => (
   </View>
 );
 
-// Settlement Tab - bảng tính toán ai nợ ai
+// Settlement Tab - settlement calculation across trips
 const SettlementTab = ({
   items,
   totalSpent,

@@ -22,6 +22,7 @@ const tripmember_module_1 = require("./trip-member/tripmember.module");
 const storage_module_1 = require("./storage/storage.module");
 const expense_split_module_1 = require("./expense-split/expense-split.module");
 const budget_module_1 = require("./budget/budget.module");
+const notification_module_1 = require("./notification/notification.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -45,6 +46,7 @@ exports.AppModule = AppModule = __decorate([
             storage_module_1.StorageModule,
             expense_split_module_1.ExpenseSplitModule,
             budget_module_1.BudgetModule,
+            notification_module_1.NotificationModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [],

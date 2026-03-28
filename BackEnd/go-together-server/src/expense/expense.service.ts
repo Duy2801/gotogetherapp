@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
 import { TripMemberService } from "src/trip-member/tripmember.service";
+import { NotificationGateway } from "src/notification/notification.gateway";
 import { CreateExpense } from "./dto/create-Expense.dto";
 
 @Injectable()
@@ -8,6 +9,7 @@ export class ExpenseService {
   constructor(
     private prisma: PrismaService,
     private tripMember: TripMemberService,
+    private notificationGateway: NotificationGateway,
   ) {}
 
   async getExpenseCategories(userId: string, tripId: string) {
@@ -200,6 +202,17 @@ export class ExpenseService {
           },
         },
       });
+    });
+
+    // Emit expense created notification
+    this.notificationGateway.emitExpenseCreated(tripId, {
+      type: "EXPENSE_CREATED",
+      title: "Chi phí mới",
+      message: `${created.paidBy.fullName} đã thêm chi phí: ${created.description}`,
+      expenseDescription: created.description,
+      amount: created.amount,
+      paidBy: created.paidBy.fullName,
+      timestamp: new Date(),
     });
 
     return this.toExpenseResponse(created);
