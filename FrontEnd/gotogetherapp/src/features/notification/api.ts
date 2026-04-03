@@ -28,11 +28,14 @@ export const notificationApi = {
     offset = 0,
   ): Promise<NotificationsResponse> => {
     try {
+      console.log(`🔄 Fetching notifications: limit=${limit}, offset=${offset}`);
       const response = await api.get(
         `/notification?limit=${limit}&offset=${offset}`,
       );
+      console.log(`✅ Notifications fetched:`, response);
       return response as unknown as NotificationsResponse;
     } catch (error) {
+      console.error('❌ Failed to fetch notifications:', error);
       throw error as ApiError;
     }
   },

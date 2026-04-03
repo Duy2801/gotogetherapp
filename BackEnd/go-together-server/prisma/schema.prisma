@@ -20,11 +20,12 @@ model User {
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   googleId      String?        @unique
-  avatar        String?         
+  avatar        String?
   devices       Device[]
   expenseSplits ExpenseSplit[]
   expenses      Expense[]      @relation("PaidBy")
   notifications Notification[]
+  sentNotifications Notification[] @relation("SentNotifications")
   tripMembers   TripMember[]
   userRoles     UserRole[]
   celebrates    Celebrate[]
@@ -201,19 +202,27 @@ model Itinerary {
 }
 
 model Notification {
-  id        String           @id @default(uuid())
-  userId    String
-  type      NotificationType
-  title     String
-  message   String
-  data      Json?
-  isRead    Boolean          @default(false)
-  readAt    DateTime?
-  createdAt DateTime         @default(now())
-  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id          String           @id @default(uuid())
+  userId      String
+  type        NotificationType
+  title       String
+  message     String
 
-  @@index([userId], map: "notifications_userId_fkey")
-  @@map("notifications")
+  refId       String?   // id của object liên quan (expense, split,...)
+  senderId    String?   // ai gửi (người nhắc nợ)
+
+  data        Json?
+
+  isRead      Boolean   @default(false)
+  readAt      DateTime?
+  createdAt   DateTime  @default(now())
+
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sender      User?     @relation("SentNotifications", fields: [senderId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([refId])
+  @@index([senderId])
 }
 
 model Device {

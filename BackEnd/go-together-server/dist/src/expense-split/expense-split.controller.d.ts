@@ -4,9 +4,9 @@ export declare class ExpenseSplitController {
     constructor(expenseSplitService: ExpenseSplitService);
     markAsPaid(splitId: string, req: any): Promise<{
         id: string;
-        userId: string;
         createdAt: Date;
         updatedAt: Date;
+        userId: string;
         amount: import("@prisma/client-runtime-utils").Decimal;
         expenseId: string;
         percentage: import("@prisma/client-runtime-utils").Decimal | null;
@@ -18,9 +18,9 @@ export declare class ExpenseSplitController {
     }>;
     confirmReceived(splitId: string, req: any): Promise<{
         id: string;
-        userId: string;
         createdAt: Date;
         updatedAt: Date;
+        userId: string;
         amount: import("@prisma/client-runtime-utils").Decimal;
         expenseId: string;
         percentage: import("@prisma/client-runtime-utils").Decimal | null;

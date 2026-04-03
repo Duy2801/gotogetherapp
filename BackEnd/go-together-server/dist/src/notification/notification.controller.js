@@ -28,6 +28,7 @@ let NotificationController = class NotificationController {
     }
     async sendReminder(req, toUserId, dto) {
         const currentUserId = req.user.userId;
+        console.log(`[Controller] Sending reminder from ${currentUserId} to ${toUserId}`);
         const sharedTrip = await this.prisma.tripMember.findFirst({
             where: {
                 AND: [
@@ -49,7 +50,14 @@ let NotificationController = class NotificationController {
             where: { id: currentUserId },
             select: { fullName: true },
         });
-        await this.notificationService.sendReminder(toUserId, currentUser?.fullName || "Unknown", 0, dto.message);
+        try {
+            await this.notificationService.sendReminder(toUserId, currentUserId, currentUser?.fullName || "Unknown", 0, dto.message);
+            console.log(`[Controller] Reminder sent successfully`);
+        }
+        catch (error) {
+            console.error(`[Controller] Error sending reminder:`, error);
+            throw error;
+        }
         return { message: "Reminder sent successfully" };
     }
     async getNotifications(req, limit = "20", offset = "0") {
@@ -62,9 +70,19 @@ let NotificationController = class NotificationController {
         await this.notificationService.deleteNotification(notificationId);
         return { message: "Notification deleted successfully" };
     }
-    async clearAllNotifications(req) {
-        await this.notificationService.clearAllNotifications(req.user.userId);
-        return { message: "All notifications cleared" };
+    debugSocketStatus() {
+        const connectedCount = this.notificationGateway['connectedUsers']?.size || 0;
+        const allRooms = Array.from(this.notificationGateway['server']?.sockets?.adapter?.rooms?.keys() || []);
+        return {
+            connectedUsersCount: connectedCount,
+            allConnectedUsers: Array.from(this.notificationGateway['connectedUsers']?.entries() || []).map(([userId, socket]) => ({
+                userId,
+                socketId: socket.id,
+                rooms: Array.from(socket.rooms || []),
+            })),
+            allRoomsOnServer: allRooms,
+            timestamp: new Date().toISOString(),
+        };
     }
 };
 exports.NotificationController = NotificationController;
@@ -101,12 +119,11 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], NotificationController.prototype, "deleteNotification", null);
 __decorate([
-    (0, common_1.Delete)(),
-    __param(0, (0, common_1.Req)()),
+    (0, common_1.Get)('debug/socket-status'),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", Promise)
-], NotificationController.prototype, "clearAllNotifications", null);
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], NotificationController.prototype, "debugSocketStatus", null);
 exports.NotificationController = NotificationController = __decorate([
     (0, common_1.Controller)("notification"),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),

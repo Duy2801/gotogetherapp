@@ -6,9 +6,9 @@ export declare class ExpenseSplitService {
     constructor(prisma: PrismaService, notificationGateway: NotificationGateway);
     markAsPaid(userId: string, splitId: string): Promise<{
         id: string;
-        userId: string;
         createdAt: Date;
         updatedAt: Date;
+        userId: string;
         amount: import("@prisma/client-runtime-utils").Decimal;
         expenseId: string;
         percentage: import("@prisma/client-runtime-utils").Decimal | null;
@@ -20,9 +20,9 @@ export declare class ExpenseSplitService {
     }>;
     confirmReceived(userId: string, splitId: string): Promise<{
         id: string;
-        userId: string;
         createdAt: Date;
         updatedAt: Date;
+        userId: string;
         amount: import("@prisma/client-runtime-utils").Decimal;
         expenseId: string;
         percentage: import("@prisma/client-runtime-utils").Decimal | null;

@@ -252,6 +252,8 @@ export const NotificationScalarFieldEnum = {
   type: 'type',
   title: 'title',
   message: 'message',
+  refId: 'refId',
+  senderId: 'senderId',
   data: 'data',
   isRead: 'isRead',
   readAt: 'readAt',
@@ -445,7 +447,9 @@ export const NotificationOrderByRelevanceFieldEnum = {
   id: 'id',
   userId: 'userId',
   title: 'title',
-  message: 'message'
+  message: 'message',
+  refId: 'refId',
+  senderId: 'senderId'
 } as const
 
 export type NotificationOrderByRelevanceFieldEnum = (typeof NotificationOrderByRelevanceFieldEnum)[keyof typeof NotificationOrderByRelevanceFieldEnum]

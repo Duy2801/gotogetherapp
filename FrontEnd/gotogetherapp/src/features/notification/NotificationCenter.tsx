@@ -42,11 +42,26 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
     clearAllHandler,
     onRefresh,
     loadMore,
+    fetchNotifications,
   } = useNotifications();
 
   const [selectedForDelete, setSelectedForDelete] = useState<string | null>(
     null,
   );
+
+  // Auto refetch when notification center opens (failsafe if socket event missed)
+  React.useEffect(() => {
+    if (visible) {
+      console.log('📬 Notification Center opened - auto refetch');
+      console.log(`📊 Current state: ${notifications.length} local, ${totalNotifications} from API`);
+      // Delay 500ms to ensure API is ready and socket events are processed
+      const timer = setTimeout(() => {
+        console.log('🔄 Performing auto-refetch...');
+        fetchNotifications(1);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [visible, fetchNotifications, notifications.length, totalNotifications]);
 
   /**
    * Handle delete with confirmation

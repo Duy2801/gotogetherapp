@@ -57,6 +57,9 @@ export const SocketProvider = ({ children, token }: SocketProviderProps) => {
     socketInstance.on('connect', () => {
       console.log('✓ Socket connected:', socketInstance.id);
       setIsConnected(true);
+
+      // Verify user received socket connection by checking rooms
+      console.log('📡 Socket rooms after connect:', Object.keys(socketInstance.rooms || {}));
     });
 
     socketInstance.on('disconnect', reason => {
@@ -66,10 +69,13 @@ export const SocketProvider = ({ children, token }: SocketProviderProps) => {
 
     socketInstance.on('connect_error', (error: any) => {
       console.error('⚠️ Socket connection error:', error);
-      console.error('Error message:', error.message);
-      console.error('Error type:', error.type);
-      console.error('Full error:', JSON.stringify(error));
-      console.warn('Attempting fallback to polling transport...');
+      console.error('   Error message:', error.message);
+      console.error('   Error type:', error.type);
+      console.error('   Error data:', error.data);
+      if (error.data?.content) {
+        console.error('   Error content:', error.data.content);
+      }
+      console.warn('ℹ️ Attempting fallback to polling transport...');
     });
 
     socketInstance.on('error', (error: any) => {

@@ -167,6 +167,8 @@ export declare const NotificationScalarFieldEnum: {
     readonly type: "type";
     readonly title: "title";
     readonly message: "message";
+    readonly refId: "refId";
+    readonly senderId: "senderId";
     readonly data: "data";
     readonly isRead: "isRead";
     readonly readAt: "readAt";
@@ -301,6 +303,8 @@ export declare const NotificationOrderByRelevanceFieldEnum: {
     readonly userId: "userId";
     readonly title: "title";
     readonly message: "message";
+    readonly refId: "refId";
+    readonly senderId: "senderId";
 };
 export type NotificationOrderByRelevanceFieldEnum = (typeof NotificationOrderByRelevanceFieldEnum)[keyof typeof NotificationOrderByRelevanceFieldEnum];
 export declare const DeviceOrderByRelevanceFieldEnum: {

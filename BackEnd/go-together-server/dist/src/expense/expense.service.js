@@ -182,7 +182,7 @@ let ExpenseService = class ExpenseService {
             expenseDescription: created.description,
             amount: created.amount,
             paidBy: created.paidBy.fullName,
-            timestamp: new Date(),
+            timestamp: new Date().toISOString(),
         });
         return this.toExpenseResponse(created);
     }

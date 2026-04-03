@@ -89,13 +89,31 @@ const SpendingDetail = ({
 
   // Join trip rooms on mount
   useEffect(() => {
-    if (!socket) return;
+    if (!socket) {
+      console.warn('⚠️ Socket not available in SpendingDetail');
+      return;
+    }
+
+    if (!socket.connected) {
+      console.warn('⚠️ Socket not connected in SpendingDetail. Waiting...');
+      const timer = setTimeout(() => {
+        const ids = tripIds || (tripId ? [tripId] : []);
+        ids.forEach((id: string) => {
+          if (id && socket.connected) {
+            socket.emit('join:trip', id);
+            console.log('✓ Joined trip room (after reconnect):', id);
+          }
+        });
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
 
     const ids = tripIds || (tripId ? [tripId] : []);
     ids.forEach((id: string) => {
       if (id) {
         socket.emit('join:trip', id);
-        console.log('🚀 Joined trip room:', id);
+        console.log('✓ Joined trip room:', id);
+        console.log('   Socket ID:', socket.id);
       }
     });
 
@@ -104,7 +122,7 @@ const SpendingDetail = ({
       ids.forEach((id: string) => {
         if (id) {
           socket.emit('leave:trip', id);
-          console.log('✓ Left trip room:', id);
+          console.log('✗ Left trip room:', id);
         }
       });
     };

@@ -80,10 +80,26 @@ const TripDetailScreen: React.FC<TripDetailScreenProps> = ({
 
   // Join and leave trip room for socket events
   useEffect(() => {
-    if (!socket || !tripId) return;
+    if (!socket || !tripId) {
+      console.warn('⚠️ Socket or tripId not available', { socket: !!socket, tripId });
+      return;
+    }
+
+    if (!socket.connected) {
+      console.warn('⚠️ Socket not connected yet. Waiting...', { connected: socket.connected });
+      const waitForConnect = setTimeout(() => {
+        if (socket.connected) {
+          socket.emit('join:trip', tripId);
+          console.log('✓ Joined trip room (after reconnect):', tripId);
+        }
+      }, 1000);
+      return () => clearTimeout(waitForConnect);
+    }
 
     socket.emit('join:trip', tripId);
     console.log('✓ Joined trip room:', tripId);
+    console.log('   Socket ID:', socket.id);
+    console.log('   Socket rooms:', Object.keys(socket.rooms || {}));
 
     return () => {
       socket.emit('leave:trip', tripId);

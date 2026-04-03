@@ -187,6 +187,8 @@ exports.NotificationScalarFieldEnum = {
     type: 'type',
     title: 'title',
     message: 'message',
+    refId: 'refId',
+    senderId: 'senderId',
     data: 'data',
     isRead: 'isRead',
     readAt: 'readAt',
@@ -300,7 +302,9 @@ exports.NotificationOrderByRelevanceFieldEnum = {
     id: 'id',
     userId: 'userId',
     title: 'title',
-    message: 'message'
+    message: 'message',
+    refId: 'refId',
+    senderId: 'senderId'
 };
 exports.DeviceOrderByRelevanceFieldEnum = {
     deviceId: 'deviceId',

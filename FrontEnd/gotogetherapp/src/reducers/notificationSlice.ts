@@ -6,7 +6,7 @@ export interface Notification {
   title: string;
   message: string;
   data?: any;
-  timestamp: Date;
+  timestamp: string; // Use ISO string instead of Date object
   isRead: boolean;
 }
 
@@ -29,6 +29,24 @@ const notificationSlice = createSlice({
       if (!action.payload.isRead) {
         state.unreadCount += 1;
       }
+      // Keep only last 50 notifications
+      if (state.notifications.length > 50) {
+        state.notifications.pop();
+      }
+    },
+
+    addSocketNotification: (state, action: PayloadAction<any>) => {
+      const notification: Notification = {
+        id: action.payload.id || `socket-${Date.now()}`,
+        type: action.payload.type,
+        title: action.payload.title,
+        message: action.payload.message,
+        data: action.payload.data,
+        timestamp: action.payload.timestamp || new Date().toISOString(),
+        isRead: false,
+      };
+      state.notifications.unshift(notification);
+      state.unreadCount += 1;
       // Keep only last 50 notifications
       if (state.notifications.length > 50) {
         state.notifications.pop();
@@ -69,6 +87,7 @@ const notificationSlice = createSlice({
 
 export const {
   addNotification,
+  addSocketNotification,
   markAsRead,
   markAllAsRead,
   removeNotification,

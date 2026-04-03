@@ -56,7 +56,7 @@ let ExpenseSplitService = class ExpenseSplitService {
             paidBy: split.user.fullName,
             paidTo: split.expense.paidBy.fullName,
             splitId: split.id,
-            timestamp: new Date(),
+            timestamp: new Date().toISOString(),
         });
         return updated;
     }
@@ -98,7 +98,7 @@ let ExpenseSplitService = class ExpenseSplitService {
             paidBy: split.user.fullName,
             paidTo: split.expense.paidBy.fullName,
             splitId: split.id,
-            timestamp: new Date(),
+            timestamp: new Date().toISOString(),
         });
         return updated;
     }

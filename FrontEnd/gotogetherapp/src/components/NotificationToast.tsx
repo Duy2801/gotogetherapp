@@ -31,7 +31,7 @@ const NotificationToast = () => {
         title: data.title,
         message: data.message,
         data,
-        timestamp: new Date(),
+        timestamp: new Date().toISOString(),
         isRead: false,
       };
 

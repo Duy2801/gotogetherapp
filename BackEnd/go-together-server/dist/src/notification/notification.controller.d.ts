@@ -9,17 +9,25 @@ export declare class NotificationController {
         message: string;
     }>;
     getNotifications(req: any, limit?: string, offset?: string): Promise<{
-        notifications: {
+        notifications: ({
+            sender: {
+                id: string;
+                fullName: string | null;
+                avatar: string | null;
+            } | null;
+        } & {
             id: string;
             userId: string;
             type: import("../../prisma/generated/enums").NotificationType;
             title: string;
             message: string;
+            refId: string | null;
+            senderId: string | null;
             data: import("@prisma/client/runtime/client").JsonValue | null;
             isRead: boolean;
             readAt: Date | null;
             createdAt: Date;
-        }[];
+        })[];
         total: number;
         page: number;
         pageSize: number;
@@ -30,6 +38,8 @@ export declare class NotificationController {
         type: import("../../prisma/generated/enums").NotificationType;
         title: string;
         message: string;
+        refId: string | null;
+        senderId: string | null;
         data: import("@prisma/client/runtime/client").JsonValue | null;
         isRead: boolean;
         readAt: Date | null;
@@ -38,7 +48,14 @@ export declare class NotificationController {
     deleteNotification(notificationId: string): Promise<{
         message: string;
     }>;
-    clearAllNotifications(req: any): Promise<{
-        message: string;
-    }>;
+    debugSocketStatus(): {
+        connectedUsersCount: any;
+        allConnectedUsers: {
+            userId: any;
+            socketId: any;
+            rooms: unknown[];
+        }[];
+        allRoomsOnServer: unknown[];
+        timestamp: string;
+    };
 }

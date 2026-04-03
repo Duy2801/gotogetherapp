@@ -26,7 +26,7 @@ export class NotificationGateway
   implements OnGatewayConnection, OnGatewayDisconnect
 {
   @WebSocketServer()
-  server: Server;
+  server!: Server;
 
   private connectedUsers = new Map<string, AuthenticatedSocket>();
 
@@ -63,6 +63,11 @@ export class NotificationGateway
       });
       client.userId = payload.sub || payload.id;
       this.connectedUsers.set(client.userId as string, client);
+
+      // Automatically join user room for personal notifications
+      const userRoom = SocketRooms.user(client.userId as string);
+      client.join(userRoom);
+      console.log(`✓ User connected and joined room: ${userRoom}`);
     } catch (error: any) {
       console.error("Full error:", error);
       client.disconnect(true);
@@ -172,6 +177,22 @@ export class NotificationGateway
    * @param data - Notification payload
    */
   emitReminder(userId: string, data: any) {
-    this.server.to(SocketRooms.user(userId)).emit(SocketEvents.REMINDER, data);
+    const room = SocketRooms.user(userId);
+
+    // Debug: Check if room has any sockets
+    const socketsInRoom = this.server.sockets.adapter.rooms?.get(room);
+    const socketCount = socketsInRoom ? socketsInRoom.size : 0;
+
+    console.log(`[Gateway] Checking room: ${room}`);
+    console.log(`[Gateway] Sockets in room: ${socketCount}`);
+    console.log(`[Gateway] All connected socket IDs:`, Array.from(this.connectedUsers.values()).map(s => ({ id: s.id, userId: s.userId })));
+    console.log(`[Gateway] All rooms on server:`, Array.from(this.server.sockets.adapter.rooms?.keys() || []));
+
+    console.log(`[Gateway] Emitting REMINDER to room ${room}:`, data);
+    this.server.to(room).emit(SocketEvents.REMINDER, data);
+
+    if (socketCount === 0) {
+      console.warn(`⚠️  WARNING: No sockets found in room ${room}!`);
+    }
   }
 }

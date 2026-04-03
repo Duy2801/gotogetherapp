@@ -124,7 +124,7 @@ export class TripMemberService {
       tripId,
       tripName: trip.name,
       invitedBy: owner.fullName,
-      timestamp: new Date(),
+      timestamp: new Date().toISOString(),
     });
 
     console.log(
@@ -176,7 +176,7 @@ export class TripMemberService {
         message: `${member.user.fullName} đã chấp nhận lời mời tham gia chuyến đi`,
         memberName: member.user.fullName,
         tripName: member.trip.name,
-        timestamp: new Date(),
+        timestamp: new Date().toISOString(),
       });
 
       return updated;
@@ -194,7 +194,7 @@ export class TripMemberService {
           message: `${member.user.fullName} đã từ chối lời mời tham gia chuyến đi "${member.trip.name}"`,
           memberName: member.user.fullName,
           tripName: member.trip.name,
-          timestamp: new Date(),
+          timestamp: new Date().toISOString(),
         });
       }
 

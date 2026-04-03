@@ -20,28 +20,39 @@ let NotificationService = class NotificationService {
         this.prisma = prisma;
         this.notificationGateway = notificationGateway;
     }
-    async sendReminder(toUserId, fromUserName, amount, message) {
+    async sendReminder(toUserId, fromUserId, fromUserName, amount, message) {
         const reminderMessage = message || `${fromUserName} nhắc bạn thanh toán khoản tiền.`;
-        await this.prisma.notification.create({
-            data: {
-                userId: toUserId,
+        try {
+            const notification = await this.prisma.notification.create({
+                data: {
+                    userId: toUserId,
+                    senderId: fromUserId,
+                    type: "SETTLEMENT_REMINDER",
+                    title: "Nhắc nhở thanh toán",
+                    message: reminderMessage,
+                    data: {
+                        amount,
+                        fromUserName,
+                    },
+                },
+            });
+            console.log(`[Reminder] Created notification: ${notification.id} for user: ${toUserId}`);
+            this.notificationGateway.emitReminder(toUserId, {
+                id: notification.id,
                 type: "SETTLEMENT_REMINDER",
                 title: "Nhắc nhở thanh toán",
                 message: reminderMessage,
-                data: {
-                    amount,
-                    fromUserName,
-                },
-            },
-        });
-        this.notificationGateway.emitReminder(toUserId, {
-            type: "SETTLEMENT_REMINDER",
-            title: "Nhắc nhở thanh toán",
-            message: reminderMessage,
-            amount,
-            fromUserName,
-            timestamp: new Date(),
-        });
+                amount,
+                fromUserName,
+                senderId: fromUserId,
+                timestamp: new Date().toISOString(),
+            });
+            console.log(`[Reminder] Socket event emitted to user: ${toUserId}`);
+        }
+        catch (error) {
+            console.error("[Reminder] Error sending reminder:", error);
+            throw error;
+        }
     }
     async markAsRead(notificationId) {
         return this.prisma.notification.update({
@@ -69,6 +80,11 @@ let NotificationService = class NotificationService {
                 orderBy: { createdAt: "desc" },
                 take: limit,
                 skip: offset,
+                include: {
+                    sender: {
+                        select: { id: true, fullName: true, avatar: true },
+                    },
+                },
             }),
             this.prisma.notification.count({ where: { userId } }),
         ]);

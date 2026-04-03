@@ -9,6 +9,7 @@ import {
   Query,
   Delete,
 } from "@nestjs/common";
+import { NotificationGateway } from "./notification.gateway";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { JwtAuthGuard } from "src/auth/guards/jwt-auth.guard";
 import { NotificationService } from "./notification.service";
@@ -37,6 +38,8 @@ export class NotificationController {
   ) {
     const currentUserId = req.user.userId;
 
+    console.log(`[Controller] Sending reminder from ${currentUserId} to ${toUserId}`);
+
     // Validate that the current user and target user are trip members
     const sharedTrip = await this.prisma.tripMember.findFirst({
       where: {
@@ -64,12 +67,19 @@ export class NotificationController {
     });
 
     // Send reminder
-    await this.notificationService.sendReminder(
-      toUserId,
-      currentUser?.fullName || "Unknown",
-      0,
-      dto.message,
-    );
+    try {
+      await this.notificationService.sendReminder(
+        toUserId,
+        currentUserId, // ID của người nhắc nợ
+        currentUser?.fullName || "Unknown",
+        0,
+        dto.message,
+      );
+      console.log(`[Controller] Reminder sent successfully`);
+    } catch (error: any) {
+      console.error(`[Controller] Error sending reminder:`, error);
+      throw error;
+    }
 
     return { message: "Reminder sent successfully" };
   }
@@ -111,12 +121,26 @@ export class NotificationController {
   }
 
   /**
-   * Clear all notifications for current user
-   * DELETE /api/v1/notification
+   * Test endpoint - check socket connection status
+   * GET /api/v1/notification/debug/socket-status
    */
-  @Delete()
-  async clearAllNotifications(@Req() req: any) {
-    await this.notificationService.clearAllNotifications(req.user.userId);
-    return { message: "All notifications cleared" };
+  @Get('debug/socket-status')
+  debugSocketStatus() {
+    const connectedCount = this.notificationGateway['connectedUsers']?.size || 0;
+    const allRooms = Array.from(
+      this.notificationGateway['server']?.sockets?.adapter?.rooms?.keys() || [],
+    );
+
+    return {
+      connectedUsersCount: connectedCount,
+      allConnectedUsers: Array.from(
+        this.notificationGateway['connectedUsers']?.entries() || [],
+      ).map(([userId, socket]: any) => ({
+        userId,
+        socketId: socket.id,
+        rooms: Array.from(socket.rooms || []),
+      })),
+      allRoomsOnServer: allRooms,
+      timestamp: new Date().toISOString(),
+    };
   }
-}

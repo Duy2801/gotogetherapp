@@ -14,6 +14,7 @@ export class NotificationService {
    */
   async sendReminder(
     toUserId: string,
+    fromUserId: string,
     fromUserName: string,
     amount: number,
     message?: string,
@@ -21,29 +22,41 @@ export class NotificationService {
     const reminderMessage =
       message || `${fromUserName} nhắc bạn thanh toán khoản tiền.`;
 
-    // Create notification record
-    await this.prisma.notification.create({
-      data: {
-        userId: toUserId,
+    try {
+      // Create notification record
+      const notification = await this.prisma.notification.create({
+        data: {
+          userId: toUserId,
+          senderId: fromUserId, // Lưu ID người nhắc nợ
+          type: "SETTLEMENT_REMINDER",
+          title: "Nhắc nhở thanh toán",
+          message: reminderMessage,
+          data: {
+            amount,
+            fromUserName,
+          },
+        },
+      });
+
+      console.log(`[Reminder] Created notification: ${notification.id} for user: ${toUserId}`);
+
+      // Emit real-time notification
+      this.notificationGateway.emitReminder(toUserId, {
+        id: notification.id,
         type: "SETTLEMENT_REMINDER",
         title: "Nhắc nhở thanh toán",
         message: reminderMessage,
-        data: {
-          amount,
-          fromUserName,
-        },
-      },
-    });
+        amount,
+        fromUserName,
+        senderId: fromUserId,
+        timestamp: new Date().toISOString(),
+      });
 
-    // Emit real-time notification
-    this.notificationGateway.emitReminder(toUserId, {
-      type: "SETTLEMENT_REMINDER",
-      title: "Nhắc nhở thanh toán",
-      message: reminderMessage,
-      amount,
-      fromUserName,
-      timestamp: new Date(),
-    });
+      console.log(`[Reminder] Socket event emitted to user: ${toUserId}`);
+    } catch (error: any) {
+      console.error("[Reminder] Error sending reminder:", error);
+      throw error;
+    }
   }
 
   /**
@@ -87,6 +100,11 @@ export class NotificationService {
         orderBy: { createdAt: "desc" },
         take: limit,
         skip: offset,
+        include: {
+          sender: {
+            select: { id: true, fullName: true, avatar: true },
+          },
+        },
       }),
       this.prisma.notification.count({ where: { userId } }),
     ]);

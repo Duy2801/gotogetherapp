@@ -177,6 +177,7 @@ export type UserWhereInput = {
     expenseSplits?: Prisma.ExpenseSplitListRelationFilter;
     expenses?: Prisma.ExpenseListRelationFilter;
     notifications?: Prisma.NotificationListRelationFilter;
+    sentNotifications?: Prisma.NotificationListRelationFilter;
     tripMembers?: Prisma.TripMemberListRelationFilter;
     userRoles?: Prisma.UserRoleListRelationFilter;
     celebrates?: Prisma.CelebrateListRelationFilter;
@@ -199,6 +200,7 @@ export type UserOrderByWithRelationInput = {
     expenseSplits?: Prisma.ExpenseSplitOrderByRelationAggregateInput;
     expenses?: Prisma.ExpenseOrderByRelationAggregateInput;
     notifications?: Prisma.NotificationOrderByRelationAggregateInput;
+    sentNotifications?: Prisma.NotificationOrderByRelationAggregateInput;
     tripMembers?: Prisma.TripMemberOrderByRelationAggregateInput;
     userRoles?: Prisma.UserRoleOrderByRelationAggregateInput;
     celebrates?: Prisma.CelebrateOrderByRelationAggregateInput;
@@ -225,6 +227,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
     expenseSplits?: Prisma.ExpenseSplitListRelationFilter;
     expenses?: Prisma.ExpenseListRelationFilter;
     notifications?: Prisma.NotificationListRelationFilter;
+    sentNotifications?: Prisma.NotificationListRelationFilter;
     tripMembers?: Prisma.TripMemberListRelationFilter;
     userRoles?: Prisma.UserRoleListRelationFilter;
     celebrates?: Prisma.CelebrateListRelationFilter;
@@ -283,6 +286,7 @@ export type UserCreateInput = {
     expenseSplits?: Prisma.ExpenseSplitCreateNestedManyWithoutUserInput;
     expenses?: Prisma.ExpenseCreateNestedManyWithoutPaidByInput;
     notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput;
+    sentNotifications?: Prisma.NotificationCreateNestedManyWithoutSenderInput;
     tripMembers?: Prisma.TripMemberCreateNestedManyWithoutUserInput;
     userRoles?: Prisma.UserRoleCreateNestedManyWithoutUserInput;
     celebrates?: Prisma.CelebrateCreateNestedManyWithoutUserInput;
@@ -305,6 +309,7 @@ export type UserUncheckedCreateInput = {
     expenseSplits?: Prisma.ExpenseSplitUncheckedCreateNestedManyWithoutUserInput;
     expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutPaidByInput;
     notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput;
+    sentNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutSenderInput;
     tripMembers?: Prisma.TripMemberUncheckedCreateNestedManyWithoutUserInput;
     userRoles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput;
     celebrates?: Prisma.CelebrateUncheckedCreateNestedManyWithoutUserInput;
@@ -327,6 +332,7 @@ export type UserUpdateInput = {
     expenseSplits?: Prisma.ExpenseSplitUpdateManyWithoutUserNestedInput;
     expenses?: Prisma.ExpenseUpdateManyWithoutPaidByNestedInput;
     notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput;
+    sentNotifications?: Prisma.NotificationUpdateManyWithoutSenderNestedInput;
     tripMembers?: Prisma.TripMemberUpdateManyWithoutUserNestedInput;
     userRoles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput;
     celebrates?: Prisma.CelebrateUpdateManyWithoutUserNestedInput;
@@ -349,6 +355,7 @@ export type UserUncheckedUpdateInput = {
     expenseSplits?: Prisma.ExpenseSplitUncheckedUpdateManyWithoutUserNestedInput;
     expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutPaidByNestedInput;
     notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput;
+    sentNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutSenderNestedInput;
     tripMembers?: Prisma.TripMemberUncheckedUpdateManyWithoutUserNestedInput;
     userRoles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput;
     celebrates?: Prisma.CelebrateUncheckedUpdateManyWithoutUserNestedInput;
@@ -453,6 +460,10 @@ export type UserScalarRelationFilter = {
     is?: Prisma.UserWhereInput;
     isNot?: Prisma.UserWhereInput;
 };
+export type UserNullableScalarRelationFilter = {
+    is?: Prisma.UserWhereInput | null;
+    isNot?: Prisma.UserWhereInput | null;
+};
 export type StringFieldUpdateOperationsInput = {
     set?: string;
 };
@@ -543,12 +554,26 @@ export type UserCreateNestedOneWithoutNotificationsInput = {
     connectOrCreate?: Prisma.UserCreateOrConnectWithoutNotificationsInput;
     connect?: Prisma.UserWhereUniqueInput;
 };
+export type UserCreateNestedOneWithoutSentNotificationsInput = {
+    create?: Prisma.XOR<Prisma.UserCreateWithoutSentNotificationsInput, Prisma.UserUncheckedCreateWithoutSentNotificationsInput>;
+    connectOrCreate?: Prisma.UserCreateOrConnectWithoutSentNotificationsInput;
+    connect?: Prisma.UserWhereUniqueInput;
+};
 export type UserUpdateOneRequiredWithoutNotificationsNestedInput = {
     create?: Prisma.XOR<Prisma.UserCreateWithoutNotificationsInput, Prisma.UserUncheckedCreateWithoutNotificationsInput>;
     connectOrCreate?: Prisma.UserCreateOrConnectWithoutNotificationsInput;
     upsert?: Prisma.UserUpsertWithoutNotificationsInput;
     connect?: Prisma.UserWhereUniqueInput;
     update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutNotificationsInput, Prisma.UserUpdateWithoutNotificationsInput>, Prisma.UserUncheckedUpdateWithoutNotificationsInput>;
+};
+export type UserUpdateOneWithoutSentNotificationsNestedInput = {
+    create?: Prisma.XOR<Prisma.UserCreateWithoutSentNotificationsInput, Prisma.UserUncheckedCreateWithoutSentNotificationsInput>;
+    connectOrCreate?: Prisma.UserCreateOrConnectWithoutSentNotificationsInput;
+    upsert?: Prisma.UserUpsertWithoutSentNotificationsInput;
+    disconnect?: Prisma.UserWhereInput | boolean;
+    delete?: Prisma.UserWhereInput | boolean;
+    connect?: Prisma.UserWhereUniqueInput;
+    update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutSentNotificationsInput, Prisma.UserUpdateWithoutSentNotificationsInput>, Prisma.UserUncheckedUpdateWithoutSentNotificationsInput>;
 };
 export type UserCreateNestedOneWithoutDevicesInput = {
     create?: Prisma.XOR<Prisma.UserCreateWithoutDevicesInput, Prisma.UserUncheckedCreateWithoutDevicesInput>;
@@ -591,6 +616,7 @@ export type UserCreateWithoutUserRolesInput = {
     expenseSplits?: Prisma.ExpenseSplitCreateNestedManyWithoutUserInput;
     expenses?: Prisma.ExpenseCreateNestedManyWithoutPaidByInput;
     notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput;
+    sentNotifications?: Prisma.NotificationCreateNestedManyWithoutSenderInput;
     tripMembers?: Prisma.TripMemberCreateNestedManyWithoutUserInput;
     celebrates?: Prisma.CelebrateCreateNestedManyWithoutUserInput;
     budgets?: Prisma.BudgetCreateNestedManyWithoutUserInput;
@@ -612,6 +638,7 @@ export type UserUncheckedCreateWithoutUserRolesInput = {
     expenseSplits?: Prisma.ExpenseSplitUncheckedCreateNestedManyWithoutUserInput;
     expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutPaidByInput;
     notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput;
+    sentNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutSenderInput;
     tripMembers?: Prisma.TripMemberUncheckedCreateNestedManyWithoutUserInput;
     celebrates?: Prisma.CelebrateUncheckedCreateNestedManyWithoutUserInput;
     budgets?: Prisma.BudgetUncheckedCreateNestedManyWithoutUserInput;
@@ -646,6 +673,7 @@ export type UserUpdateWithoutUserRolesInput = {
     expenseSplits?: Prisma.ExpenseSplitUpdateManyWithoutUserNestedInput;
     expenses?: Prisma.ExpenseUpdateManyWithoutPaidByNestedInput;
     notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput;
+    sentNotifications?: Prisma.NotificationUpdateManyWithoutSenderNestedInput;
     tripMembers?: Prisma.TripMemberUpdateManyWithoutUserNestedInput;
     celebrates?: Prisma.CelebrateUpdateManyWithoutUserNestedInput;
     budgets?: Prisma.BudgetUpdateManyWithoutUserNestedInput;
@@ -667,6 +695,7 @@ export type UserUncheckedUpdateWithoutUserRolesInput = {
     expenseSplits?: Prisma.ExpenseSplitUncheckedUpdateManyWithoutUserNestedInput;
     expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutPaidByNestedInput;
     notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput;
+    sentNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutSenderNestedInput;
     tripMembers?: Prisma.TripMemberUncheckedUpdateManyWithoutUserNestedInput;
     celebrates?: Prisma.CelebrateUncheckedUpdateManyWithoutUserNestedInput;
     budgets?: Prisma.BudgetUncheckedUpdateManyWithoutUserNestedInput;
@@ -688,6 +717,7 @@ export type UserCreateWithoutTripMembersInput = {
     expenseSplits?: Prisma.ExpenseSplitCreateNestedManyWithoutUserInput;
     expenses?: Prisma.ExpenseCreateNestedManyWithoutPaidByInput;
     notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput;
+    sentNotifications?: Prisma.NotificationCreateNestedManyWithoutSenderInput;
     userRoles?: Prisma.UserRoleCreateNestedManyWithoutUserInput;
     celebrates?: Prisma.CelebrateCreateNestedManyWithoutUserInput;
     budgets?: Prisma.BudgetCreateNestedManyWithoutUserInput;
@@ -709,6 +739,7 @@ export type UserUncheckedCreateWithoutTripMembersInput = {
     expenseSplits?: Prisma.ExpenseSplitUncheckedCreateNestedManyWithoutUserInput;
     expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutPaidByInput;
     notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput;
+    sentNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutSenderInput;
     userRoles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput;
     celebrates?: Prisma.CelebrateUncheckedCreateNestedManyWithoutUserInput;
     budgets?: Prisma.BudgetUncheckedCreateNestedManyWithoutUserInput;
@@ -743,6 +774,7 @@ export type UserUpdateWithoutTripMembersInput = {
     expenseSplits?: Prisma.ExpenseSplitUpdateManyWithoutUserNestedInput;
     expenses?: Prisma.ExpenseUpdateManyWithoutPaidByNestedInput;
     notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput;
+    sentNotifications?: Prisma.NotificationUpdateManyWithoutSenderNestedInput;
     userRoles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput;
     celebrates?: Prisma.CelebrateUpdateManyWithoutUserNestedInput;
     budgets?: Prisma.BudgetUpdateManyWithoutUserNestedInput;
@@ -764,6 +796,7 @@ export type UserUncheckedUpdateWithoutTripMembersInput = {
     expenseSplits?: Prisma.ExpenseSplitUncheckedUpdateManyWithoutUserNestedInput;
     expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutPaidByNestedInput;
     notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput;
+    sentNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutSenderNestedInput;
     userRoles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput;
     celebrates?: Prisma.CelebrateUncheckedUpdateManyWithoutUserNestedInput;
     budgets?: Prisma.BudgetUncheckedUpdateManyWithoutUserNestedInput;
@@ -784,6 +817,7 @@ export type UserCreateWithoutExpensesInput = {
     devices?: Prisma.DeviceCreateNestedManyWithoutUserInput;
     expenseSplits?: Prisma.ExpenseSplitCreateNestedManyWithoutUserInput;
     notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput;
+    sentNotifications?: Prisma.NotificationCreateNestedManyWithoutSenderInput;
     tripMembers?: Prisma.TripMemberCreateNestedManyWithoutUserInput;
     userRoles?: Prisma.UserRoleCreateNestedManyWithoutUserInput;
     celebrates?: Prisma.CelebrateCreateNestedManyWithoutUserInput;
@@ -805,6 +839,7 @@ export type UserUncheckedCreateWithoutExpensesInput = {
     devices?: Prisma.DeviceUncheckedCreateNestedManyWithoutUserInput;
     expenseSplits?: Prisma.ExpenseSplitUncheckedCreateNestedManyWithoutUserInput;
     notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput;
+    sentNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutSenderInput;
     tripMembers?: Prisma.TripMemberUncheckedCreateNestedManyWithoutUserInput;
     userRoles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput;
     celebrates?: Prisma.CelebrateUncheckedCreateNestedManyWithoutUserInput;
@@ -839,6 +874,7 @@ export type UserUpdateWithoutExpensesInput = {
     devices?: Prisma.DeviceUpdateManyWithoutUserNestedInput;
     expenseSplits?: Prisma.ExpenseSplitUpdateManyWithoutUserNestedInput;
     notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput;
+    sentNotifications?: Prisma.NotificationUpdateManyWithoutSenderNestedInput;
     tripMembers?: Prisma.TripMemberUpdateManyWithoutUserNestedInput;
     userRoles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput;
     celebrates?: Prisma.CelebrateUpdateManyWithoutUserNestedInput;
@@ -860,6 +896,7 @@ export type UserUncheckedUpdateWithoutExpensesInput = {
     devices?: Prisma.DeviceUncheckedUpdateManyWithoutUserNestedInput;
     expenseSplits?: Prisma.ExpenseSplitUncheckedUpdateManyWithoutUserNestedInput;
     notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput;
+    sentNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutSenderNestedInput;
     tripMembers?: Prisma.TripMemberUncheckedUpdateManyWithoutUserNestedInput;
     userRoles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput;
     celebrates?: Prisma.CelebrateUncheckedUpdateManyWithoutUserNestedInput;
@@ -881,6 +918,7 @@ export type UserCreateWithoutExpenseSplitsInput = {
     devices?: Prisma.DeviceCreateNestedManyWithoutUserInput;
     expenses?: Prisma.ExpenseCreateNestedManyWithoutPaidByInput;
     notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput;
+    sentNotifications?: Prisma.NotificationCreateNestedManyWithoutSenderInput;
     tripMembers?: Prisma.TripMemberCreateNestedManyWithoutUserInput;
     userRoles?: Prisma.UserRoleCreateNestedManyWithoutUserInput;
     celebrates?: Prisma.CelebrateCreateNestedManyWithoutUserInput;
@@ -902,6 +940,7 @@ export type UserUncheckedCreateWithoutExpenseSplitsInput = {
     devices?: Prisma.DeviceUncheckedCreateNestedManyWithoutUserInput;
     expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutPaidByInput;
     notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput;
+    sentNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutSenderInput;
     tripMembers?: Prisma.TripMemberUncheckedCreateNestedManyWithoutUserInput;
     userRoles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput;
     celebrates?: Prisma.CelebrateUncheckedCreateNestedManyWithoutUserInput;
@@ -936,6 +975,7 @@ export type UserUpdateWithoutExpenseSplitsInput = {
     devices?: Prisma.DeviceUpdateManyWithoutUserNestedInput;
     expenses?: Prisma.ExpenseUpdateManyWithoutPaidByNestedInput;
     notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput;
+    sentNotifications?: Prisma.NotificationUpdateManyWithoutSenderNestedInput;
     tripMembers?: Prisma.TripMemberUpdateManyWithoutUserNestedInput;
     userRoles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput;
     celebrates?: Prisma.CelebrateUpdateManyWithoutUserNestedInput;
@@ -957,6 +997,7 @@ export type UserUncheckedUpdateWithoutExpenseSplitsInput = {
     devices?: Prisma.DeviceUncheckedUpdateManyWithoutUserNestedInput;
     expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutPaidByNestedInput;
     notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput;
+    sentNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutSenderNestedInput;
     tripMembers?: Prisma.TripMemberUncheckedUpdateManyWithoutUserNestedInput;
     userRoles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput;
     celebrates?: Prisma.CelebrateUncheckedUpdateManyWithoutUserNestedInput;
@@ -979,6 +1020,7 @@ export type UserCreateWithoutBudgetsInput = {
     expenseSplits?: Prisma.ExpenseSplitCreateNestedManyWithoutUserInput;
     expenses?: Prisma.ExpenseCreateNestedManyWithoutPaidByInput;
     notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput;
+    sentNotifications?: Prisma.NotificationCreateNestedManyWithoutSenderInput;
     tripMembers?: Prisma.TripMemberCreateNestedManyWithoutUserInput;
     userRoles?: Prisma.UserRoleCreateNestedManyWithoutUserInput;
     celebrates?: Prisma.CelebrateCreateNestedManyWithoutUserInput;
@@ -1000,6 +1042,7 @@ export type UserUncheckedCreateWithoutBudgetsInput = {
     expenseSplits?: Prisma.ExpenseSplitUncheckedCreateNestedManyWithoutUserInput;
     expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutPaidByInput;
     notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput;
+    sentNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutSenderInput;
     tripMembers?: Prisma.TripMemberUncheckedCreateNestedManyWithoutUserInput;
     userRoles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput;
     celebrates?: Prisma.CelebrateUncheckedCreateNestedManyWithoutUserInput;
@@ -1034,6 +1077,7 @@ export type UserUpdateWithoutBudgetsInput = {
     expenseSplits?: Prisma.ExpenseSplitUpdateManyWithoutUserNestedInput;
     expenses?: Prisma.ExpenseUpdateManyWithoutPaidByNestedInput;
     notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput;
+    sentNotifications?: Prisma.NotificationUpdateManyWithoutSenderNestedInput;
     tripMembers?: Prisma.TripMemberUpdateManyWithoutUserNestedInput;
     userRoles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput;
     celebrates?: Prisma.CelebrateUpdateManyWithoutUserNestedInput;
@@ -1055,6 +1099,7 @@ export type UserUncheckedUpdateWithoutBudgetsInput = {
     expenseSplits?: Prisma.ExpenseSplitUncheckedUpdateManyWithoutUserNestedInput;
     expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutPaidByNestedInput;
     notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput;
+    sentNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutSenderNestedInput;
     tripMembers?: Prisma.TripMemberUncheckedUpdateManyWithoutUserNestedInput;
     userRoles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput;
     celebrates?: Prisma.CelebrateUncheckedUpdateManyWithoutUserNestedInput;
@@ -1075,6 +1120,7 @@ export type UserCreateWithoutNotificationsInput = {
     devices?: Prisma.DeviceCreateNestedManyWithoutUserInput;
     expenseSplits?: Prisma.ExpenseSplitCreateNestedManyWithoutUserInput;
     expenses?: Prisma.ExpenseCreateNestedManyWithoutPaidByInput;
+    sentNotifications?: Prisma.NotificationCreateNestedManyWithoutSenderInput;
     tripMembers?: Prisma.TripMemberCreateNestedManyWithoutUserInput;
     userRoles?: Prisma.UserRoleCreateNestedManyWithoutUserInput;
     celebrates?: Prisma.CelebrateCreateNestedManyWithoutUserInput;
@@ -1096,6 +1142,7 @@ export type UserUncheckedCreateWithoutNotificationsInput = {
     devices?: Prisma.DeviceUncheckedCreateNestedManyWithoutUserInput;
     expenseSplits?: Prisma.ExpenseSplitUncheckedCreateNestedManyWithoutUserInput;
     expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutPaidByInput;
+    sentNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutSenderInput;
     tripMembers?: Prisma.TripMemberUncheckedCreateNestedManyWithoutUserInput;
     userRoles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput;
     celebrates?: Prisma.CelebrateUncheckedCreateNestedManyWithoutUserInput;
@@ -1104,6 +1151,54 @@ export type UserUncheckedCreateWithoutNotificationsInput = {
 export type UserCreateOrConnectWithoutNotificationsInput = {
     where: Prisma.UserWhereUniqueInput;
     create: Prisma.XOR<Prisma.UserCreateWithoutNotificationsInput, Prisma.UserUncheckedCreateWithoutNotificationsInput>;
+};
+export type UserCreateWithoutSentNotificationsInput = {
+    id?: string;
+    email: string;
+    fullName?: string | null;
+    password?: string | null;
+    dateOfBirth?: Date | string | null;
+    gender?: number | null;
+    status?: $Enums.UserStatus;
+    isVerified?: boolean;
+    createdAt?: Date | string;
+    updatedAt?: Date | string;
+    googleId?: string | null;
+    avatar?: string | null;
+    devices?: Prisma.DeviceCreateNestedManyWithoutUserInput;
+    expenseSplits?: Prisma.ExpenseSplitCreateNestedManyWithoutUserInput;
+    expenses?: Prisma.ExpenseCreateNestedManyWithoutPaidByInput;
+    notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput;
+    tripMembers?: Prisma.TripMemberCreateNestedManyWithoutUserInput;
+    userRoles?: Prisma.UserRoleCreateNestedManyWithoutUserInput;
+    celebrates?: Prisma.CelebrateCreateNestedManyWithoutUserInput;
+    budgets?: Prisma.BudgetCreateNestedManyWithoutUserInput;
+};
+export type UserUncheckedCreateWithoutSentNotificationsInput = {
+    id?: string;
+    email: string;
+    fullName?: string | null;
+    password?: string | null;
+    dateOfBirth?: Date | string | null;
+    gender?: number | null;
+    status?: $Enums.UserStatus;
+    isVerified?: boolean;
+    createdAt?: Date | string;
+    updatedAt?: Date | string;
+    googleId?: string | null;
+    avatar?: string | null;
+    devices?: Prisma.DeviceUncheckedCreateNestedManyWithoutUserInput;
+    expenseSplits?: Prisma.ExpenseSplitUncheckedCreateNestedManyWithoutUserInput;
+    expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutPaidByInput;
+    notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput;
+    tripMembers?: Prisma.TripMemberUncheckedCreateNestedManyWithoutUserInput;
+    userRoles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput;
+    celebrates?: Prisma.CelebrateUncheckedCreateNestedManyWithoutUserInput;
+    budgets?: Prisma.BudgetUncheckedCreateNestedManyWithoutUserInput;
+};
+export type UserCreateOrConnectWithoutSentNotificationsInput = {
+    where: Prisma.UserWhereUniqueInput;
+    create: Prisma.XOR<Prisma.UserCreateWithoutSentNotificationsInput, Prisma.UserUncheckedCreateWithoutSentNotificationsInput>;
 };
 export type UserUpsertWithoutNotificationsInput = {
     update: Prisma.XOR<Prisma.UserUpdateWithoutNotificationsInput, Prisma.UserUncheckedUpdateWithoutNotificationsInput>;
@@ -1130,6 +1225,7 @@ export type UserUpdateWithoutNotificationsInput = {
     devices?: Prisma.DeviceUpdateManyWithoutUserNestedInput;
     expenseSplits?: Prisma.ExpenseSplitUpdateManyWithoutUserNestedInput;
     expenses?: Prisma.ExpenseUpdateManyWithoutPaidByNestedInput;
+    sentNotifications?: Prisma.NotificationUpdateManyWithoutSenderNestedInput;
     tripMembers?: Prisma.TripMemberUpdateManyWithoutUserNestedInput;
     userRoles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput;
     celebrates?: Prisma.CelebrateUpdateManyWithoutUserNestedInput;
@@ -1151,6 +1247,60 @@ export type UserUncheckedUpdateWithoutNotificationsInput = {
     devices?: Prisma.DeviceUncheckedUpdateManyWithoutUserNestedInput;
     expenseSplits?: Prisma.ExpenseSplitUncheckedUpdateManyWithoutUserNestedInput;
     expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutPaidByNestedInput;
+    sentNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutSenderNestedInput;
+    tripMembers?: Prisma.TripMemberUncheckedUpdateManyWithoutUserNestedInput;
+    userRoles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput;
+    celebrates?: Prisma.CelebrateUncheckedUpdateManyWithoutUserNestedInput;
+    budgets?: Prisma.BudgetUncheckedUpdateManyWithoutUserNestedInput;
+};
+export type UserUpsertWithoutSentNotificationsInput = {
+    update: Prisma.XOR<Prisma.UserUpdateWithoutSentNotificationsInput, Prisma.UserUncheckedUpdateWithoutSentNotificationsInput>;
+    create: Prisma.XOR<Prisma.UserCreateWithoutSentNotificationsInput, Prisma.UserUncheckedCreateWithoutSentNotificationsInput>;
+    where?: Prisma.UserWhereInput;
+};
+export type UserUpdateToOneWithWhereWithoutSentNotificationsInput = {
+    where?: Prisma.UserWhereInput;
+    data: Prisma.XOR<Prisma.UserUpdateWithoutSentNotificationsInput, Prisma.UserUncheckedUpdateWithoutSentNotificationsInput>;
+};
+export type UserUpdateWithoutSentNotificationsInput = {
+    id?: Prisma.StringFieldUpdateOperationsInput | string;
+    email?: Prisma.StringFieldUpdateOperationsInput | string;
+    fullName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    dateOfBirth?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
+    gender?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
+    status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus;
+    isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+    createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    devices?: Prisma.DeviceUpdateManyWithoutUserNestedInput;
+    expenseSplits?: Prisma.ExpenseSplitUpdateManyWithoutUserNestedInput;
+    expenses?: Prisma.ExpenseUpdateManyWithoutPaidByNestedInput;
+    notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput;
+    tripMembers?: Prisma.TripMemberUpdateManyWithoutUserNestedInput;
+    userRoles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput;
+    celebrates?: Prisma.CelebrateUpdateManyWithoutUserNestedInput;
+    budgets?: Prisma.BudgetUpdateManyWithoutUserNestedInput;
+};
+export type UserUncheckedUpdateWithoutSentNotificationsInput = {
+    id?: Prisma.StringFieldUpdateOperationsInput | string;
+    email?: Prisma.StringFieldUpdateOperationsInput | string;
+    fullName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    dateOfBirth?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
+    gender?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
+    status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus;
+    isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+    createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    devices?: Prisma.DeviceUncheckedUpdateManyWithoutUserNestedInput;
+    expenseSplits?: Prisma.ExpenseSplitUncheckedUpdateManyWithoutUserNestedInput;
+    expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutPaidByNestedInput;
+    notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput;
     tripMembers?: Prisma.TripMemberUncheckedUpdateManyWithoutUserNestedInput;
     userRoles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput;
     celebrates?: Prisma.CelebrateUncheckedUpdateManyWithoutUserNestedInput;
@@ -1172,6 +1322,7 @@ export type UserCreateWithoutDevicesInput = {
     expenseSplits?: Prisma.ExpenseSplitCreateNestedManyWithoutUserInput;
     expenses?: Prisma.ExpenseCreateNestedManyWithoutPaidByInput;
     notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput;
+    sentNotifications?: Prisma.NotificationCreateNestedManyWithoutSenderInput;
     tripMembers?: Prisma.TripMemberCreateNestedManyWithoutUserInput;
     userRoles?: Prisma.UserRoleCreateNestedManyWithoutUserInput;
     celebrates?: Prisma.CelebrateCreateNestedManyWithoutUserInput;
@@ -1193,6 +1344,7 @@ export type UserUncheckedCreateWithoutDevicesInput = {
     expenseSplits?: Prisma.ExpenseSplitUncheckedCreateNestedManyWithoutUserInput;
     expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutPaidByInput;
     notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput;
+    sentNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutSenderInput;
     tripMembers?: Prisma.TripMemberUncheckedCreateNestedManyWithoutUserInput;
     userRoles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput;
     celebrates?: Prisma.CelebrateUncheckedCreateNestedManyWithoutUserInput;
@@ -1227,6 +1379,7 @@ export type UserUpdateWithoutDevicesInput = {
     expenseSplits?: Prisma.ExpenseSplitUpdateManyWithoutUserNestedInput;
     expenses?: Prisma.ExpenseUpdateManyWithoutPaidByNestedInput;
     notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput;
+    sentNotifications?: Prisma.NotificationUpdateManyWithoutSenderNestedInput;
     tripMembers?: Prisma.TripMemberUpdateManyWithoutUserNestedInput;
     userRoles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput;
     celebrates?: Prisma.CelebrateUpdateManyWithoutUserNestedInput;
@@ -1248,6 +1401,7 @@ export type UserUncheckedUpdateWithoutDevicesInput = {
     expenseSplits?: Prisma.ExpenseSplitUncheckedUpdateManyWithoutUserNestedInput;
     expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutPaidByNestedInput;
     notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput;
+    sentNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutSenderNestedInput;
     tripMembers?: Prisma.TripMemberUncheckedUpdateManyWithoutUserNestedInput;
     userRoles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput;
     celebrates?: Prisma.CelebrateUncheckedUpdateManyWithoutUserNestedInput;
@@ -1270,6 +1424,7 @@ export type UserCreateWithoutCelebratesInput = {
     expenseSplits?: Prisma.ExpenseSplitCreateNestedManyWithoutUserInput;
     expenses?: Prisma.ExpenseCreateNestedManyWithoutPaidByInput;
     notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput;
+    sentNotifications?: Prisma.NotificationCreateNestedManyWithoutSenderInput;
     tripMembers?: Prisma.TripMemberCreateNestedManyWithoutUserInput;
     userRoles?: Prisma.UserRoleCreateNestedManyWithoutUserInput;
     budgets?: Prisma.BudgetCreateNestedManyWithoutUserInput;
@@ -1291,6 +1446,7 @@ export type UserUncheckedCreateWithoutCelebratesInput = {
     expenseSplits?: Prisma.ExpenseSplitUncheckedCreateNestedManyWithoutUserInput;
     expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutPaidByInput;
     notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput;
+    sentNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutSenderInput;
     tripMembers?: Prisma.TripMemberUncheckedCreateNestedManyWithoutUserInput;
     userRoles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput;
     budgets?: Prisma.BudgetUncheckedCreateNestedManyWithoutUserInput;
@@ -1325,6 +1481,7 @@ export type UserUpdateWithoutCelebratesInput = {
     expenseSplits?: Prisma.ExpenseSplitUpdateManyWithoutUserNestedInput;
     expenses?: Prisma.ExpenseUpdateManyWithoutPaidByNestedInput;
     notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput;
+    sentNotifications?: Prisma.NotificationUpdateManyWithoutSenderNestedInput;
     tripMembers?: Prisma.TripMemberUpdateManyWithoutUserNestedInput;
     userRoles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput;
     budgets?: Prisma.BudgetUpdateManyWithoutUserNestedInput;
@@ -1346,6 +1503,7 @@ export type UserUncheckedUpdateWithoutCelebratesInput = {
     expenseSplits?: Prisma.ExpenseSplitUncheckedUpdateManyWithoutUserNestedInput;
     expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutPaidByNestedInput;
     notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput;
+    sentNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutSenderNestedInput;
     tripMembers?: Prisma.TripMemberUncheckedUpdateManyWithoutUserNestedInput;
     userRoles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput;
     budgets?: Prisma.BudgetUncheckedUpdateManyWithoutUserNestedInput;
@@ -1355,6 +1513,7 @@ export type UserCountOutputType = {
     expenseSplits: number;
     expenses: number;
     notifications: number;
+    sentNotifications: number;
     tripMembers: number;
     userRoles: number;
     celebrates: number;
@@ -1365,6 +1524,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
     expenseSplits?: boolean | UserCountOutputTypeCountExpenseSplitsArgs;
     expenses?: boolean | UserCountOutputTypeCountExpensesArgs;
     notifications?: boolean | UserCountOutputTypeCountNotificationsArgs;
+    sentNotifications?: boolean | UserCountOutputTypeCountSentNotificationsArgs;
     tripMembers?: boolean | UserCountOutputTypeCountTripMembersArgs;
     userRoles?: boolean | UserCountOutputTypeCountUserRolesArgs;
     celebrates?: boolean | UserCountOutputTypeCountCelebratesArgs;
@@ -1383,6 +1543,9 @@ export type UserCountOutputTypeCountExpensesArgs<ExtArgs extends runtime.Types.E
     where?: Prisma.ExpenseWhereInput;
 };
 export type UserCountOutputTypeCountNotificationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+    where?: Prisma.NotificationWhereInput;
+};
+export type UserCountOutputTypeCountSentNotificationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
     where?: Prisma.NotificationWhereInput;
 };
 export type UserCountOutputTypeCountTripMembersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1414,6 +1577,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
     expenseSplits?: boolean | Prisma.User$expenseSplitsArgs<ExtArgs>;
     expenses?: boolean | Prisma.User$expensesArgs<ExtArgs>;
     notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>;
+    sentNotifications?: boolean | Prisma.User$sentNotificationsArgs<ExtArgs>;
     tripMembers?: boolean | Prisma.User$tripMembersArgs<ExtArgs>;
     userRoles?: boolean | Prisma.User$userRolesArgs<ExtArgs>;
     celebrates?: boolean | Prisma.User$celebratesArgs<ExtArgs>;
@@ -1440,6 +1604,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
     expenseSplits?: boolean | Prisma.User$expenseSplitsArgs<ExtArgs>;
     expenses?: boolean | Prisma.User$expensesArgs<ExtArgs>;
     notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>;
+    sentNotifications?: boolean | Prisma.User$sentNotificationsArgs<ExtArgs>;
     tripMembers?: boolean | Prisma.User$tripMembersArgs<ExtArgs>;
     userRoles?: boolean | Prisma.User$userRolesArgs<ExtArgs>;
     celebrates?: boolean | Prisma.User$celebratesArgs<ExtArgs>;
@@ -1453,6 +1618,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
         expenseSplits: Prisma.$ExpenseSplitPayload<ExtArgs>[];
         expenses: Prisma.$ExpensePayload<ExtArgs>[];
         notifications: Prisma.$NotificationPayload<ExtArgs>[];
+        sentNotifications: Prisma.$NotificationPayload<ExtArgs>[];
         tripMembers: Prisma.$TripMemberPayload<ExtArgs>[];
         userRoles: Prisma.$UserRolePayload<ExtArgs>[];
         celebrates: Prisma.$CelebratePayload<ExtArgs>[];
@@ -1525,6 +1691,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
     expenseSplits<T extends Prisma.User$expenseSplitsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$expenseSplitsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ExpenseSplitPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>;
     expenses<T extends Prisma.User$expensesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$expensesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ExpensePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>;
     notifications<T extends Prisma.User$notificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$notificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>;
+    sentNotifications<T extends Prisma.User$sentNotificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$sentNotificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>;
     tripMembers<T extends Prisma.User$tripMembersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$tripMembersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TripMemberPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>;
     userRoles<T extends Prisma.User$userRolesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$userRolesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserRolePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>;
     celebrates<T extends Prisma.User$celebratesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$celebratesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CelebratePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>;
@@ -1666,6 +1833,17 @@ export type User$expensesArgs<ExtArgs extends runtime.Types.Extensions.InternalA
     distinct?: Prisma.ExpenseScalarFieldEnum | Prisma.ExpenseScalarFieldEnum[];
 };
 export type User$notificationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+    select?: Prisma.NotificationSelect<ExtArgs> | null;
+    omit?: Prisma.NotificationOmit<ExtArgs> | null;
+    include?: Prisma.NotificationInclude<ExtArgs> | null;
+    where?: Prisma.NotificationWhereInput;
+    orderBy?: Prisma.NotificationOrderByWithRelationInput | Prisma.NotificationOrderByWithRelationInput[];
+    cursor?: Prisma.NotificationWhereUniqueInput;
+    take?: number;
+    skip?: number;
+    distinct?: Prisma.NotificationScalarFieldEnum | Prisma.NotificationScalarFieldEnum[];
+};
+export type User$sentNotificationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
     select?: Prisma.NotificationSelect<ExtArgs> | null;
     omit?: Prisma.NotificationOmit<ExtArgs> | null;
     include?: Prisma.NotificationInclude<ExtArgs> | null;

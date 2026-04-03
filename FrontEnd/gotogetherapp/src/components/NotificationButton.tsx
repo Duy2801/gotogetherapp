@@ -23,7 +23,9 @@ export const NotificationButton: React.FC = () => {
   const badgeScale = React.useRef(new Animated.Value(1)).current;
 
   React.useEffect(() => {
+    console.log(`🔔 [NotificationButton] unreadCount updated: ${unreadCount}`);
     if (unreadCount > 0) {
+      console.log(`✨ Animating badge for ${unreadCount} unread`);
       Animated.sequence([
         Animated.timing(badgeScale, {
           toValue: 1.2,
@@ -43,7 +45,10 @@ export const NotificationButton: React.FC = () => {
     <>
       <TouchableOpacity
         style={styles.button}
-        onPress={() => setIsModalVisible(true)}
+        onPress={() => {
+          console.log('🔔 Notification button pressed - opening center');
+          setIsModalVisible(true);
+        }}
         activeOpacity={0.7}
       >
         <FontAwesome6
@@ -73,7 +78,10 @@ export const NotificationButton: React.FC = () => {
       {/* Notification Center Modal */}
       <NotificationCenter
         visible={isModalVisible}
-        onClose={() => setIsModalVisible(false)}
+        onClose={() => {
+          console.log('🔔 Notification Center closed');
+          setIsModalVisible(false);
+        }}
       />
     </>
   );

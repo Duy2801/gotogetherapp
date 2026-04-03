@@ -36,6 +36,7 @@ export const useNotifications = (pageSize = 20): UseNotificationsReturn => {
   const [totalNotifications, setTotalNotifications] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+  const [prevUnreadCount, setPrevUnreadCount] = useState(unreadCount);
 
   const offset = (currentPage - 1) * pageSize;
 
@@ -45,9 +46,12 @@ export const useNotifications = (pageSize = 20): UseNotificationsReturn => {
   const fetchNotifications = useCallback(
     async (page = 1) => {
       try {
+        console.log(`🔍 [useNotifications] Fetching page ${page}...`);
         setLoading(true);
         const offset = (page - 1) * pageSize;
         const result = await notificationApi.getNotifications(pageSize, offset);
+
+        console.log(`✅ [useNotifications] Page ${page} fetched:`, result);
 
         if (page === 1) {
           setNotifications(result.notifications);
@@ -61,7 +65,7 @@ export const useNotifications = (pageSize = 20): UseNotificationsReturn => {
         const totalPages = Math.ceil(result.total / pageSize);
         setHasMore(page < totalPages);
       } catch (error) {
-        console.error('Failed to fetch notifications:', error);
+        console.error('❌ [useNotifications] Failed to fetch notifications:', error);
       } finally {
         setLoading(false);
       }
@@ -161,6 +165,16 @@ export const useNotifications = (pageSize = 20): UseNotificationsReturn => {
     };
     loadInitialNotifications();
   }, [fetchNotifications]);
+
+  // Refetch when new socket notifications arrive (unreadCount increases)
+  useEffect(() => {
+    console.log(`[useNotifications] unreadCount: ${unreadCount}, prevUnreadCount: ${prevUnreadCount}`);
+    if (unreadCount > prevUnreadCount) {
+      console.log(`📨 New notification detected! Unread: ${unreadCount} > ${prevUnreadCount}. Refetching...`);
+      fetchNotifications(1);
+      setPrevUnreadCount(unreadCount);
+    }
+  }, [unreadCount, prevUnreadCount, fetchNotifications]);
 
   return {
     notifications,
