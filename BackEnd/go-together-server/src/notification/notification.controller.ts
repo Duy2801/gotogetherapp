@@ -8,6 +8,7 @@ import {
   Get,
   Query,
   Delete,
+  BadRequestException,
 } from "@nestjs/common";
 import { NotificationGateway } from "./notification.gateway";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
@@ -22,6 +23,7 @@ import { PrismaService } from "src/prisma/prisma.service";
 @ApiTags("Notification")
 export class NotificationController {
   constructor(
+    private notificationGateway: NotificationGateway,
     private notificationService: NotificationService,
     private prisma: PrismaService,
   ) {}
@@ -38,7 +40,9 @@ export class NotificationController {
   ) {
     const currentUserId = req.user.userId;
 
-    console.log(`[Controller] Sending reminder from ${currentUserId} to ${toUserId}`);
+    console.log(
+      `[Controller] Sending reminder from ${currentUserId} to ${toUserId}`,
+    );
 
     // Validate that the current user and target user are trip members
     const sharedTrip = await this.prisma.tripMember.findFirst({
@@ -57,7 +61,7 @@ export class NotificationController {
     });
 
     if (!sharedTrip) {
-      throw new Error("Users are not members of the same trip");
+      throw new BadRequestException("Users are not members of the same trip");
     }
 
     // Get current user name
@@ -74,6 +78,7 @@ export class NotificationController {
         currentUser?.fullName || "Unknown",
         0,
         dto.message,
+        dto.splitId, // Pass splitId so notification can be linked to payment
       );
       console.log(`[Controller] Reminder sent successfully`);
     } catch (error: any) {
@@ -111,6 +116,21 @@ export class NotificationController {
   }
 
   /**
+   * Clear all notifications for current user
+   * DELETE /api/v1/notification
+   */
+  @Delete()
+  async clearAllNotifications(@Req() req: any) {
+    const result = await this.notificationService.clearAllNotifications(
+      req.user.userId,
+    );
+    return {
+      message: "All notifications cleared successfully",
+      deleted: result.count,
+    };
+  }
+
+  /**
    * Delete a single notification
    * DELETE /api/v1/notification/:id
    */
@@ -124,17 +144,18 @@ export class NotificationController {
    * Test endpoint - check socket connection status
    * GET /api/v1/notification/debug/socket-status
    */
-  @Get('debug/socket-status')
+  @Get("debug/socket-status")
   debugSocketStatus() {
-    const connectedCount = this.notificationGateway['connectedUsers']?.size || 0;
+    const connectedCount =
+      this.notificationGateway["connectedUsers"]?.size || 0;
     const allRooms = Array.from(
-      this.notificationGateway['server']?.sockets?.adapter?.rooms?.keys() || [],
+      this.notificationGateway["server"]?.sockets?.adapter?.rooms?.keys() || [],
     );
 
     return {
       connectedUsersCount: connectedCount,
       allConnectedUsers: Array.from(
-        this.notificationGateway['connectedUsers']?.entries() || [],
+        this.notificationGateway["connectedUsers"]?.entries() || [],
       ).map(([userId, socket]: any) => ({
         userId,
         socketId: socket.id,
@@ -144,3 +165,4 @@ export class NotificationController {
       timestamp: new Date().toISOString(),
     };
   }
+}

@@ -4,7 +4,7 @@ export class CreateBudgetDto {
   @IsNotEmpty()
   @IsNumber()
   @Min(0)
-  amount: number;
+  amount: number | undefined;
 
   @IsOptional()
   @IsNumber()

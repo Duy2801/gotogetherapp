@@ -15,15 +15,32 @@ import { useFocusEffect } from '@react-navigation/native';
 import FontAwesome6 from '@react-native-vector-icons/fontawesome6';
 import { PRIMARY_COLOR, SECONDARY_COLOR } from '../../constants/color';
 import { SCREEN_NAME } from '../../constants/screenName';
-import { budgetApi } from './api';
+import { Budget, budgetApi } from './api';
 import { spendingApi, SpendingPaymentSummary } from '../spending/api';
 import { formatCompactMoney, formatCurrency } from '../../utils/format';
 
 const currentMonth = new Date().getMonth() + 1;
 const currentYear = new Date().getFullYear();
 
+const getBudgetDisplayState = (budget: Budget) => {
+  const spent = budget.spent || 0;
+  const amount = budget.amount || 0;
+  const remaining = budget.remaining ?? amount - spent;
+  const overflowAmount = remaining < 0 ? Math.abs(remaining) : 0;
+  const isOverBudget = budget.isOverBudget ?? overflowAmount > 0;
+
+  return {
+    spent,
+    amount,
+    remaining,
+    overflowAmount,
+    isOverBudget,
+    progressPercent: Math.min(budget.percentage || 0, 100),
+  };
+};
+
 const BudgetScreen = ({ navigation }: { navigation: any }) => {
-  const [budget, setBudget] = useState<any>(null);
+  const [budget, setBudget] = useState<Budget | null>(null);
   const [paymentSummary, setPaymentSummary] =
     useState<SpendingPaymentSummary | null>(null);
 
@@ -96,7 +113,10 @@ const BudgetScreen = ({ navigation }: { navigation: any }) => {
     try {
       const amount = parseFloat(budgetAmount);
       if (budget?.id) {
-        await budgetApi.updateBudget(budget.id, { amount, warningAt: warningAtNum });
+        await budgetApi.updateBudget(budget.id, {
+          amount,
+          warningAt: warningAtNum,
+        });
       } else {
         // Chưa có budget → tạo mới
         await budgetApi.createBudget({
@@ -112,17 +132,20 @@ const BudgetScreen = ({ navigation }: { navigation: any }) => {
       closeForm();
       fetchBudget();
     } catch (error: any) {
-      Alert.alert('Lỗi', error?.error || error?.message || 'Không thể lưu ngân sách');
+      Alert.alert(
+        'Lỗi',
+        error?.error || error?.message || 'Không thể lưu ngân sách',
+      );
     } finally {
       setSaving(false);
     }
   };
 
-
   const handleAmountChange = (value: string) => {
     setBudgetAmount(value.replace(/[^0-9]/g, ''));
   };
 
+  const budgetDisplay = budget ? getBudgetDisplayState(budget) : null;
 
   return (
     <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
@@ -148,14 +171,19 @@ const BudgetScreen = ({ navigation }: { navigation: any }) => {
               <View style={styles.tabContainer}>
                 <View>
                   <Text style={styles.tabLabel}>Đã tiêu</Text>
-                  <Text style={styles.tabValueSpent}>
-                    {formatCurrency(budget.spent || 0)}
+                  <Text
+                    style={[
+                      styles.tabValueSpent,
+                      budgetDisplay?.isOverBudget && styles.tabValueSpentOver,
+                    ]}
+                  >
+                    {formatCurrency(budgetDisplay?.spent || 0)}
                   </Text>
                 </View>
                 <View>
                   <Text style={styles.tabLabel}>Hạn mức chi tiêu</Text>
                   <Text style={styles.tabValueBudget}>
-                    {formatCurrency(budget.amount)}
+                    {formatCurrency(budgetDisplay?.amount || 0)}
                   </Text>
                 </View>
               </View>
@@ -166,17 +194,27 @@ const BudgetScreen = ({ navigation }: { navigation: any }) => {
                   <View
                     style={[
                       styles.progressBarFill,
-                      { width: `${Math.min(budget.percentage || 0, 100)}%` },
+                      {
+                        width: `${
+                          budgetDisplay?.progressPercent ?? 0
+                        }%` as `${number}%`,
+                      },
+                      budgetDisplay?.isOverBudget && styles.progressBarFillOver,
                     ]}
                   />
                 </View>
               </View>
 
               {/* Remaining Amount */}
-              <Text style={styles.remainingText}>
-                Còn lại:{' '}
-                {formatCurrency(budget.remaining || 0)}
-              </Text>
+              {budgetDisplay?.isOverBudget ? (
+                <Text style={[styles.remainingText, styles.overBudgetText]}>
+                  Vượt ngân sách: {formatCurrency(budgetDisplay.overflowAmount)}
+                </Text>
+              ) : (
+                <Text style={styles.remainingText}>
+                  Còn lại: {formatCurrency(budgetDisplay?.remaining || 0)}
+                </Text>
+              )}
 
               {/* Update Button */}
               {!showForm && (
@@ -206,8 +244,8 @@ const BudgetScreen = ({ navigation }: { navigation: any }) => {
               />
               <Text style={styles.emptyBudgetTitle}>Quản lý ngân sách</Text>
               <Text style={styles.emptyBudgetDesc}>
-                Nhấn "Cập nhật" để thiết lập hoặc điều chỉnh ngân sách tháng
-                của bạn
+                Nhấn "Cập nhật" để thiết lập hoặc điều chỉnh ngân sách tháng của
+                bạn
               </Text>
               {!showForm && (
                 <TouchableOpacity
@@ -487,6 +525,9 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#F59E0B',
   },
+  tabValueSpentOver: {
+    color: '#DC2626',
+  },
   tabValueBudget: {
     fontSize: 18,
     fontWeight: '700',
@@ -507,11 +548,18 @@ const styles = StyleSheet.create({
     borderRadius: 99,
     backgroundColor: '#F59E0B',
   },
+  progressBarFillOver: {
+    backgroundColor: '#DC2626',
+  },
   remainingText: {
     fontSize: 14,
     color: '#475569',
     marginBottom: 16,
     fontWeight: '500',
+  },
+  overBudgetText: {
+    color: '#DC2626',
+    fontWeight: '700',
   },
   updateTargetButton: {
     flexDirection: 'row',

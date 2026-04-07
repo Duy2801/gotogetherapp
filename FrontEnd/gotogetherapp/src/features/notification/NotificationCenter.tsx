@@ -12,11 +12,13 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
 import FontAwesome6 from '@react-native-vector-icons/fontawesome6';
 import { useNotifications } from './useNotifications';
 import { formatDate } from '../../utils/format';
 import { PRIMARY_COLOR, SECONDARY_COLOR } from '../../constants/color';
 import { Notification } from './api';
+import { navigateFromNotification } from './notificationNavigation';
 
 interface NotificationCenterProps {
   visible: boolean;
@@ -31,6 +33,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
   visible,
   onClose,
 }) => {
+  const navigation = useNavigation();
   const {
     notifications = [],
     loading,
@@ -53,7 +56,9 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
   React.useEffect(() => {
     if (visible) {
       console.log('📬 Notification Center opened - auto refetch');
-      console.log(`📊 Current state: ${notifications.length} local, ${totalNotifications} from API`);
+      console.log(
+        `📊 Current state: ${notifications.length} local, ${totalNotifications} from API`,
+      );
       // Delay 500ms to ensure API is ready and socket events are processed
       const timer = setTimeout(() => {
         console.log('🔄 Performing auto-refetch...');
@@ -96,6 +101,37 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
   };
 
   /**
+   * Handle notification tap - navigate to related feature and mark as read
+   */
+  const handleNotificationPress = (notification: Notification) => {
+    console.log(`\n👆 [NOTIFICATION PRESSED]`);
+    console.log(`   ID: ${notification.id}`);
+    console.log(`   Type: ${notification.type}`);
+    console.log(`   RefID: ${(notification as any).refId}`);
+    console.log(`   Data:`, (notification as any).data);
+    console.log(`   Navigation object exists: ${!!navigation}`);
+
+    try {
+      // Mark as read if not already
+      if (!notification.isRead) {
+        console.log('   📍 Marking as read...');
+        markAsReadHandler(notification.id);
+      }
+
+      // Close the modal and navigate
+      console.log('   📍 Closing modal...');
+      onClose();
+
+      setTimeout(() => {
+        console.log('   📍 Calling navigateFromNotification...');
+        navigateFromNotification(navigation, notification);
+      }, 300); // Delay to allow modal animation to complete
+    } catch (error) {
+      console.error('❌ [ERROR] handleNotificationPress:', error);
+    }
+  };
+
+  /**
    * Render notification item
    */
   const renderNotificationItem = ({ item }: { item: Notification }) => {
@@ -125,11 +161,19 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
       return colorMap[type] || '#6B7280';
     };
 
+    // All notifications are clickable - will navigate based on type
     return (
-      <View
-        style={[
+      <Pressable
+        onPress={() => {
+          console.log('🎯 Pressable onPress triggered for:', item.id);
+          handleNotificationPress(item);
+        }}
+        onPressIn={() => console.log('🟢 Pressable onPressIn:', item.id)}
+        onPressOut={() => console.log('🔴 Pressable onPressOut:', item.id)}
+        style={({ pressed }) => [
           styles.notificationItem,
           !item.isRead && styles.notificationItemUnread,
+          pressed && styles.notificationItemPressed,
         ]}
       >
         {/* Icon */}
@@ -160,13 +204,25 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
               {item.message}
             </Text>
           </View>
-          <Text style={styles.timestamp}>{formatDate(item.createdAt)}</Text>
+          <Text style={styles.timestamp}>
+            {formatDate((item as any).createdAt || (item as any).timestamp)}
+          </Text>
         </View>
 
         {/* Unread indicator */}
         {!item.isRead && <View style={styles.unreadBadge} />}
 
-        {/* Actions */}
+        {/* Chevron indicator - always show since all are clickable */}
+        <View style={styles.actionIndicator}>
+          <FontAwesome6
+            name="chevron-right"
+            size={14}
+            color={PRIMARY_COLOR}
+            iconStyle="solid"
+          />
+        </View>
+
+        {/* Quick Actions */}
         <View style={styles.actions}>
           {!item.isRead && (
             <TouchableOpacity
@@ -193,7 +249,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
             />
           </TouchableOpacity>
         </View>
-      </View>
+      </Pressable>
     );
   };
 
@@ -390,6 +446,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#ECFDF5',
     borderColor: '#D1F4D1',
   },
+  notificationItemPressed: {
+    backgroundColor: '#F0F9FF',
+    borderColor: PRIMARY_COLOR,
+  },
   iconContainer: {
     width: 40,
     height: 40,
@@ -426,6 +486,13 @@ const styles = StyleSheet.create({
     height: 8,
     borderRadius: 4,
     backgroundColor: PRIMARY_COLOR,
+    flexShrink: 0,
+  },
+  actionIndicator: {
+    width: 20,
+    height: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
     flexShrink: 0,
   },
   actions: {

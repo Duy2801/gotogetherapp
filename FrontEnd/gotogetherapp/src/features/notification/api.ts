@@ -6,14 +6,18 @@ export interface Notification {
   type: string;
   title: string;
   message: string;
+  refId?: string; // ID of the related object (expense, split, trip, etc.)
+  senderId?: string; // ID of the user who sent the notification
   data?: any;
   isRead: boolean;
   readAt?: string;
   createdAt: string;
+  timestamp?: string;
 }
 
 export interface NotificationsResponse {
   notifications: Notification[];
+  unreadCount?: number;
   total: number;
   page: number;
   pageSize: number;
@@ -28,12 +32,15 @@ export const notificationApi = {
     offset = 0,
   ): Promise<NotificationsResponse> => {
     try {
-      console.log(`🔄 Fetching notifications: limit=${limit}, offset=${offset}`);
+      console.log(
+        `🔄 Fetching notifications: limit=${limit}, offset=${offset}`,
+      );
       const response = await api.get(
         `/notification?limit=${limit}&offset=${offset}`,
       );
-      console.log(`✅ Notifications fetched:`, response);
-      return response as unknown as NotificationsResponse;
+      const payload = (response as any)?.data ?? response;
+      console.log(`✅ Notifications fetched:`, payload);
+      return payload as NotificationsResponse;
     } catch (error) {
       console.error('❌ Failed to fetch notifications:', error);
       throw error as ApiError;

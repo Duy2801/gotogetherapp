@@ -13,12 +13,15 @@ exports.TripMemberService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const notification_gateway_1 = require("../notification/notification.gateway");
+const notification_service_1 = require("../notification/notification.service");
 let TripMemberService = class TripMemberService {
     prisma;
     notificationGateway;
-    constructor(prisma, notificationGateway) {
+    notificationService;
+    constructor(prisma, notificationGateway, notificationService) {
         this.prisma = prisma;
         this.notificationGateway = notificationGateway;
+        this.notificationService = notificationService;
     }
     async ensureTripMember(userId, tripId) {
         const member = await this.prisma.tripMember.findUnique({
@@ -100,10 +103,15 @@ let TripMemberService = class TripMemberService {
                 },
             },
         });
+        const message = `${owner.fullName} đã mời bạn tham gia chuyến đi "${trip.name}"`;
+        await this.notificationService.createTripInviteNotification(inviteUser.id, ownerId, tripId, message, {
+            tripName: trip.name,
+            invitedBy: owner.fullName,
+        });
         this.notificationGateway.emitUserInvited(inviteUser.id, {
             type: "TRIP_INVITE",
             title: `Lời mời từ ${owner.fullName}`,
-            message: `${owner.fullName} đã mời bạn tham gia chuyến đi "${trip.name}"`,
+            message,
             tripId,
             tripName: trip.name,
             invitedBy: owner.fullName,
@@ -257,6 +265,7 @@ exports.TripMemberService = TripMemberService;
 exports.TripMemberService = TripMemberService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
-        notification_gateway_1.NotificationGateway])
+        notification_gateway_1.NotificationGateway,
+        notification_service_1.NotificationService])
 ], TripMemberService);
 //# sourceMappingURL=tripmember.service.js.map

@@ -1,10 +1,15 @@
 import React, { useState } from 'react';
-import { TouchableOpacity, StyleSheet, View, Text, Animated } from 'react-native';
+import {
+  TouchableOpacity,
+  StyleSheet,
+  Text,
+  Animated,
+  Image,
+} from 'react-native';
 import { useSelector } from 'react-redux';
-import FontAwesome6 from '@react-native-vector-icons/fontawesome6';
 import { RootState } from '../reducers/store';
 import { NotificationCenter } from '../features/notification/NotificationCenter';
-import { PRIMARY_COLOR } from '../constants/color';
+import { ICONNOTIFICATION } from '../assets';
 
 /**
  * Notification Button Component
@@ -51,11 +56,10 @@ export const NotificationButton: React.FC = () => {
         }}
         activeOpacity={0.7}
       >
-        <FontAwesome6
-          name="bell"
-          size={22}
-          color={PRIMARY_COLOR}
-          iconStyle="solid"
+        <Image
+          source={ICONNOTIFICATION.NOTIFICATION}
+          style={styles.notificationIcon}
+          resizeMode="contain"
         />
 
         {/* Unread Badge */}
@@ -94,6 +98,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     position: 'relative',
+  },
+  notificationIcon: {
+    width: 22,
+    height: 22,
   },
   badge: {
     position: 'absolute',

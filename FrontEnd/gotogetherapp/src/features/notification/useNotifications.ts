@@ -1,7 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../reducers/store';
-import { markAsRead, removeNotification } from '../../reducers/notificationSlice';
+import {
+  hydrateNotifications,
+  markAsRead,
+  removeNotification,
+} from '../../reducers/notificationSlice';
 import { notificationApi, Notification } from './api';
 
 interface UseNotificationsReturn {
@@ -40,6 +44,19 @@ export const useNotifications = (pageSize = 20): UseNotificationsReturn => {
 
   const offset = (currentPage - 1) * pageSize;
 
+  const normalizeNotifications = (items: any[] | undefined | null) => {
+    if (!Array.isArray(items)) return [];
+
+    return items.map(item => ({
+      ...item,
+      createdAt: item.createdAt || item.timestamp || new Date().toISOString(),
+      timestamp: item.timestamp || item.createdAt || new Date().toISOString(),
+      isRead: Boolean(item.isRead),
+      refId: item.refId, // Ensure refId is preserved
+      senderId: item.senderId, // Ensure senderId is preserved
+    }));
+  };
+
   /**
    * Fetch notifications from API
    */
@@ -50,27 +67,46 @@ export const useNotifications = (pageSize = 20): UseNotificationsReturn => {
         setLoading(true);
         const offset = (page - 1) * pageSize;
         const result = await notificationApi.getNotifications(pageSize, offset);
+        const apiNotifications = normalizeNotifications(
+          (result as any)?.notifications,
+        );
 
-        console.log(`✅ [useNotifications] Page ${page} fetched:`, result);
+        console.log(`✅ [useNotifications] Page ${page} fetched:`, {
+          ...result,
+          notifications: apiNotifications,
+        });
 
         if (page === 1) {
-          setNotifications(result.notifications);
+          setNotifications(apiNotifications);
+          dispatch(
+            hydrateNotifications({
+              notifications: apiNotifications,
+              unreadCount:
+                (result as any)?.unreadCount ??
+                apiNotifications.filter(notification => !notification.isRead)
+                  .length,
+            }),
+          );
         } else {
-          setNotifications(prev => [...prev, ...result.notifications]);
+          setNotifications(prev => [...prev, ...apiNotifications]);
         }
 
-        setTotalNotifications(result.total);
+        const totalCount = (result as any)?.total ?? apiNotifications.length;
+        setTotalNotifications(totalCount);
         setCurrentPage(page);
 
-        const totalPages = Math.ceil(result.total / pageSize);
+        const totalPages = Math.ceil(totalCount / pageSize);
         setHasMore(page < totalPages);
       } catch (error) {
-        console.error('❌ [useNotifications] Failed to fetch notifications:', error);
+        console.error(
+          '❌ [useNotifications] Failed to fetch notifications:',
+          error,
+        );
       } finally {
         setLoading(false);
       }
     },
-    [pageSize],
+    [pageSize, dispatch],
   );
 
   /**
@@ -116,7 +152,9 @@ export const useNotifications = (pageSize = 20): UseNotificationsReturn => {
         await notificationApi.deleteNotification(notificationId);
 
         // Update local state
-        const updatedNotifications = notifications.filter(n => n.id !== notificationId);
+        const updatedNotifications = notifications.filter(
+          n => n.id !== notificationId,
+        );
         setNotifications(updatedNotifications);
         setTotalNotifications(prev => prev - 1);
 
@@ -168,9 +206,13 @@ export const useNotifications = (pageSize = 20): UseNotificationsReturn => {
 
   // Refetch when new socket notifications arrive (unreadCount increases)
   useEffect(() => {
-    console.log(`[useNotifications] unreadCount: ${unreadCount}, prevUnreadCount: ${prevUnreadCount}`);
+    console.log(
+      `[useNotifications] unreadCount: ${unreadCount}, prevUnreadCount: ${prevUnreadCount}`,
+    );
     if (unreadCount > prevUnreadCount) {
-      console.log(`📨 New notification detected! Unread: ${unreadCount} > ${prevUnreadCount}. Refetching...`);
+      console.log(
+        `📨 New notification detected! Unread: ${unreadCount} > ${prevUnreadCount}. Refetching...`,
+      );
       fetchNotifications(1);
       setPrevUnreadCount(unreadCount);
     }

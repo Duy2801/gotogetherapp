@@ -75,7 +75,7 @@ const NotificationToast = () => {
 
       // Show Toast
       Toast.show({
-        type: 'custom',
+        type: 'notification',
         position: 'top',
         visibilityTime: config.duration,
         text1: title,

@@ -20,7 +20,6 @@ const BudgetCategoryItem = ({
   };
 
   const getIconName = () => {
-    if (budget.categoryIcon) return budget.categoryIcon;
     return 'wallet';
   };
 
@@ -33,12 +32,7 @@ const BudgetCategoryItem = ({
   return (
     <View style={[styles.container, !isLast && styles.containerWithBorder]}>
       <View style={styles.iconWrap}>
-        <View
-          style={[
-            styles.iconCircle,
-            { backgroundColor: budget.categoryColor || '#E7F0E8' },
-          ]}
-        >
+        <View style={[styles.iconCircle, { backgroundColor: '#E7F0E8' }]}>
           <FontAwesome6
             name={getIconName() as any}
             size={14}
@@ -50,9 +44,7 @@ const BudgetCategoryItem = ({
 
       <View style={styles.content}>
         <View style={styles.row}>
-          <Text style={styles.categoryName}>
-            {budget.categoryName || 'Tổng ngân sách'}
-          </Text>
+          <Text style={styles.categoryName}>{'Tổng ngân sách'}</Text>
           <View style={styles.statusRow}>
             <FontAwesome6
               name={getStatusIcon()}

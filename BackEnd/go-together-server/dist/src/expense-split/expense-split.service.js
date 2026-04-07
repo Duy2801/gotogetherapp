@@ -13,12 +13,15 @@ exports.ExpenseSplitService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const notification_gateway_1 = require("../notification/notification.gateway");
+const notification_service_1 = require("../notification/notification.service");
 let ExpenseSplitService = class ExpenseSplitService {
     prisma;
     notificationGateway;
-    constructor(prisma, notificationGateway) {
+    notificationService;
+    constructor(prisma, notificationGateway, notificationService) {
         this.prisma = prisma;
         this.notificationGateway = notificationGateway;
+        this.notificationService = notificationService;
     }
     async markAsPaid(userId, splitId) {
         const split = await this.prisma.expenseSplit.findUnique({
@@ -26,10 +29,10 @@ let ExpenseSplitService = class ExpenseSplitService {
             include: {
                 expense: {
                     include: {
-                        paidBy: { select: { fullName: true } },
+                        paidBy: { select: { fullName: true, id: true } },
                     },
                 },
-                user: { select: { fullName: true } },
+                user: { select: { fullName: true, id: true } },
             },
         });
         if (!split) {
@@ -49,9 +52,15 @@ let ExpenseSplitService = class ExpenseSplitService {
                 paidAt: new Date(),
             },
         });
+        const message = `${split.user.fullName} đã đánh dấu trả tiền cho ${split.expense.description}`;
+        await this.notificationService.createPaymentMarkedNotification(split.expense.paidById, split.userId, splitId, split.expense.id, split.expense.tripId, message, {
+            amount: split.amount,
+            paidBy: split.user.fullName,
+            paidTo: split.expense.paidBy.fullName,
+        });
         this.notificationGateway.emitPaymentMarked(split.expense.tripId, {
             type: "PAYMENT_MARKED",
-            message: `${split.user.fullName} đã đánh dấu trả tiền cho ${split.expense.description}`,
+            message,
             amount: split.amount,
             paidBy: split.user.fullName,
             paidTo: split.expense.paidBy.fullName,
@@ -69,7 +78,7 @@ let ExpenseSplitService = class ExpenseSplitService {
                         paidBy: { select: { fullName: true } },
                     },
                 },
-                user: { select: { fullName: true } },
+                user: { select: { fullName: true, id: true } },
             },
         });
         if (!split) {
@@ -91,9 +100,15 @@ let ExpenseSplitService = class ExpenseSplitService {
                 confirmedAt: new Date(),
             },
         });
+        const message = `${split.expense.paidBy.fullName} đã xác nhận nhận tiền từ ${split.user.fullName}`;
+        await this.notificationService.createPaymentConfirmedNotification(split.userId, split.expense.paidById, splitId, split.expense.id, split.expense.tripId, message, {
+            amount: split.amount,
+            paidBy: split.user.fullName,
+            paidTo: split.expense.paidBy.fullName,
+        });
         this.notificationGateway.emitPaymentConfirmed(split.expense.tripId, {
             type: "PAYMENT_CONFIRMED",
-            message: `${split.expense.paidBy.fullName} đã xác nhận nhận tiền từ ${split.user.fullName}`,
+            message,
             amount: split.amount,
             paidBy: split.user.fullName,
             paidTo: split.expense.paidBy.fullName,
@@ -107,6 +122,7 @@ exports.ExpenseSplitService = ExpenseSplitService;
 exports.ExpenseSplitService = ExpenseSplitService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
-        notification_gateway_1.NotificationGateway])
+        notification_gateway_1.NotificationGateway,
+        notification_service_1.NotificationService])
 ], ExpenseSplitService);
 //# sourceMappingURL=expense-split.service.js.map

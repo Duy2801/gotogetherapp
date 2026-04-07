@@ -14,15 +14,18 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.NotificationController = void 0;
 const common_1 = require("@nestjs/common");
+const notification_gateway_1 = require("./notification.gateway");
 const swagger_1 = require("@nestjs/swagger");
 const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
 const notification_service_1 = require("./notification.service");
 const send_reminder_dto_1 = require("./dto/send-reminder.dto");
 const prisma_service_1 = require("../prisma/prisma.service");
 let NotificationController = class NotificationController {
+    notificationGateway;
     notificationService;
     prisma;
-    constructor(notificationService, prisma) {
+    constructor(notificationGateway, notificationService, prisma) {
+        this.notificationGateway = notificationGateway;
         this.notificationService = notificationService;
         this.prisma = prisma;
     }
@@ -44,14 +47,14 @@ let NotificationController = class NotificationController {
             },
         });
         if (!sharedTrip) {
-            throw new Error("Users are not members of the same trip");
+            throw new common_1.BadRequestException("Users are not members of the same trip");
         }
         const currentUser = await this.prisma.user.findUnique({
             where: { id: currentUserId },
             select: { fullName: true },
         });
         try {
-            await this.notificationService.sendReminder(toUserId, currentUserId, currentUser?.fullName || "Unknown", 0, dto.message);
+            await this.notificationService.sendReminder(toUserId, currentUserId, currentUser?.fullName || "Unknown", 0, dto.message, dto.splitId);
             console.log(`[Controller] Reminder sent successfully`);
         }
         catch (error) {
@@ -66,16 +69,23 @@ let NotificationController = class NotificationController {
     async markAsRead(notificationId) {
         return this.notificationService.markAsRead(notificationId);
     }
+    async clearAllNotifications(req) {
+        const result = await this.notificationService.clearAllNotifications(req.user.userId);
+        return {
+            message: "All notifications cleared successfully",
+            deleted: result.count,
+        };
+    }
     async deleteNotification(notificationId) {
         await this.notificationService.deleteNotification(notificationId);
         return { message: "Notification deleted successfully" };
     }
     debugSocketStatus() {
-        const connectedCount = this.notificationGateway['connectedUsers']?.size || 0;
-        const allRooms = Array.from(this.notificationGateway['server']?.sockets?.adapter?.rooms?.keys() || []);
+        const connectedCount = this.notificationGateway["connectedUsers"]?.size || 0;
+        const allRooms = Array.from(this.notificationGateway["server"]?.sockets?.adapter?.rooms?.keys() || []);
         return {
             connectedUsersCount: connectedCount,
-            allConnectedUsers: Array.from(this.notificationGateway['connectedUsers']?.entries() || []).map(([userId, socket]) => ({
+            allConnectedUsers: Array.from(this.notificationGateway["connectedUsers"]?.entries() || []).map(([userId, socket]) => ({
                 userId,
                 socketId: socket.id,
                 rooms: Array.from(socket.rooms || []),
@@ -112,6 +122,13 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], NotificationController.prototype, "markAsRead", null);
 __decorate([
+    (0, common_1.Delete)(),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], NotificationController.prototype, "clearAllNotifications", null);
+__decorate([
     (0, common_1.Delete)(":id"),
     __param(0, (0, common_1.Param)("id")),
     __metadata("design:type", Function),
@@ -119,7 +136,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], NotificationController.prototype, "deleteNotification", null);
 __decorate([
-    (0, common_1.Get)('debug/socket-status'),
+    (0, common_1.Get)("debug/socket-status"),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
@@ -129,7 +146,8 @@ exports.NotificationController = NotificationController = __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiTags)("Notification"),
-    __metadata("design:paramtypes", [notification_service_1.NotificationService,
+    __metadata("design:paramtypes", [notification_gateway_1.NotificationGateway,
+        notification_service_1.NotificationService,
         prisma_service_1.PrismaService])
 ], NotificationController);
 //# sourceMappingURL=notification.controller.js.map

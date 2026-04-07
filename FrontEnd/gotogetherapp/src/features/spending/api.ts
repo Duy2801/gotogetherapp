@@ -80,7 +80,7 @@ const buildPaymentItemsFromExpense = (
   }
 
   return expense.splits
-    .filter(split => split.userId === userId && !split.isPaid)
+    .filter(split => split.userId === userId && !split.confirmed)
     .map(split => ({
       splitId: split.id,
       expenseId: expense.id,
@@ -266,10 +266,12 @@ export const spendingApi = {
   sendReminder: async (
     toUserId: string,
     message: string,
+    splitId?: string,
   ): Promise<{ message: string }> => {
     try {
       const response = await api.post(`/notification/remind/${toUserId}`, {
         message,
+        splitId,
       });
       return response as unknown as { message: string };
     } catch (error) {

@@ -57,9 +57,6 @@ export const SocketProvider = ({ children, token }: SocketProviderProps) => {
     socketInstance.on('connect', () => {
       console.log('✓ Socket connected:', socketInstance.id);
       setIsConnected(true);
-
-      // Verify user received socket connection by checking rooms
-      console.log('📡 Socket rooms after connect:', Object.keys(socketInstance.rooms || {}));
     });
 
     socketInstance.on('disconnect', reason => {

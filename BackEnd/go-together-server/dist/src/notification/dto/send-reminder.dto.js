@@ -13,10 +13,17 @@ exports.SendReminderDto = void 0;
 const class_validator_1 = require("class-validator");
 class SendReminderDto {
     message;
+    splitId;
 }
 exports.SendReminderDto = SendReminderDto;
 __decorate([
     (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], SendReminderDto.prototype, "message", void 0);
+__decorate([
+    (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], SendReminderDto.prototype, "splitId", void 0);
 //# sourceMappingURL=send-reminder.dto.js.map

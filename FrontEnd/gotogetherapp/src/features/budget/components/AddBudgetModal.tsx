@@ -23,7 +23,6 @@ interface AddBudgetModalProps {
   onClose: (refresh: boolean) => void;
 }
 
-// Predefined categories - in real app, these would come from an API
 const CATEGORIES = [
   { id: null, name: 'Tổng ngân sách', icon: 'wallet', color: '#159947' },
   { id: 'food', name: 'Ăn uống', icon: 'utensils', color: '#EF4444' },
@@ -154,7 +153,7 @@ const AddBudgetModal = ({
                     style={[
                       styles.categoryCard,
                       selectedCategoryId === category.id &&
-                      styles.categoryCardSelected,
+                        styles.categoryCardSelected,
                     ]}
                     onPress={() => setSelectedCategoryId(category.id)}
                     disabled={!!budget}

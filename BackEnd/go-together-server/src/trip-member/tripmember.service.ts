@@ -6,12 +6,14 @@ import {
 } from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
 import { NotificationGateway } from "src/notification/notification.gateway";
+import { NotificationService } from "src/notification/notification.service";
 
 @Injectable()
 export class TripMemberService {
   constructor(
     private prisma: PrismaService,
     private notificationGateway: NotificationGateway,
+    private notificationService: NotificationService,
   ) {}
 
   async ensureTripMember(userId: string, tripId: string) {
@@ -117,10 +119,22 @@ export class TripMemberService {
     });
 
     // Emit invitation notification to invited user
+    const message = `${owner.fullName} đã mời bạn tham gia chuyến đi "${trip.name}"`;
+    await this.notificationService.createTripInviteNotification(
+      inviteUser.id,
+      ownerId,
+      tripId,
+      message,
+      {
+        tripName: trip.name,
+        invitedBy: owner.fullName,
+      },
+    );
+
     this.notificationGateway.emitUserInvited(inviteUser.id, {
       type: "TRIP_INVITE",
       title: `Lời mời từ ${owner.fullName}`,
-      message: `${owner.fullName} đã mời bạn tham gia chuyến đi "${trip.name}"`,
+      message,
       tripId,
       tripName: trip.name,
       invitedBy: owner.fullName,

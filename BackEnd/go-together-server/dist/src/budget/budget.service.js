@@ -21,6 +21,9 @@ let BudgetService = class BudgetService {
         const currentDate = new Date();
         const month = dto.month || currentDate.getMonth() + 1;
         const year = dto.year || currentDate.getFullYear();
+        if (dto.amount === undefined) {
+            throw new common_1.BadRequestException("Amount is required");
+        }
         const existingBudget = await this.prisma.budget.findUnique({
             where: {
                 userId_month_year: {

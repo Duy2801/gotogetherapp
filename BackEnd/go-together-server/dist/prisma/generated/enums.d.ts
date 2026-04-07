@@ -40,5 +40,8 @@ export declare const NotificationType: {
     readonly BUDGET_WARNING: "BUDGET_WARNING";
     readonly SETTLEMENT_REMINDER: "SETTLEMENT_REMINDER";
     readonly EXPENSE_REMINDER: "EXPENSE_REMINDER";
+    readonly PAYMENT_MARKED: "PAYMENT_MARKED";
+    readonly PAYMENT_CONFIRMED: "PAYMENT_CONFIRMED";
+    readonly INVITATION_REJECTED: "INVITATION_REJECTED";
 };
 export type NotificationType = (typeof NotificationType)[keyof typeof NotificationType];

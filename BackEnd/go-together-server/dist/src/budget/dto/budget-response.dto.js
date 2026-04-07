@@ -4,10 +4,6 @@ exports.BudgetSummaryDto = exports.BudgetResponseDto = void 0;
 class BudgetResponseDto {
     id;
     userId;
-    categoryId;
-    categoryName;
-    categoryIcon;
-    categoryColor;
     amount;
     spent;
     month;

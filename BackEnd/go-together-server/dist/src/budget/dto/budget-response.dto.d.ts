@@ -1,10 +1,6 @@
 export declare class BudgetResponseDto {
     id: string;
     userId: string;
-    categoryId?: string;
-    categoryName?: string;
-    categoryIcon?: string;
-    categoryColor?: string;
     amount: number;
     spent: number;
     month: number;

@@ -14,14 +14,17 @@ const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const tripmember_service_1 = require("../trip-member/tripmember.service");
 const notification_gateway_1 = require("../notification/notification.gateway");
+const notification_service_1 = require("../notification/notification.service");
 let ExpenseService = class ExpenseService {
     prisma;
     tripMember;
     notificationGateway;
-    constructor(prisma, tripMember, notificationGateway) {
+    notificationService;
+    constructor(prisma, tripMember, notificationGateway, notificationService) {
         this.prisma = prisma;
         this.tripMember = tripMember;
         this.notificationGateway = notificationGateway;
+        this.notificationService = notificationService;
     }
     async getExpenseCategories(userId, tripId) {
         await this.tripMember.ensureTripMember(userId, tripId);
@@ -175,6 +178,17 @@ let ExpenseService = class ExpenseService {
         if (!created) {
             throw new common_1.BadRequestException("Failed to create expense");
         }
+        const participants = created.splits || [];
+        for (const split of participants) {
+            if (split.userId !== created.paidById) {
+                const message = `${created.paidBy.fullName} đã thêm chi phí: ${created.description}`;
+                await this.notificationService.createExpenseCreatedNotification(split.userId, created.paidById, created.id, tripId, message, {
+                    description: created.description,
+                    amount: created.amount,
+                    paidBy: created.paidBy.fullName,
+                });
+            }
+        }
         this.notificationGateway.emitExpenseCreated(tripId, {
             type: "EXPENSE_CREATED",
             title: "Chi phí mới",
@@ -182,6 +196,7 @@ let ExpenseService = class ExpenseService {
             expenseDescription: created.description,
             amount: created.amount,
             paidBy: created.paidBy.fullName,
+            expenseId: created.id,
             timestamp: new Date().toISOString(),
         });
         return this.toExpenseResponse(created);
@@ -267,6 +282,7 @@ exports.ExpenseService = ExpenseService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
         tripmember_service_1.TripMemberService,
-        notification_gateway_1.NotificationGateway])
+        notification_gateway_1.NotificationGateway,
+        notification_service_1.NotificationService])
 ], ExpenseService);
 //# sourceMappingURL=expense.service.js.map

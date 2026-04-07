@@ -176,11 +176,22 @@ const PaymentDetailScreen = ({ navigation }: { navigation: any }) => {
     }
   };
 
-  const handleRemind = async (userData: { name: string; userId: string; amount: number }) => {
-    const message = `Nhắc bạn chuyển cho tôi ${formatMoney(userData.amount)} cho khoản chi phí chuyến đi. Cảm ơn ${userData.name}.`;
+  const handleRemind = async (userData: {
+    name: string;
+    userId: string;
+    amount: number;
+    splitId: string;
+  }) => {
+    const message = `Nhắc bạn chuyển cho tôi ${formatMoney(
+      userData.amount,
+    )} cho khoản chi phí chuyến đi. Cảm ơn ${userData.name}.`;
     try {
       setActionLoadingId(`remind-${userData.userId}`);
-      await spendingApi.sendReminder(userData.userId, message);
+      await spendingApi.sendReminder(
+        userData.userId,
+        message,
+        userData.splitId,
+      );
       Alert.alert('Thành công', 'Đã gửi nhắc nhở cho ' + userData.name);
     } catch (error: any) {
       Alert.alert(
@@ -370,7 +381,9 @@ const PaymentDetailScreen = ({ navigation }: { navigation: any }) => {
               onPress={() => {
                 setDetailModalGroup(null);
                 // Get all unique trip IDs from items
-                const tripIds = [...new Set(group.items.map((item: any) => item.tripId))];
+                const tripIds = [
+                  ...new Set(group.items.map((item: any) => item.tripId)),
+                ];
                 if (tripIds.length > 0) {
                   navigation.navigate(SCREEN_NAME.SPENDING_DETAIL, { tripIds });
                 }
@@ -395,6 +408,7 @@ const PaymentDetailScreen = ({ navigation }: { navigation: any }) => {
   const renderGroupCard = (group: any, type: 'debt' | 'receivable') => {
     const primaryItem = group.items[0];
     const canConfirm = type === 'receivable' && primaryItem?.isPaid;
+    const canMarkAsPaid = type === 'debt' && !primaryItem?.isPaid;
     const actionLoading = actionLoadingId === primaryItem?.splitId;
 
     const tripIds = [
@@ -499,12 +513,14 @@ const PaymentDetailScreen = ({ navigation }: { navigation: any }) => {
               <TouchableOpacity
                 style={styles.primaryActionButton}
                 onPress={() => handleMarkAsPaid(primaryItem.splitId)}
-                disabled={actionLoading}
+                disabled={actionLoading || !canMarkAsPaid}
               >
                 {actionLoading ? (
                   <ActivityIndicator size="small" color="#FFFFFF" />
                 ) : (
-                  <Text style={styles.primaryActionText}>Đánh dấu đã trả</Text>
+                  <Text style={styles.primaryActionText}>
+                    {primaryItem?.isPaid ? 'Chờ xác nhận' : 'Đánh dấu đã trả'}
+                  </Text>
                 )}
               </TouchableOpacity>
               <TouchableOpacity
@@ -529,6 +545,7 @@ const PaymentDetailScreen = ({ navigation }: { navigation: any }) => {
                     name: group.counterpartyName,
                     userId: group.counterpartyId || '',
                     amount: group.totalAmount,
+                    splitId: primaryItem.splitId,
                   })
                 }
               >

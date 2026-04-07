@@ -2,6 +2,7 @@ import { BadRequestException, Injectable } from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
 import { TripMemberService } from "src/trip-member/tripmember.service";
 import { NotificationGateway } from "src/notification/notification.gateway";
+import { NotificationService } from "src/notification/notification.service";
 import { CreateExpense } from "./dto/create-Expense.dto";
 
 @Injectable()
@@ -10,6 +11,7 @@ export class ExpenseService {
     private prisma: PrismaService,
     private tripMember: TripMemberService,
     private notificationGateway: NotificationGateway,
+    private notificationService: NotificationService,
   ) {}
 
   async getExpenseCategories(userId: string, tripId: string) {
@@ -208,7 +210,27 @@ export class ExpenseService {
       throw new BadRequestException("Failed to create expense");
     }
 
-    // Emit expense created notification
+    // Create notification for each participant who didn't pay
+    const participants = created.splits || [];
+    for (const split of participants) {
+      if (split.userId !== created.paidById) {
+        const message = `${created.paidBy.fullName} đã thêm chi phí: ${created.description}`;
+        await this.notificationService.createExpenseCreatedNotification(
+          split.userId,
+          created.paidById,
+          created.id,
+          tripId,
+          message,
+          {
+            description: created.description,
+            amount: created.amount,
+            paidBy: created.paidBy.fullName,
+          },
+        );
+      }
+    }
+
+    // Emit expense created notification via socket
     this.notificationGateway.emitExpenseCreated(tripId, {
       type: "EXPENSE_CREATED",
       title: "Chi phí mới",
@@ -216,6 +238,7 @@ export class ExpenseService {
       expenseDescription: created.description,
       amount: created.amount,
       paidBy: created.paidBy.fullName,
+      expenseId: created.id,
       timestamp: new Date().toISOString(),
     });
 

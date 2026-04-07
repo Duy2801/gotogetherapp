@@ -1,5 +1,5 @@
 export declare class CreateBudgetDto {
-    amount: number;
+    amount: number | undefined;
     month?: number;
     year?: number;
     warningAt?: number;

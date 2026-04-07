@@ -5,6 +5,8 @@ export interface Notification {
   type: string;
   title: string;
   message: string;
+  refId?: string;
+  senderId?: string;
   data?: any;
   timestamp: string; // Use ISO string instead of Date object
   isRead: boolean;
@@ -41,6 +43,8 @@ const notificationSlice = createSlice({
         type: action.payload.type,
         title: action.payload.title,
         message: action.payload.message,
+        refId: action.payload.refId,
+        senderId: action.payload.senderId,
         data: action.payload.data,
         timestamp: action.payload.timestamp || new Date().toISOString(),
         isRead: false,
@@ -53,15 +57,28 @@ const notificationSlice = createSlice({
       }
     },
 
+    hydrateNotifications: (
+      state,
+      action: PayloadAction<{
+        notifications: Notification[];
+        unreadCount: number;
+      }>,
+    ) => {
+      state.notifications = action.payload.notifications.slice(0, 50);
+      state.unreadCount = action.payload.unreadCount;
+    },
+
     markAsRead: (state, action: PayloadAction<string>) => {
-      const notification = state.notifications.find(n => n.id === action.payload);
+      const notification = state.notifications.find(
+        n => n.id === action.payload,
+      );
       if (notification && !notification.isRead) {
         notification.isRead = true;
         state.unreadCount = Math.max(0, state.unreadCount - 1);
       }
     },
 
-    markAllAsRead: (state) => {
+    markAllAsRead: state => {
       state.notifications.forEach(n => {
         n.isRead = true;
       });
@@ -78,7 +95,7 @@ const notificationSlice = createSlice({
       }
     },
 
-    clearAllNotifications: (state) => {
+    clearAllNotifications: state => {
       state.notifications = [];
       state.unreadCount = 0;
     },
@@ -88,6 +105,7 @@ const notificationSlice = createSlice({
 export const {
   addNotification,
   addSocketNotification,
+  hydrateNotifications,
   markAsRead,
   markAllAsRead,
   removeNotification,

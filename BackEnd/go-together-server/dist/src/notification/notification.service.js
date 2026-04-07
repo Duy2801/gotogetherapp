@@ -20,7 +20,156 @@ let NotificationService = class NotificationService {
         this.prisma = prisma;
         this.notificationGateway = notificationGateway;
     }
-    async sendReminder(toUserId, fromUserId, fromUserName, amount, message) {
+    async createPaymentMarkedNotification(toUserId, fromUserId, splitId, expenseId, tripId, message, data) {
+        try {
+            const notification = await this.prisma.notification.create({
+                data: {
+                    userId: toUserId,
+                    senderId: fromUserId,
+                    type: "PAYMENT_MARKED",
+                    title: "Thanh toán được đánh dấu",
+                    message,
+                    refId: splitId,
+                    data: {
+                        splitId,
+                        expenseId,
+                        tripId,
+                        ...data,
+                    },
+                },
+            });
+            console.log(`[PaymentMarked] Created notification: ${notification.id} for user: ${toUserId}`);
+            return notification;
+        }
+        catch (error) {
+            console.error("[PaymentMarked] Error creating notification:", error);
+            throw error;
+        }
+    }
+    async createPaymentConfirmedNotification(toUserId, fromUserId, splitId, expenseId, tripId, message, data) {
+        try {
+            const notification = await this.prisma.notification.create({
+                data: {
+                    userId: toUserId,
+                    senderId: fromUserId,
+                    type: "PAYMENT_CONFIRMED",
+                    title: "Thanh toán được xác nhận",
+                    message,
+                    refId: splitId,
+                    data: {
+                        splitId,
+                        expenseId,
+                        tripId,
+                        ...data,
+                    },
+                },
+            });
+            console.log(`[PaymentConfirmed] Created notification: ${notification.id} for user: ${toUserId}`);
+            return notification;
+        }
+        catch (error) {
+            console.error("[PaymentConfirmed] Error creating notification:", error);
+            throw error;
+        }
+    }
+    async createExpenseCreatedNotification(toUserId, fromUserId, expenseId, tripId, message, data) {
+        try {
+            const notification = await this.prisma.notification.create({
+                data: {
+                    userId: toUserId,
+                    senderId: fromUserId,
+                    type: "EXPENSE_CREATED",
+                    title: "Chi phí mới",
+                    message,
+                    refId: expenseId,
+                    data: {
+                        expenseId,
+                        tripId,
+                        ...data,
+                    },
+                },
+            });
+            console.log(`[ExpenseCreated] Created notification: ${notification.id} for user: ${toUserId}`);
+            return notification;
+        }
+        catch (error) {
+            console.error("[ExpenseCreated] Error creating notification:", error);
+            throw error;
+        }
+    }
+    async createTripInviteNotification(toUserId, fromUserId, tripId, message, data) {
+        try {
+            const notification = await this.prisma.notification.create({
+                data: {
+                    userId: toUserId,
+                    senderId: fromUserId,
+                    type: "TRIP_INVITE",
+                    title: "Lời mời tham gia chuyến đi",
+                    message,
+                    refId: tripId,
+                    data: {
+                        tripId,
+                        ...data,
+                    },
+                },
+            });
+            console.log(`[TripInvite] Created notification: ${notification.id} for user: ${toUserId}`);
+            return notification;
+        }
+        catch (error) {
+            console.error("[TripInvite] Error creating notification:", error);
+            throw error;
+        }
+    }
+    async createMemberJoinedNotification(toUserId, fromUserId, tripId, message, data) {
+        try {
+            const notification = await this.prisma.notification.create({
+                data: {
+                    userId: toUserId,
+                    senderId: fromUserId,
+                    type: "MEMBER_JOINED",
+                    title: "Thành viên mới tham gia",
+                    message,
+                    refId: tripId,
+                    data: {
+                        tripId,
+                        ...data,
+                    },
+                },
+            });
+            console.log(`[MemberJoined] Created notification: ${notification.id} for user: ${toUserId}`);
+            return notification;
+        }
+        catch (error) {
+            console.error("[MemberJoined] Error creating notification:", error);
+            throw error;
+        }
+    }
+    async createInviteRejectedNotification(toUserId, fromUserId, tripId, message, data) {
+        try {
+            const notification = await this.prisma.notification.create({
+                data: {
+                    userId: toUserId,
+                    senderId: fromUserId,
+                    type: "INVITATION_REJECTED",
+                    title: "Lời mời bị từ chối",
+                    message,
+                    refId: tripId,
+                    data: {
+                        tripId,
+                        ...data,
+                    },
+                },
+            });
+            console.log(`[InviteRejected] Created notification: ${notification.id} for user: ${toUserId}`);
+            return notification;
+        }
+        catch (error) {
+            console.error("[InviteRejected] Error creating notification:", error);
+            throw error;
+        }
+    }
+    async sendReminder(toUserId, fromUserId, fromUserName, amount, message, splitId) {
         const reminderMessage = message || `${fromUserName} nhắc bạn thanh toán khoản tiền.`;
         try {
             const notification = await this.prisma.notification.create({
@@ -30,9 +179,11 @@ let NotificationService = class NotificationService {
                     type: "SETTLEMENT_REMINDER",
                     title: "Nhắc nhở thanh toán",
                     message: reminderMessage,
+                    refId: splitId,
                     data: {
                         amount,
                         fromUserName,
+                        splitId,
                     },
                 },
             });
@@ -45,6 +196,7 @@ let NotificationService = class NotificationService {
                 amount,
                 fromUserName,
                 senderId: fromUserId,
+                refId: splitId,
                 timestamp: new Date().toISOString(),
             });
             console.log(`[Reminder] Socket event emitted to user: ${toUserId}`);
@@ -74,22 +226,40 @@ let NotificationService = class NotificationService {
         });
     }
     async getUserNotifications(userId, limit = 20, offset = 0) {
-        const [notifications, total] = await Promise.all([
+        const [notifications, unreadCount, total] = await Promise.all([
             this.prisma.notification.findMany({
                 where: { userId },
                 orderBy: { createdAt: "desc" },
                 take: limit,
                 skip: offset,
-                include: {
+                select: {
+                    id: true,
+                    userId: true,
+                    type: true,
+                    title: true,
+                    message: true,
+                    refId: true,
+                    senderId: true,
+                    data: true,
+                    isRead: true,
+                    readAt: true,
+                    createdAt: true,
                     sender: {
                         select: { id: true, fullName: true, avatar: true },
                     },
                 },
             }),
+            this.prisma.notification.count({
+                where: { userId, isRead: false },
+            }),
             this.prisma.notification.count({ where: { userId } }),
         ]);
+        console.log(`📤 [getUserNotifications] Returning ${notifications.length} notifications:`, notifications
+            .slice(0, 2)
+            .map((n) => ({ type: n.type, refId: n.refId, data: n.data })));
         return {
             notifications,
+            unreadCount,
             total,
             page: Math.floor(offset / limit) + 1,
             pageSize: limit,

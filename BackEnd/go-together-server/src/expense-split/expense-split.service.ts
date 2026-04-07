@@ -6,12 +6,14 @@ import {
 } from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
 import { NotificationGateway } from "src/notification/notification.gateway";
+import { NotificationService } from "src/notification/notification.service";
 
 @Injectable()
 export class ExpenseSplitService {
   constructor(
     private prisma: PrismaService,
     private notificationGateway: NotificationGateway,
+    private notificationService: NotificationService,
   ) {}
 
   async markAsPaid(userId: string, splitId: string) {
@@ -20,10 +22,10 @@ export class ExpenseSplitService {
       include: {
         expense: {
           include: {
-            paidBy: { select: { fullName: true } },
+            paidBy: { select: { fullName: true, id: true } },
           },
         },
-        user: { select: { fullName: true } },
+        user: { select: { fullName: true, id: true } },
       },
     });
     if (!split) {
@@ -45,10 +47,27 @@ export class ExpenseSplitService {
       },
     });
 
-    // Emit payment marked notification
+    const message = `${split.user.fullName} đã đánh dấu trả tiền cho ${split.expense.description}`;
+
+    // Create database notification for paidBy user (person who lent the money)
+    await this.notificationService.createPaymentMarkedNotification(
+      split.expense.paidById,
+      split.userId,
+      splitId,
+      split.expense.id,
+      split.expense.tripId,
+      message,
+      {
+        amount: split.amount,
+        paidBy: split.user.fullName,
+        paidTo: split.expense.paidBy.fullName,
+      },
+    );
+
+    // Emit payment marked notification via socket
     this.notificationGateway.emitPaymentMarked(split.expense.tripId, {
       type: "PAYMENT_MARKED",
-      message: `${split.user.fullName} đã đánh dấu trả tiền cho ${split.expense.description}`,
+      message,
       amount: split.amount,
       paidBy: split.user.fullName,
       paidTo: split.expense.paidBy.fullName,
@@ -68,7 +87,7 @@ export class ExpenseSplitService {
             paidBy: { select: { fullName: true } },
           },
         },
-        user: { select: { fullName: true } },
+        user: { select: { fullName: true, id: true } },
       },
     });
     if (!split) {
@@ -93,10 +112,27 @@ export class ExpenseSplitService {
       },
     });
 
-    // Emit payment confirmed notification
+    const message = `${split.expense.paidBy.fullName} đã xác nhận nhận tiền từ ${split.user.fullName}`;
+
+    // Create database notification for the user who paid (splitId owner)
+    await this.notificationService.createPaymentConfirmedNotification(
+      split.userId,
+      split.expense.paidById,
+      splitId,
+      split.expense.id,
+      split.expense.tripId,
+      message,
+      {
+        amount: split.amount,
+        paidBy: split.user.fullName,
+        paidTo: split.expense.paidBy.fullName,
+      },
+    );
+
+    // Emit payment confirmed notification via socket
     this.notificationGateway.emitPaymentConfirmed(split.expense.tripId, {
       type: "PAYMENT_CONFIRMED",
-      message: `${split.expense.paidBy.fullName} đã xác nhận nhận tiền từ ${split.user.fullName}`,
+      message,
       amount: split.amount,
       paidBy: split.user.fullName,
       paidTo: split.expense.paidBy.fullName,

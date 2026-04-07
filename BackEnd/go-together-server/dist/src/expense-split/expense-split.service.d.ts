@@ -1,9 +1,11 @@
 import { PrismaService } from "src/prisma/prisma.service";
 import { NotificationGateway } from "src/notification/notification.gateway";
+import { NotificationService } from "src/notification/notification.service";
 export declare class ExpenseSplitService {
     private prisma;
     private notificationGateway;
-    constructor(prisma: PrismaService, notificationGateway: NotificationGateway);
+    private notificationService;
+    constructor(prisma: PrismaService, notificationGateway: NotificationGateway, notificationService: NotificationService);
     markAsPaid(userId: string, splitId: string): Promise<{
         id: string;
         createdAt: Date;

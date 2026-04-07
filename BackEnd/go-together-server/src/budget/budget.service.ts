@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
 import { CreateBudgetDto } from "./dto/create-budget.dto";
 import { UpdateBudgetDto } from "./dto/update-budget.dto";
@@ -11,6 +15,11 @@ export class BudgetService {
     const currentDate = new Date();
     const month = dto.month || currentDate.getMonth() + 1;
     const year = dto.year || currentDate.getFullYear();
+
+    if (dto.amount === undefined) {
+      throw new BadRequestException("Amount is required");
+    }
+
     const existingBudget = await this.prisma.budget.findUnique({
       where: {
         userId_month_year: {
