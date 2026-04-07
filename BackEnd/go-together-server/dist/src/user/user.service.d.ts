@@ -4,10 +4,10 @@ export declare class UserService {
     private prisma;
     constructor(prisma: PrismaService);
     create(dto: UserCreateDto): Promise<{
-        password: string | null;
         id: string;
         email: string;
         fullName: string | null;
+        password: string | null;
         dateOfBirth: Date | null;
         gender: number | null;
         status: import("../../prisma/generated/enums").UserStatus;
@@ -18,10 +18,10 @@ export declare class UserService {
         avatar: string | null;
     }>;
     findByEmail(email: string): Promise<{
-        password: string | null;
         id: string;
         email: string;
         fullName: string | null;
+        password: string | null;
         dateOfBirth: Date | null;
         gender: number | null;
         status: import("../../prisma/generated/enums").UserStatus;

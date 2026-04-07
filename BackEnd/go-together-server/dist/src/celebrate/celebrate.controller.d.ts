@@ -5,6 +5,12 @@ export declare class CelebrateController {
     private celebrateService;
     constructor(celebrateService: CelebrateService);
     getAllCelebration(req: any): Promise<({
+        images: {
+            id: string;
+            createdAt: Date;
+            celebrateId: string;
+            imageUrl: string;
+        }[];
         user: {
             id: string;
             fullName: string | null;
@@ -18,12 +24,6 @@ export declare class CelebrateController {
             endDate: Date;
             images: string | null;
         };
-        images: {
-            id: string;
-            createdAt: Date;
-            celebrateId: string;
-            imageUrl: string;
-        }[];
     } & {
         id: string;
         createdAt: Date;

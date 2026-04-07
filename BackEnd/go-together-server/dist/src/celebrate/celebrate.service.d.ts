@@ -5,6 +5,12 @@ export declare class CelebrateService {
     private prisma;
     constructor(prisma: PrismaService);
     getAllCelebrate(userId: string): Promise<({
+        images: {
+            id: string;
+            createdAt: Date;
+            celebrateId: string;
+            imageUrl: string;
+        }[];
         user: {
             id: string;
             fullName: string | null;
@@ -18,12 +24,6 @@ export declare class CelebrateService {
             endDate: Date;
             images: string | null;
         };
-        images: {
-            id: string;
-            createdAt: Date;
-            celebrateId: string;
-            imageUrl: string;
-        }[];
     } & {
         id: string;
         createdAt: Date;

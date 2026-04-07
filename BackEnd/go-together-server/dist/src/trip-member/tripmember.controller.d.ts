@@ -12,12 +12,12 @@ export declare class TripMemberController {
             avatar: string | null;
         };
     } & {
-        role: import("../../prisma/generated/enums").MemberRole;
         id: string;
         createdAt: Date;
         updatedAt: Date;
         userId: string;
         tripId: string;
+        role: import("../../prisma/generated/enums").MemberRole;
         inviteStatus: import("../../prisma/generated/enums").InviteStatus;
         joinedAt: Date | null;
         leftAt: Date | null;
@@ -30,55 +30,55 @@ export declare class TripMemberController {
             avatar: string | null;
         };
     } & {
-        role: import("../../prisma/generated/enums").MemberRole;
         id: string;
         createdAt: Date;
         updatedAt: Date;
         userId: string;
         tripId: string;
+        role: import("../../prisma/generated/enums").MemberRole;
         inviteStatus: import("../../prisma/generated/enums").InviteStatus;
         joinedAt: Date | null;
         leftAt: Date | null;
     }>;
     respondInvitaion(req: Request, tripId: string, dto: RespondInvitationDto): Promise<{
-        role: import("../../prisma/generated/enums").MemberRole;
         id: string;
         createdAt: Date;
         updatedAt: Date;
         userId: string;
         tripId: string;
+        role: import("../../prisma/generated/enums").MemberRole;
         inviteStatus: import("../../prisma/generated/enums").InviteStatus;
         joinedAt: Date | null;
         leftAt: Date | null;
     }>;
     leaveTrip(tripId: string, req: Request): Promise<{
-        role: import("../../prisma/generated/enums").MemberRole;
         id: string;
         createdAt: Date;
         updatedAt: Date;
         userId: string;
         tripId: string;
+        role: import("../../prisma/generated/enums").MemberRole;
         inviteStatus: import("../../prisma/generated/enums").InviteStatus;
         joinedAt: Date | null;
         leftAt: Date | null;
     }>;
     transferOwner(tripId: string, userId: string, req: Request): Promise<[{
-        role: import("../../prisma/generated/enums").MemberRole;
         id: string;
         createdAt: Date;
         updatedAt: Date;
         userId: string;
         tripId: string;
+        role: import("../../prisma/generated/enums").MemberRole;
         inviteStatus: import("../../prisma/generated/enums").InviteStatus;
         joinedAt: Date | null;
         leftAt: Date | null;
     }, {
-        role: import("../../prisma/generated/enums").MemberRole;
         id: string;
         createdAt: Date;
         updatedAt: Date;
         userId: string;
         tripId: string;
+        role: import("../../prisma/generated/enums").MemberRole;
         inviteStatus: import("../../prisma/generated/enums").InviteStatus;
         joinedAt: Date | null;
         leftAt: Date | null;
