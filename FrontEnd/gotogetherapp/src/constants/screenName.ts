@@ -18,6 +18,7 @@ export const SCREEN_NAME = {
   BUDGET: 'Budget',
   PAYMENT_DETAIL: 'PaymentDetail',
   SPENDING_DETAIL: 'SpendingDetail',
+  SPENDING_STATISTICS: 'SpendingStatistics',
   TRIP_DETAIL: 'TripDetailScreen',
   ADD_EXPENSE: 'AddExpense',
   ADD_TRIP: 'AddTrip',

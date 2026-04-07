@@ -45,6 +45,24 @@ const PaymentDetailScreen = ({ navigation }: { navigation: any }) => {
     receivableGroups: [],
   });
 
+  const navigateToStatistics = useCallback(() => {
+    let currentNav: any = navigation;
+
+    while (currentNav) {
+      const routeNames = currentNav?.getState?.()?.routeNames;
+      if (
+        Array.isArray(routeNames) &&
+        routeNames.includes(SCREEN_NAME.SPENDING_STATISTICS)
+      ) {
+        currentNav.navigate(SCREEN_NAME.SPENDING_STATISTICS);
+        return;
+      }
+      currentNav = currentNav?.getParent?.();
+    }
+
+    navigation.navigate(SCREEN_NAME.SPENDING_STATISTICS);
+  }, [navigation]);
+
   const fetchData = useCallback(async () => {
     if (!currentUser?.id) {
       setLoading(false);
@@ -600,14 +618,17 @@ const PaymentDetailScreen = ({ navigation }: { navigation: any }) => {
           />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Thanh toán & Ngân sách</Text>
-        <View style={styles.headerIconWrapper}>
+        <TouchableOpacity
+          style={styles.headerIconWrapper}
+          onPress={navigateToStatistics}
+        >
           <FontAwesome6
             name="chart-line"
             size={18}
-            color={PRIMARY_COLOR}
+            color={'#111827'}
             iconStyle="solid"
           />
-        </View>
+        </TouchableOpacity>
       </View>
 
       {/* Filters */}

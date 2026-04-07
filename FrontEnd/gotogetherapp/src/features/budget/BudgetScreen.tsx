@@ -277,7 +277,7 @@ const BudgetScreen = ({ navigation }: { navigation: any }) => {
                   <FontAwesome6
                     name="wallet"
                     size={16}
-                    color={PRIMARY_COLOR}
+                    color={SECONDARY_COLOR}
                     iconStyle="solid"
                   />
                 </View>

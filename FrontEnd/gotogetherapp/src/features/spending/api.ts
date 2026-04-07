@@ -38,6 +38,33 @@ export interface PaymentTimelineItem {
   confirmedAt?: string;
 }
 
+export interface SpendingStatisticsTrip {
+  tripId: string;
+  tripName: string;
+  totalAmount: number;
+  expenseCount: number;
+}
+
+export interface SpendingStatisticsCategory {
+  categoryId: string;
+  categoryName: string;
+  color: string | null;
+  icon: string | null;
+  totalAmount: number;
+  expenseCount: number;
+  percentage: number;
+}
+
+export interface SpendingStatisticsResponse {
+  month?: number;
+  year?: number;
+  monthLabel?: string;
+  totalAcrossTrips: number;
+  selectedTripId: string | null;
+  trips: SpendingStatisticsTrip[];
+  categories: SpendingStatisticsCategory[];
+}
+
 type SplitActionResponse = {
   status: boolean;
   data?: any;
@@ -237,6 +264,36 @@ export const spendingApi = {
         receivableGroups: groups.filter(
           group => group.direction === 'receivable',
         ),
+      };
+    } catch (error) {
+      throw error as ApiError;
+    }
+  },
+
+  getSpendingStatistics: async (
+    tripId?: string,
+    month?: number,
+    year?: number,
+  ): Promise<SpendingStatisticsResponse> => {
+    try {
+      const response = await api.get('/statistics/spending', {
+        params: {
+          ...(tripId ? { tripId } : {}),
+          ...(month ? { month } : {}),
+          ...(year ? { year } : {}),
+        },
+      });
+
+      const data = (response as any)?.data ?? response;
+
+      return {
+        month: Number(data?.month ?? 0) || undefined,
+        year: Number(data?.year ?? 0) || undefined,
+        monthLabel: data?.monthLabel ?? undefined,
+        totalAcrossTrips: Number(data?.totalAcrossTrips ?? 0),
+        selectedTripId: data?.selectedTripId ?? null,
+        trips: Array.isArray(data?.trips) ? data.trips : [],
+        categories: Array.isArray(data?.categories) ? data.categories : [],
       };
     } catch (error) {
       throw error as ApiError;

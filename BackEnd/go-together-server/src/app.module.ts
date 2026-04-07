@@ -14,6 +14,7 @@ import { StorageModule } from "./storage/storage.module";
 import { ExpenseSplitModule } from "./expense-split/expense-split.module";
 import { BudgetModule } from "./budget/budget.module";
 import { NotificationModule } from "./notification/notification.module";
+import { StatisticsModule } from "./statistics/statistics.module";
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { NotificationModule } from "./notification/notification.module";
     ExpenseSplitModule,
     BudgetModule,
     NotificationModule,
+    StatisticsModule
   ],
   controllers: [AppController],
   providers: [],

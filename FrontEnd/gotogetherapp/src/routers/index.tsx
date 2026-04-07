@@ -17,6 +17,7 @@ import CelebrateScreen from '../features/celebrate/CelebrateScreen';
 import { TripDetailScreen, AddExpenseScreen } from '../features/tripdetail';
 import AddTripScreen from '../features/home/components/AddTripScreen';
 import SpendingDetail from '../features/spending/components/SpendingDetail';
+import SpendingStatisticsScreen from '../features/statistic/SpendingStatisticsScreen';
 const Stack = createNativeStackNavigator();
 
 function ApplicationNavigator() {
@@ -33,6 +34,10 @@ function ApplicationNavigator() {
     { name: SCREEN_NAME.SETTING, component: SettingScreen },
     { name: SCREEN_NAME.SPENDING, component: SpendingScreen },
     { name: SCREEN_NAME.PAYMENT_DETAIL, component: PaymentDetailScreen },
+    {
+      name: SCREEN_NAME.SPENDING_STATISTICS,
+      component: SpendingStatisticsScreen,
+    },
     { name: SCREEN_NAME.TRIP_DETAIL, component: TripDetailScreen },
     { name: SCREEN_NAME.SPENDING_DETAIL, component: SpendingDetail },
     { name: SCREEN_NAME.ADD_TRIP, component: AddTripScreen },

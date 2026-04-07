@@ -24,8 +24,6 @@ const BudgetItem = ({
   };
 
   const getIconName = () => {
-    if (budget.categoryIcon) return budget.categoryIcon;
-    if (budget.categoryId) return 'tag';
     return 'wallet';
   };
 
@@ -50,23 +48,16 @@ const BudgetItem = ({
     >
       <View style={styles.header}>
         <View style={styles.iconContainer}>
-          <View
-            style={[
-              styles.iconCircle,
-              { backgroundColor: budget.categoryColor || '#E7F0E8' },
-            ]}
-          >
+          <View style={[styles.iconCircle, { backgroundColor: '#E7F0E8' }]}>
             <FontAwesome6
               name={getIconName() as any}
               size={16}
-              color={budget.categoryColor ? '#FFFFFF' : '#159947'}
+              color={'#159947'}
               iconStyle="solid"
             />
           </View>
           <View style={styles.titleContainer}>
-            <Text style={styles.title}>
-              {budget.categoryName || 'Tổng ngân sách'}
-            </Text>
+            <Text style={styles.title}>{'Tổng ngân sách'}</Text>
             <Text style={styles.subtitle}>
               Đã dùng {budget.percentage}% • Còn{' '}
               {formatCompactMoney(budget.remaining)}
