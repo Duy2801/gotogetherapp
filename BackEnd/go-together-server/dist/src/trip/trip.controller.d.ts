@@ -13,14 +13,14 @@ export declare class TripController {
                 members: number;
             };
         } & {
-            id: string;
             name: string;
-            startDate: Date;
-            endDate: Date;
-            totalBudget: import("@prisma/client-runtime-utils").Decimal | null;
+            id: string;
             status: import("../../prisma/generated/enums").TripStatus;
             createdAt: Date;
             updatedAt: Date;
+            startDate: Date;
+            endDate: Date;
+            totalBudget: import("@prisma/client-runtime-utils").Decimal | null;
             images: string | null;
         })[];
         total: number;
@@ -29,14 +29,14 @@ export declare class TripController {
     }>;
     getTripDetail(tripId: string): Promise<import("./dto/trip-detail-reponse").TripDetailResponseDto>;
     createTrip(req: Request, dto: CreateTripDTO): Promise<{
-        id: string;
         name: string;
-        startDate: Date;
-        endDate: Date;
-        totalBudget: import("@prisma/client-runtime-utils").Decimal | null;
+        id: string;
         status: import("../../prisma/generated/enums").TripStatus;
         createdAt: Date;
         updatedAt: Date;
+        startDate: Date;
+        endDate: Date;
+        totalBudget: import("@prisma/client-runtime-utils").Decimal | null;
         images: string | null;
     }>;
     getTotalAmoutAndQuantity(tripId: string): Promise<import("./dto/trip-amoutQuantity-reponse").tripAmountQuantityResponse>;

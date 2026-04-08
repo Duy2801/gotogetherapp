@@ -20,14 +20,14 @@ export declare class TripService {
                 members: number;
             };
         } & {
-            id: string;
             name: string;
-            startDate: Date;
-            endDate: Date;
-            totalBudget: import("@prisma/client-runtime-utils").Decimal | null;
+            id: string;
             status: import("prisma/generated/enums").TripStatus;
             createdAt: Date;
             updatedAt: Date;
+            startDate: Date;
+            endDate: Date;
+            totalBudget: import("@prisma/client-runtime-utils").Decimal | null;
             images: string | null;
         })[];
         total: number;
@@ -36,14 +36,14 @@ export declare class TripService {
     }>;
     getTripDetail(tripId: string): Promise<TripDetailResponseDto>;
     createTrip(userId: string, data: CreateTripDTO): Promise<{
-        id: string;
         name: string;
-        startDate: Date;
-        endDate: Date;
-        totalBudget: import("@prisma/client-runtime-utils").Decimal | null;
+        id: string;
         status: import("prisma/generated/enums").TripStatus;
         createdAt: Date;
         updatedAt: Date;
+        startDate: Date;
+        endDate: Date;
+        totalBudget: import("@prisma/client-runtime-utils").Decimal | null;
         images: string | null;
     }>;
     getTotalAmoutAndQuantity(userId: string): Promise<tripAmountQuantityResponse>;
