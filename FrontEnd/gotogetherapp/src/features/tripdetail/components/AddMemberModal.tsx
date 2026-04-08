@@ -18,7 +18,7 @@ import Button from '../../../components/Button/Button';
 interface AddMemberModalProps {
   visible: boolean;
   onClose: () => void;
-  onSubmit: (email: string) => Promise<void>;
+  onSubmit: (email: string) => Promise<boolean | void>;
 }
 
 const AddMemberModal: React.FC<AddMemberModalProps> = ({

@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   RefreshControl,
   ScrollView,
   StyleSheet,
@@ -18,6 +17,7 @@ import { SCREEN_NAME } from '../../constants/screenName';
 import { Budget, budgetApi } from './api';
 import { spendingApi, SpendingPaymentSummary } from '../spending/api';
 import { formatCompactMoney, formatCurrency } from '../../utils/format';
+import { showErrorToast, showSuccessToast } from '../../utils/appToast';
 
 const currentMonth = new Date().getMonth() + 1;
 const currentYear = new Date().getFullYear();
@@ -100,12 +100,12 @@ const BudgetScreen = ({ navigation }: { navigation: any }) => {
 
   const handleSave = async () => {
     if (!budgetAmount || parseFloat(budgetAmount) <= 0) {
-      Alert.alert('Lỗi', 'Vui lòng nhập ngân sách hợp lệ');
+      showErrorToast('Lỗi', 'Vui lòng nhập ngân sách hợp lệ');
       return;
     }
     const warningAtNum = parseInt(warningAt) || 80;
     if (warningAtNum < 0 || warningAtNum > 100) {
-      Alert.alert('Lỗi', 'Ngưỡng cảnh báo phải từ 0–100%');
+      showErrorToast('Lỗi', 'Ngưỡng cảnh báo phải từ 0–100%');
       return;
     }
 
@@ -126,13 +126,13 @@ const BudgetScreen = ({ navigation }: { navigation: any }) => {
           year: currentYear,
           warningAt: warningAtNum,
         });
-        Alert.alert('Thành công', 'Đã tạo ngân sách tháng');
+        showSuccessToast('Thành công', 'Đã tạo ngân sách tháng');
       }
 
       closeForm();
       fetchBudget();
     } catch (error: any) {
-      Alert.alert(
+      showErrorToast(
         'Lỗi',
         error?.error || error?.message || 'Không thể lưu ngân sách',
       );

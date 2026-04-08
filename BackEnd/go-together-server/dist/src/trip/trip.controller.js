@@ -42,6 +42,10 @@ let TripController = class TripController {
     getTotalAmoutAndQuantity(tripId) {
         return this.tripService.getTotalAmoutAndQuantity(tripId);
     }
+    deleteTrip(req, tripId) {
+        const userId = req.user.userId;
+        return this.tripService.deleteTrip(userId, tripId);
+    }
 };
 exports.TripController = TripController;
 __decorate([
@@ -76,6 +80,14 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], TripController.prototype, "getTotalAmoutAndQuantity", null);
+__decorate([
+    (0, common_1.Delete)(":tripId"),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)("tripId")),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Request, String]),
+    __metadata("design:returntype", void 0)
+], TripController.prototype, "deleteTrip", null);
 exports.TripController = TripController = __decorate([
     (0, swagger_1.ApiTags)("Trip"),
     (0, common_1.Controller)("trips"),

@@ -47,7 +47,7 @@ export class TripMemberController {
       dto.status as any,
     );
   }
-  @Post(":trip/leave")
+  @Post(":tripId/leave")
   leaveTrip(@Param("tripId") tripId: string, @Req() req: Request) {
     const userId = (req as any).user.userId;
     return this.tripMemberService.leaveTrip(userId, tripId);

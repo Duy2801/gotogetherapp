@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
 import { TripDetailResponseDto } from "./dto/trip-detail-reponse";
 import { CreateExpenseDto } from "./dto/create-expense.dto";
@@ -11,10 +16,65 @@ import { tripAmountQuantityResponse } from "./dto/trip-amoutQuantity-reponse";
 export class TripService {
   constructor(private prisma: PrismaService) {}
 
+  private async syncTripStatusesForUser(userId: string) {
+    const memberships = await this.prisma.tripMember.findMany({
+      where: {
+        userId,
+        inviteStatus: "ACCEPTED",
+      },
+      select: {
+        tripId: true,
+      },
+    });
+
+    const tripIds = memberships.map((item) => item.tripId);
+    if (!tripIds.length) {
+      return;
+    }
+
+    const now = new Date();
+
+    await Promise.all([
+      this.prisma.trip.updateMany({
+        where: {
+          id: { in: tripIds },
+          status: { not: "ARCHIVED" },
+          startDate: { gt: now },
+        },
+        data: {
+          status: "UPCOMING",
+        },
+      }),
+      this.prisma.trip.updateMany({
+        where: {
+          id: { in: tripIds },
+          status: { not: "ARCHIVED" },
+          startDate: { lte: now },
+          endDate: { gte: now },
+        },
+        data: {
+          status: "ONGOING",
+        },
+      }),
+      this.prisma.trip.updateMany({
+        where: {
+          id: { in: tripIds },
+          status: { not: "ARCHIVED" },
+          endDate: { lt: now },
+        },
+        data: {
+          status: "COMPLETED",
+        },
+      }),
+    ]);
+  }
+
   async getAllTrip(
     userId: string,
     query: { status?: string; page: number; limit: number },
   ) {
+    await this.syncTripStatusesForUser(userId);
+
     const { status, page = 1, limit = 10 } = query;
     const whereCondition: any = {
       members: {
@@ -185,5 +245,53 @@ export class TripService {
       amount: Number(expenseResult._sum.amount ?? 0),
       quantity,
     };
+  }
+  async deleteTrip(userId: string, tripId: string) {
+    const ownerMember = await this.prisma.tripMember.findUnique({
+      where: {
+        tripId_userId: {
+          tripId,
+          userId,
+        },
+      },
+      select: {
+        role: true,
+        inviteStatus: true,
+      },
+    });
+
+    if (!ownerMember || ownerMember.inviteStatus !== "ACCEPTED") {
+      throw new ForbiddenException("Bạn không thuộc chuyến đi này");
+    }
+
+    if (ownerMember.role !== "OWNER") {
+      throw new ForbiddenException(
+        "Chỉ chủ chuyến đi mới có quyền xóa chuyến đi",
+      );
+    }
+
+    const trip = await this.prisma.trip.findUnique({
+      where: { id: tripId },
+      select: { id: true },
+    });
+    if (!trip) {
+      throw new NotFoundException("Trip not found");
+    }
+
+    const expenseCount = await this.prisma.expense.count({
+      where: { tripId },
+    });
+
+    if (expenseCount > 0) {
+      throw new BadRequestException(
+        "Không thể xóa chuyến đi khi đã có chi tiêu.",
+      );
+    }
+
+    await this.prisma.trip.delete({
+      where: { id: tripId },
+    });
+
+    return { message: "Đã xóa chuyến đi thành công" };
   }
 }

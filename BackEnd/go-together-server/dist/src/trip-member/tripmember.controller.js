@@ -73,7 +73,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], TripMemberController.prototype, "respondInvitaion", null);
 __decorate([
-    (0, common_1.Post)(":trip/leave"),
+    (0, common_1.Post)(":tripId/leave"),
     __param(0, (0, common_1.Param)("tripId")),
     __param(1, (0, common_1.Req)()),
     __metadata("design:type", Function),

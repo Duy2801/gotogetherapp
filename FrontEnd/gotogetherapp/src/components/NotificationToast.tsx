@@ -84,6 +84,7 @@ const NotificationToast = () => {
         props: {
           backgroundColor: config.backgroundColor,
           icon: config.icon,
+          toastAssetKey: config.toastAssetKey,
           notificationId: id,
           onClose: () => {
             dispatch(removeNotification(id));

@@ -8,7 +8,7 @@ export interface Notification {
   refId?: string;
   senderId?: string;
   data?: any;
-  timestamp: string; // Use ISO string instead of Date object
+  timestamp: string; 
   isRead: boolean;
 }
 
@@ -31,7 +31,6 @@ const notificationSlice = createSlice({
       if (!action.payload.isRead) {
         state.unreadCount += 1;
       }
-      // Keep only last 50 notifications
       if (state.notifications.length > 50) {
         state.notifications.pop();
       }
@@ -51,7 +50,6 @@ const notificationSlice = createSlice({
       };
       state.notifications.unshift(notification);
       state.unreadCount += 1;
-      // Keep only last 50 notifications
       if (state.notifications.length > 50) {
         state.notifications.pop();
       }

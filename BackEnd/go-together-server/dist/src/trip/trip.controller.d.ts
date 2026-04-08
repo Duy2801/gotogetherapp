@@ -5,22 +5,22 @@ export declare class TripController {
     constructor(tripService: TripService);
     getAllTrip(req: Request, status?: string, page?: number, limit?: number): Promise<{
         trips: ({
-            _count: {
-                members: number;
-            };
             members: {
                 role: import("../../prisma/generated/enums").MemberRole;
                 inviteStatus: import("../../prisma/generated/enums").InviteStatus;
             }[];
+            _count: {
+                members: number;
+            };
         } & {
             id: string;
-            status: import("../../prisma/generated/enums").TripStatus;
-            createdAt: Date;
-            updatedAt: Date;
             name: string;
             startDate: Date;
             endDate: Date;
             totalBudget: import("@prisma/client-runtime-utils").Decimal | null;
+            status: import("../../prisma/generated/enums").TripStatus;
+            createdAt: Date;
+            updatedAt: Date;
             images: string | null;
         })[];
         total: number;
@@ -30,14 +30,17 @@ export declare class TripController {
     getTripDetail(tripId: string): Promise<import("./dto/trip-detail-reponse").TripDetailResponseDto>;
     createTrip(req: Request, dto: CreateTripDTO): Promise<{
         id: string;
-        status: import("../../prisma/generated/enums").TripStatus;
-        createdAt: Date;
-        updatedAt: Date;
         name: string;
         startDate: Date;
         endDate: Date;
         totalBudget: import("@prisma/client-runtime-utils").Decimal | null;
+        status: import("../../prisma/generated/enums").TripStatus;
+        createdAt: Date;
+        updatedAt: Date;
         images: string | null;
     }>;
     getTotalAmoutAndQuantity(tripId: string): Promise<import("./dto/trip-amoutQuantity-reponse").tripAmountQuantityResponse>;
+    deleteTrip(req: Request, tripId: string): Promise<{
+        message: string;
+    }>;
 }

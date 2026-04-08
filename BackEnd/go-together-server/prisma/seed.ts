@@ -54,7 +54,6 @@ async function main() {
 
   console.log("✅ Created roles");
 
-  // 2. Create Permissions
   const permissions = await Promise.all([
     prisma.permission.create({
       data: { name: "MANAGE_USERS", description: "Can manage users" },

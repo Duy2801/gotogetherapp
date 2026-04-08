@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   Image,
   KeyboardAvoidingView,
   Platform,
@@ -15,6 +14,7 @@ import DatePicker from 'react-native-date-picker';
 import { useSelector } from 'react-redux';
 import { PRIMARY_COLOR, SECONDARY_COLOR } from '../../../constants/color';
 import { RootState } from '../../../reducers/store';
+import { showErrorToast, showSuccessToast } from '../../../utils/appToast';
 import { Category, Member, tripDetailApi } from '../api';
 
 interface AddExpenseScreenProps {
@@ -37,6 +37,35 @@ const categoryFallbackIcon: Record<string, string> = {
   'Giải trí': '🎉',
   'Mua sắm': '🛍️',
   Khác: '💰',
+};
+
+const getApiErrorMessage = (error: any, fallback: string) => {
+  const apiMessage = error?.response?.data?.message;
+
+  if (Array.isArray(apiMessage) && apiMessage.length) {
+    return String(apiMessage[0]);
+  }
+
+  if (typeof apiMessage === 'string' && apiMessage.trim()) {
+    return apiMessage;
+  }
+
+  if (
+    typeof error?.response?.data?.error === 'string' &&
+    error.response.data.error.trim()
+  ) {
+    return error.response.data.error;
+  }
+
+  if (typeof error?.message === 'string' && error.message.trim()) {
+    return error.message;
+  }
+
+  if (typeof error?.error === 'string' && error.error.trim()) {
+    return error.error;
+  }
+
+  return fallback;
 };
 
 const AddExpenseScreen: React.FC<AddExpenseScreenProps> = ({
@@ -113,9 +142,9 @@ const AddExpenseScreen: React.FC<AddExpenseScreenProps> = ({
           }
         }
       } catch (error: any) {
-        Alert.alert(
+        showErrorToast(
           'Lỗi',
-          error?.error || 'Không thể tải dữ liệu thêm chi tiêu',
+          getApiErrorMessage(error, 'Không thể tải dữ liệu thêm chi tiêu'),
         );
       } finally {
         setLoading(false);
@@ -149,22 +178,22 @@ const AddExpenseScreen: React.FC<AddExpenseScreenProps> = ({
 
   const validateForm = () => {
     if (!amount || amount <= 0) {
-      Alert.alert('Lỗi', 'Vui lòng nhập số tiền hợp lệ');
+      showErrorToast('Lỗi', 'Vui lòng nhập số tiền hợp lệ');
       return false;
     }
 
     if (!selectedCategoryId) {
-      Alert.alert('Lỗi', 'Vui lòng chọn danh mục');
+      showErrorToast('Lỗi', 'Vui lòng chọn danh mục');
       return false;
     }
 
     if (!paidById) {
-      Alert.alert('Lỗi', 'Không xác định được người trả tiền');
+      showErrorToast('Lỗi', 'Không xác định được người trả tiền');
       return false;
     }
 
     if (!selectedParticipants.length) {
-      Alert.alert('Lỗi', 'Không có thành viên để chia chi tiêu');
+      showErrorToast('Lỗi', 'Không có thành viên để chia chi tiêu');
       return false;
     }
 
@@ -223,12 +252,15 @@ const AddExpenseScreen: React.FC<AddExpenseScreenProps> = ({
       });
 
       if (response.status) {
-        Alert.alert('Thành công', 'Đã thêm chi tiêu mới');
+        showSuccessToast('Thành công', 'Thêm chi phí thành công');
         onExpenseAdded?.();
         navigation.goBack();
       }
     } catch (error: any) {
-      Alert.alert('Lỗi', error?.error || 'Không thể thêm chi tiêu');
+      showErrorToast(
+        'Lỗi',
+        getApiErrorMessage(error, 'Không thể thêm chi tiêu'),
+      );
     } finally {
       setSubmitting(false);
     }

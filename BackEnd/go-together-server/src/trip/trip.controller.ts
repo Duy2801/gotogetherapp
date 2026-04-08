@@ -54,4 +54,10 @@ export class TripController {
   getTotalAmoutAndQuantity(@Param("tripId") tripId: string) {
     return this.tripService.getTotalAmoutAndQuantity(tripId);
   }
+
+  @Delete(":tripId")
+  deleteTrip(@Req() req: Request, @Param("tripId") tripId: string) {
+    const userId = (req as any).user.userId;
+    return this.tripService.deleteTrip(userId, tripId);
+  }
 }

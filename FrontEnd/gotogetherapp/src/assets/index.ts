@@ -54,3 +54,15 @@ export const AVARTAEMAIL = {
     uri: 'https://res.cloudinary.com/dvsuhb9cj/image/upload/v1773323107/avatarEmail_riwbpf.png',
   },
 };
+
+export const Toast = {
+  SUCCESS: {
+    uri: 'https://gotogetherimage.s3.ap-southeast-2.amazonaws.com/success.png',
+  },
+  ERROR: {
+    uri: 'https://gotogetherimage.s3.ap-southeast-2.amazonaws.com/error.png',
+  },
+  NOTIFICATION: {
+    uri: 'https://gotogetherimage.s3.ap-southeast-2.amazonaws.com/notification.png',
+  },
+};

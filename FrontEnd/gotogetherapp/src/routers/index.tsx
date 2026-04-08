@@ -2,6 +2,8 @@ import {
   useNavigationContainerRef,
   NavigationContainer,
 } from '@react-navigation/native';
+import type { ComponentType } from 'react';
+import Toast from 'react-native-toast-message';
 import { SCREEN_NAME } from '../constants/screenName';
 import OnboardingScreen from '../features/onboarding/OnboardingScreen';
 import HomeScreen from '../features/home/HomeScreen';
@@ -18,12 +20,63 @@ import { TripDetailScreen, AddExpenseScreen } from '../features/tripdetail';
 import AddTripScreen from '../features/home/components/AddTripScreen';
 import SpendingDetail from '../features/spending/components/SpendingDetail';
 import SpendingStatisticsScreen from '../features/statistic/SpendingStatisticsScreen';
+import { CustomToastComponent } from '../config/Toast';
 const Stack = createNativeStackNavigator();
+
+type AppRouteItem = {
+  name: string;
+  component: ComponentType<any>;
+  options?: Record<string, any>;
+};
 
 function ApplicationNavigator() {
   const ref = useNavigationContainerRef();
 
-  const router = [
+  const toastConfig = {
+    notification: (toastProps: any) => <CustomToastComponent {...toastProps} />,
+    success: (toastProps: any) => (
+      <CustomToastComponent
+        {...toastProps}
+        props={{
+          ...(toastProps?.props || {}),
+          toastAssetKey: 'SUCCESS',
+          backgroundColor: '#10B981',
+        }}
+      />
+    ),
+    error: (toastProps: any) => (
+      <CustomToastComponent
+        {...toastProps}
+        props={{
+          ...(toastProps?.props || {}),
+          toastAssetKey: 'ERROR',
+          backgroundColor: '#EF4444',
+        }}
+      />
+    ),
+    info: (toastProps: any) => (
+      <CustomToastComponent
+        {...toastProps}
+        props={{
+          ...(toastProps?.props || {}),
+          toastAssetKey: 'NOTIFICATION',
+          backgroundColor: '#3B82F6',
+        }}
+      />
+    ),
+    warning: (toastProps: any) => (
+      <CustomToastComponent
+        {...toastProps}
+        props={{
+          ...(toastProps?.props || {}),
+          toastAssetKey: 'NOTIFICATION',
+          backgroundColor: '#F59E0B',
+        }}
+      />
+    ),
+  };
+
+  const router: AppRouteItem[] = [
     { name: SCREEN_NAME.ONBOARDING, component: OnboardingScreen },
     { name: SCREEN_NAME.HOME, component: HomeScreen },
     { name: SCREEN_NAME.LOGIN, component: LoginScreen },
@@ -53,19 +106,21 @@ function ApplicationNavigator() {
   ];
 
   return (
-    <NavigationContainer ref={ref}>
-      <Stack.Navigator>
-        {router.map(item => (
-          <Stack.Screen
-            key={item.name}
-            name={item.name}
-            component={item.component}
-            options={{ headerShown: false, ...(item as any).options }}
-          />
-        ))}
-      </Stack.Navigator>
-    </NavigationContainer>
-    // THieu TOAST
+    <>
+      <NavigationContainer ref={ref}>
+        <Stack.Navigator>
+          {router.map(item => (
+            <Stack.Screen
+              key={item.name}
+              name={item.name}
+              component={item.component}
+              options={{ headerShown: false, ...(item as any).options }}
+            />
+          ))}
+        </Stack.Navigator>
+      </NavigationContainer>
+      <Toast config={toastConfig as any} />
+    </>
   );
 }
 

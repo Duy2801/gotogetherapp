@@ -5,7 +5,6 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  Alert,
   ActivityIndicator,
   Modal,
   KeyboardAvoidingView,
@@ -17,6 +16,7 @@ import ImagePicker from 'react-native-image-crop-picker';
 import { tripApi, createTripPayload } from '../api';
 import { PRIMARY_COLOR, SECONDARY_COLOR } from '../../../constants/color';
 import { uploadService } from '../../../services/uploadService';
+import { showErrorToast, showSuccessToast } from '../../../utils/appToast';
 
 interface AddTripScreenProps {
   visible: boolean;
@@ -71,11 +71,11 @@ const AddTripScreen: React.FC<AddTripScreenProps> = ({
 
   const handleSubmit = async () => {
     if (!name.trim()) {
-      Alert.alert('Lỗi', 'Vui lòng nhập địa điểm chuyến đi');
+      showErrorToast('Lỗi', 'Vui lòng nhập địa điểm chuyến đi');
       return;
     }
     if (endDate < startDate) {
-      Alert.alert('Lỗi', 'Ngày kết thúc phải sau ngày bắt đầu');
+      showErrorToast('Lỗi', 'Ngày kết thúc phải sau ngày bắt đầu');
       return;
     }
 
@@ -88,7 +88,7 @@ const AddTripScreen: React.FC<AddTripScreenProps> = ({
         try {
           imageUrl = await uploadService.uploadTripImage(imageUri);
         } catch (uploadError: any) {
-          Alert.alert('Lỗi', uploadError?.message || 'Không thể upload ảnh');
+          showErrorToast('Lỗi', uploadError?.message || 'Không thể upload ảnh');
           setLoading(false);
           return;
         }
@@ -105,11 +105,12 @@ const AddTripScreen: React.FC<AddTripScreenProps> = ({
 
       const response = await tripApi.createTrip(payload);
       if (response.status) {
+        showSuccessToast('Thành công', 'Đã thêm chuyến đi mới.');
         handleClose();
         onSuccess();
       }
     } catch (error: any) {
-      Alert.alert('Lỗi', error?.error || 'Không thể thêm chuyến đi');
+      showErrorToast('Lỗi', error?.error || 'Không thể thêm chuyến đi');
     } finally {
       setLoading(false);
     }

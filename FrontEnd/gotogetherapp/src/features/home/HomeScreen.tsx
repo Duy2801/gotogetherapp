@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import {
   StyleSheet,
   Text,
@@ -7,22 +7,23 @@ import {
   FlatList,
   ActivityIndicator,
   RefreshControl,
-  Alert,
 } from 'react-native';
 import { Image } from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { RootState } from '../../reducers/store';
 import { PRIMARY_COLOR, SECONDARY_COLOR } from '../../constants/color';
 import { Trip, tripApi } from './api';
 import TripCard from './components/TripCard';
 import EmptyTrips from './components/EmptyTrips';
 import TripFilter from './components/TripFilter';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { HELLO } from '../../assets';
 import { SCREEN_NAME } from '../../constants/screenName';
 import AddTripScreen from './components/AddTripScreen';
 import SimpleFloatingButton from '../../components/SimpleFloatingButton';
 import NotificationButton from '../../components/NotificationButton';
+import TripTimeFilterModal from './components/TripTimeFilterModal';
+import { showErrorToast, showSuccessToast } from '../../utils/appToast';
 
 const HomeScreen = () => {
   const navigation = useNavigation();
@@ -32,6 +33,7 @@ const HomeScreen = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState('ALL');
+  const [selectedMonthDate, setSelectedMonthDate] = useState(new Date());
   const [showAddTrip, setShowAddTrip] = useState(false);
   const [invitationActionTripId, setInvitationActionTripId] = useState<
     string | null
@@ -48,7 +50,10 @@ const HomeScreen = () => {
       }
     } catch (error: any) {
       console.error('Error fetching trips:', error);
-      Alert.alert('Lỗi', error?.error || 'Không thể tải danh sách chuyến đi');
+      showErrorToast(
+        'Lỗi',
+        error?.error || 'Không thể tải danh sách chuyến đi',
+      );
     } finally {
       setLoading(false);
     }
@@ -60,9 +65,11 @@ const HomeScreen = () => {
     setRefreshing(false);
   }, [fetchTrips]);
 
-  useEffect(() => {
-    fetchTrips();
-  }, [fetchTrips]);
+  useFocusEffect(
+    useCallback(() => {
+      fetchTrips();
+    }, [fetchTrips]),
+  );
 
   const handleTripPress = (trip: Trip) => {
     (navigation as any).navigate(SCREEN_NAME.TRIP_DETAIL, { tripId: trip.id });
@@ -87,6 +94,37 @@ const HomeScreen = () => {
     trip => getCurrentInviteStatus(trip) === 'ACCEPTED',
   );
 
+  const availableTripYears = useMemo(() => {
+    const years = new Set<number>();
+
+    acceptedTrips.forEach(trip => {
+      const startYear = new Date(trip.startDate).getFullYear();
+      const endYear = new Date(trip.endDate).getFullYear();
+
+      for (let year = startYear; year <= endYear; year += 1) {
+        years.add(year);
+      }
+    });
+
+    return Array.from(years).sort((a, b) => b - a);
+  }, [acceptedTrips]);
+
+  const filteredAcceptedTrips = useMemo(() => {
+    const month = selectedMonthDate.getMonth();
+    const year = selectedMonthDate.getFullYear();
+
+    return acceptedTrips.filter(trip => {
+      const tripStart = new Date(trip.startDate);
+      const tripEnd = new Date(trip.endDate);
+
+      const rangeStart = new Date(year, month, 1);
+      const rangeEnd = new Date(year, month + 1, 0);
+      rangeEnd.setHours(23, 59, 59, 999);
+
+      return tripStart <= rangeEnd && tripEnd >= rangeStart;
+    });
+  }, [acceptedTrips, selectedMonthDate]);
+
   const pendingTrips = trips.filter(
     trip => getCurrentInviteStatus(trip) === 'PENDING',
   );
@@ -100,7 +138,7 @@ const HomeScreen = () => {
       const response = await tripApi.respondInvitation(tripId, { status });
 
       if (response.status) {
-        Alert.alert(
+        showSuccessToast(
           'Thành công',
           status === 'ACCEPTED'
             ? 'Bạn đã tham gia chuyến đi.'
@@ -110,7 +148,7 @@ const HomeScreen = () => {
 
       await fetchTrips();
     } catch (error: any) {
-      Alert.alert(
+      showErrorToast(
         'Lỗi',
         error?.error ||
           error?.message ||
@@ -123,9 +161,23 @@ const HomeScreen = () => {
 
   const renderEmptyState = () => {
     if (loading) return null;
+    if (acceptedTrips.length && !filteredAcceptedTrips.length) {
+      return (
+        <View style={styles.noResultWrap}>
+          <Text style={styles.noResultText}>
+            Không có chuyến đi nào trong tháng đã chọn.
+          </Text>
+        </View>
+      );
+    }
     return <EmptyTrips onCreateTrip={handleCreateTrip} />;
   };
-  const hasTrips = acceptedTrips.length > 0;
+
+  const now = new Date();
+  const isTimeFilterActive =
+    selectedMonthDate.getMonth() !== now.getMonth() ||
+    selectedMonthDate.getFullYear() !== now.getFullYear();
+
   return (
     <View style={styles.container}>
       <View style={styles.headerContainer}>
@@ -149,14 +201,18 @@ const HomeScreen = () => {
       <View style={styles.bodyContainer}>
         <View style={styles.tabBar}>
           <Text style={styles.sectionTitle}>Hành trình</Text>
-          <TouchableOpacity
-            style={styles.calendarButton}
-            onPress={() =>
-              Alert.alert('Lọc theo thời gian', 'Tính năng đang phát triển')
-            }
+          <View
+            style={[
+              styles.calendarButton,
+              isTimeFilterActive && styles.calendarButtonActive,
+            ]}
           >
-            <Text style={styles.calendarIcon}>📅</Text>
-          </TouchableOpacity>
+            <TripTimeFilterModal
+              selectedDate={selectedMonthDate}
+              onDateChange={setSelectedMonthDate}
+              availableYears={availableTripYears}
+            />
+          </View>
         </View>
         <TripFilter
           selectedFilter={selectedFilter}
@@ -225,7 +281,7 @@ const HomeScreen = () => {
           </View>
         ) : (
           <FlatList
-            data={acceptedTrips}
+            data={filteredAcceptedTrips}
             renderItem={renderTripItem}
             keyExtractor={item => item.id}
             contentContainerStyle={styles.listContent}
@@ -311,10 +367,17 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   calendarButton: {
-    padding: 4,
+    padding: 0,
+    borderRadius: 8,
+  },
+  calendarButtonActive: {
+    backgroundColor: '#D1FAE5',
   },
   calendarIcon: {
     fontSize: 20,
+  },
+  calendarIconActive: {
+    color: '#047857',
   },
   loadingContainer: {
     flex: 1,
@@ -324,6 +387,20 @@ const styles = StyleSheet.create({
   listContent: {
     paddingTop: 12,
     paddingBottom: 20,
+  },
+  noResultWrap: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    paddingVertical: 14,
+    paddingHorizontal: 12,
+    marginTop: 8,
+  },
+  noResultText: {
+    fontSize: 13,
+    color: '#6B7280',
+    textAlign: 'center',
   },
   inviteSection: {
     marginTop: 12,

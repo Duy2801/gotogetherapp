@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   Modal,
   ScrollView,
   StyleSheet,
@@ -14,6 +13,7 @@ import FontAwesome6 from '@react-native-vector-icons/fontawesome6';
 import { PRIMARY_COLOR } from '../../../constants/color';
 import { Budget, budgetApi, CreateBudgetDto, UpdateBudgetDto } from '../api';
 import { formatAmountInput, formatCurrency } from '../../../utils/format';
+import { showErrorToast } from '../../../utils/appToast';
 
 interface AddBudgetModalProps {
   visible: boolean;
@@ -66,13 +66,13 @@ const AddBudgetModal = ({
 
   const handleSave = async () => {
     if (!amount || parseFloat(amount) <= 0) {
-      Alert.alert('Lỗi', 'Vui lòng nhập số tiền hợp lệ');
+      showErrorToast('Lỗi', 'Vui lòng nhập số tiền hợp lệ');
       return;
     }
 
     const warningAtNum = parseInt(warningAt) || 80;
     if (warningAtNum < 0 || warningAtNum > 100) {
-      Alert.alert('Lỗi', 'Ngưỡng cảnh báo phải từ 0-100%');
+      showErrorToast('Lỗi', 'Ngưỡng cảnh báo phải từ 0-100%');
       return;
     }
 
@@ -96,7 +96,7 @@ const AddBudgetModal = ({
       }
       onClose(true);
     } catch (error: any) {
-      Alert.alert(
+      showErrorToast(
         'Lỗi',
         error?.error || error?.message || 'Không thể lưu ngân sách',
       );

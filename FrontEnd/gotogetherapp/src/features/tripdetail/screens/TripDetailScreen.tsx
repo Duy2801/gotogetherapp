@@ -24,6 +24,11 @@ import { tripDetailApi, TripDetail, Expense, Member } from '../api';
 import SimpleFloatingButton from '../../../components/SimpleFloatingButton';
 import { RootState } from '../../../reducers/store';
 import { useSocket } from '../../../services/useSocket';
+import {
+  showErrorToast,
+  showInfoToast,
+  showSuccessToast,
+} from '../../../utils/appToast';
 
 interface TripDetailScreenProps {
   route: any;
@@ -67,7 +72,10 @@ const TripDetailScreen: React.FC<TripDetailScreenProps> = ({
         }
       } catch (expenseError: any) {}
     } catch (error: any) {
-      Alert.alert('Lỗi', error?.error || 'Không thể tải thông tin chuyến đi');
+      showErrorToast(
+        'Lỗi',
+        error?.error || 'Không thể tải thông tin chuyến đi',
+      );
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -81,7 +89,10 @@ const TripDetailScreen: React.FC<TripDetailScreenProps> = ({
   // Join and leave trip room for socket events
   useEffect(() => {
     if (!socket || !tripId) {
-      console.warn('⚠️ Socket or tripId not available', { socket: !!socket, tripId });
+      console.warn('⚠️ Socket or tripId not available', {
+        socket: !!socket,
+        tripId,
+      });
       return;
     }
 
@@ -151,6 +162,7 @@ const TripDetailScreen: React.FC<TripDetailScreenProps> = ({
   const currentMember =
     acceptedMembers.find(member => member.userId === currentUser?.id) || null;
   const isCurrentUserOwner = currentMember?.role === 'OWNER';
+  const canDeleteTrip = isCurrentUserOwner && totalExpense === 0;
 
   const transferableMembers = useMemo(
     () =>
@@ -176,52 +188,60 @@ const TripDetailScreen: React.FC<TripDetailScreenProps> = ({
 
   const handleInviteMember = async (email: string) => {
     try {
-      console.log('Inviting member:', email, 'to trip:', tripId);
       const response = await tripDetailApi.inviteMember(tripId, { email });
-      console.log('Invite response:', response);
 
       if (response.status) {
-        Alert.alert(
-          'Thành công',
-          `Đã gửi lời mời đến ${email}. Họ cần chấp nhận lời mời để tham gia chuyến đi.`,
-        );
+        showSuccessToast('Thành công', `Đã gửi lời mời đến ${email}.`);
         fetchTripDetail();
+        return true;
       }
+
+      return false;
     } catch (error: any) {
-      console.error('Error inviting member:', error);
       const errorMessage =
         error?.message || error?.error || 'Không thể mời thành viên';
 
       if (errorMessage.includes('chi tiêu')) {
-        Alert.alert(
+        showErrorToast(
           'Không thể thêm thành viên',
           'Không thể thêm thành viên khi đã có chi tiêu trong chuyến đi.',
+        );
+      } else if (
+        errorMessage.toLowerCase().includes('must be an email') ||
+        errorMessage.toLowerCase().includes('email không đúng định dạng')
+      ) {
+        showErrorToast(
+          'Email không hợp lệ',
+          'Vui lòng nhập đúng định dạng email.',
         );
       } else if (
         errorMessage.includes('email') ||
         errorMessage.includes('người dùng')
       ) {
-        Alert.alert(
+        showErrorToast(
           'Không tìm thấy',
           'Không tìm thấy người dùng với email này. Vui lòng kiểm tra lại.',
         );
       } else if (errorMessage.includes('đã là thành viên')) {
-        Alert.alert('Thông báo', 'Người dùng đã là thành viên của chuyến đi.');
+        showInfoToast(
+          'Thông báo',
+          'Người dùng đã là thành viên của chuyến đi.',
+        );
       } else if (errorMessage.includes('lời mời đã được gửi')) {
-        Alert.alert('Thông báo', 'Lời mời đã được gửi trước đó.');
+        showInfoToast('Thông báo', 'Lời mời đã được gửi trước đó.');
       } else if (
         errorMessage.includes('không thuộc chuyến đi') ||
         errorMessage.includes('không có quyền')
       ) {
-        Alert.alert(
+        showErrorToast(
           'Lỗi',
           'Bạn không có quyền mời thành viên vào chuyến đi này. Chỉ chủ chuyến đi mới có quyền này.',
         );
       } else {
-        Alert.alert('Lỗi', errorMessage);
+        showErrorToast('Lỗi', errorMessage);
       }
 
-      throw error;
+      return false;
     }
   };
 
@@ -236,10 +256,10 @@ const TripDetailScreen: React.FC<TripDetailScreenProps> = ({
             setActionLoading(true);
             await tripDetailApi.leaveTrip(tripId);
             setShowActionModal(false);
-            Alert.alert('Thành công', 'Bạn đã rời khỏi chuyến đi.');
+            showSuccessToast('Thành công', 'Bạn đã rời khỏi chuyến đi.');
             navigation.goBack();
           } catch (error: any) {
-            Alert.alert(
+            showErrorToast(
               'Không thể rời nhóm',
               error?.error ||
                 error?.message ||
@@ -253,13 +273,54 @@ const TripDetailScreen: React.FC<TripDetailScreenProps> = ({
     ]);
   };
 
+  const handleDeleteTrip = async () => {
+    Alert.alert(
+      'Xóa chuyến đi',
+      'Bạn chắc chắn muốn xóa chuyến đi này? Hành động này không thể hoàn tác.',
+      [
+        { text: 'Huỷ', style: 'cancel' },
+        {
+          text: 'Xóa',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              setActionLoading(true);
+              const response = await tripDetailApi.deleteTrip(tripId);
+              setShowActionModal(false);
+
+              if (response.status) {
+                showSuccessToast('Thành công', 'Đã xóa chuyến đi.');
+                navigation.goBack();
+                return;
+              }
+
+              showInfoToast('Thông báo', 'Chưa thể xóa chuyến đi lúc này.');
+            } catch (error: any) {
+              showErrorToast(
+                'Không thể xóa chuyến đi',
+                error?.error ||
+                  error?.message ||
+                  'Đã có lỗi xảy ra khi xóa chuyến đi.',
+              );
+            } finally {
+              setActionLoading(false);
+            }
+          },
+        },
+      ],
+    );
+  };
+
   const handleOpenTransferOwner = () => {
     if (!isCurrentUserOwner) {
-      Alert.alert('Thông báo', 'Chỉ chủ chuyến đi mới có thể chuyển quyền.');
+      showInfoToast('Thông báo', 'Chỉ chủ chuyến đi mới có thể chuyển quyền.');
       return;
     }
     if (!transferableMembers.length) {
-      Alert.alert('Thông báo', 'Không có thành viên phù hợp để chuyển quyền.');
+      showInfoToast(
+        'Thông báo',
+        'Không có thành viên phù hợp để chuyển quyền.',
+      );
       return;
     }
     setShowActionModal(false);
@@ -280,12 +341,12 @@ const TripDetailScreen: React.FC<TripDetailScreenProps> = ({
               await tripDetailApi.transferOwner(tripId, member.userId);
               setShowTransferModal(false);
               await fetchTripDetail();
-              Alert.alert(
+              showSuccessToast(
                 'Thành công',
                 `Đã chuyển quyền chủ chuyến cho ${member.fullName}.`,
               );
             } catch (error: any) {
-              Alert.alert(
+              showErrorToast(
                 'Không thể chuyển quyền',
                 error?.error ||
                   error?.message ||
@@ -313,7 +374,7 @@ const TripDetailScreen: React.FC<TripDetailScreenProps> = ({
       }
     } catch (error: any) {
       setAllExpenses(expenses);
-      Alert.alert(
+      showInfoToast(
         'Thông báo',
         error?.error || error?.message || 'Không thể tải toàn bộ chi tiêu.',
       );
@@ -467,7 +528,7 @@ const TripDetailScreen: React.FC<TripDetailScreenProps> = ({
                   setShowAddMemberModal(true);
                   return;
                 }
-                Alert.alert(
+                showInfoToast(
                   'Thông báo',
                   'Chỉ chủ chuyến đi mới có thể mời thành viên mới.',
                 );
@@ -706,21 +767,39 @@ const TripDetailScreen: React.FC<TripDetailScreenProps> = ({
               </TouchableOpacity>
             )}
 
-            <TouchableOpacity
-              style={styles.actionItem}
-              onPress={handleLeaveTrip}
-              disabled={actionLoading}
-            >
-              <FontAwesome6
-                name="right-from-bracket"
-                size={13}
-                color="#DC2626"
-                iconStyle="solid"
-              />
-              <Text style={[styles.actionItemText, styles.actionDangerText]}>
-                Rời nhóm
-              </Text>
-            </TouchableOpacity>
+            {canDeleteTrip ? (
+              <TouchableOpacity
+                style={styles.actionItem}
+                onPress={handleDeleteTrip}
+                disabled={actionLoading}
+              >
+                <FontAwesome6
+                  name="trash-can"
+                  size={13}
+                  color="#DC2626"
+                  iconStyle="solid"
+                />
+                <Text style={[styles.actionItemText, styles.actionDangerText]}>
+                  Xóa chuyến đi
+                </Text>
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity
+                style={styles.actionItem}
+                onPress={handleLeaveTrip}
+                disabled={actionLoading}
+              >
+                <FontAwesome6
+                  name="right-from-bracket"
+                  size={13}
+                  color="#DC2626"
+                  iconStyle="solid"
+                />
+                <Text style={[styles.actionItemText, styles.actionDangerText]}>
+                  Rời nhóm
+                </Text>
+              </TouchableOpacity>
+            )}
 
             <TouchableOpacity
               style={styles.actionCancelBtn}

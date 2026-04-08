@@ -219,6 +219,15 @@ export const tripDetailApi = {
     }
   },
 
+  deleteTrip: async (tripId: string): Promise<TripMemberActionResponse> => {
+    try {
+      const response = await api.delete(`/trips/${tripId}`);
+      return response as unknown as TripMemberActionResponse;
+    } catch (error) {
+      throw error as ApiError;
+    }
+  },
+
   createExpense: async (
     tripId: string,
     payload: CreateExpenseDto,

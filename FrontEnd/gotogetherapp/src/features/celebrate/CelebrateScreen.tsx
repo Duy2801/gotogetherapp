@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   Dimensions,
   FlatList,
   Image,
@@ -25,6 +24,11 @@ import { PRIMARY_COLOR, SECONDARY_COLOR } from '../../constants/color';
 import { celebrateApi, CelebrateItem } from './api';
 import { tripApi, Trip } from '../home/api';
 import { uploadService } from '../../services/uploadService';
+import {
+  showErrorToast,
+  showInfoToast,
+  showSuccessToast,
+} from '../../utils/appToast';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -273,7 +277,7 @@ function CelebrateScreen() {
 
   const handleCreatePress = () => {
     if (!trips.length) {
-      Alert.alert('Thông báo', 'Bạn chưa có chuyến đi để tạo kỷ niệm.');
+      showInfoToast('Thông báo', 'Bạn chưa có chuyến đi để tạo kỷ niệm.');
       return;
     }
 
@@ -325,17 +329,17 @@ function CelebrateScreen() {
 
   const handleSubmitCreate = async () => {
     if (!selectedTripId) {
-      Alert.alert('Thiếu thông tin', 'Vui lòng chọn chuyến đi.');
+      showInfoToast('Thiếu thông tin', 'Vui lòng chọn chuyến đi.');
       return;
     }
 
     if (!description.trim()) {
-      Alert.alert('Thiếu thông tin', 'Vui lòng nhập mô tả kỷ niệm.');
+      showInfoToast('Thiếu thông tin', 'Vui lòng nhập mô tả kỷ niệm.');
       return;
     }
 
     if (!celebrateDate.trim()) {
-      Alert.alert(
+      showInfoToast(
         'Thiếu thông tin',
         'Vui lòng nhập ngày theo định dạng YYYY-MM-DD.',
       );
@@ -371,14 +375,14 @@ function CelebrateScreen() {
       setDescription('');
       setSelectedImageUris([]);
       await fetchCelebrations();
-      Alert.alert(
+      showSuccessToast(
         'Thành công',
         editingCelebrateId
           ? 'Đã cập nhật thông tin kỷ niệm.'
           : 'Đã thêm kỷ niệm mới.',
       );
     } catch (error: any) {
-      Alert.alert(
+      showErrorToast(
         'Lỗi',
         error?.error || error?.message || 'Không thể thêm kỷ niệm',
       );

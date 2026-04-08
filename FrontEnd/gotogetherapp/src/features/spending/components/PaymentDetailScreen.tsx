@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   Modal,
   ScrollView,
   RefreshControl,
@@ -23,6 +22,7 @@ import {
   formatMoney,
   formatDate,
 } from '../../../utils/format';
+import { showErrorToast, showSuccessToast } from '../../../utils/appToast';
 import { PaymentFilter, FilterType } from './PaymentFilter';
 import { SCREEN_NAME } from '../../../constants/screenName';
 import { useSocket } from '../../../services/useSocket';
@@ -167,9 +167,9 @@ const PaymentDetailScreen = ({ navigation }: { navigation: any }) => {
       setActionLoadingId(splitId);
       await spendingApi.markSplitAsPaid(splitId);
       await fetchData();
-      Alert.alert('Thành công', 'Đã đánh dấu khoản này là đã trả.');
+      showSuccessToast('Thành công', 'Đã đánh dấu khoản này là đã trả.');
     } catch (error: any) {
-      Alert.alert(
+      showErrorToast(
         'Không thể cập nhật',
         error?.error || error?.message || 'Không thể đánh dấu đã trả.',
       );
@@ -183,9 +183,9 @@ const PaymentDetailScreen = ({ navigation }: { navigation: any }) => {
       setActionLoadingId(splitId);
       await spendingApi.confirmSplitReceived(splitId);
       await fetchData();
-      Alert.alert('Thành công', 'Đã xác nhận nhận tiền.');
+      showSuccessToast('Thành công', 'Đã xác nhận nhận tiền.');
     } catch (error: any) {
-      Alert.alert(
+      showErrorToast(
         'Không thể xác nhận',
         error?.error || error?.message || 'Không thể xác nhận đã nhận tiền.',
       );
@@ -210,9 +210,9 @@ const PaymentDetailScreen = ({ navigation }: { navigation: any }) => {
         message,
         userData.splitId,
       );
-      Alert.alert('Thành công', 'Đã gửi nhắc nhở cho ' + userData.name);
+      showSuccessToast('Thành công', `Đã gửi nhắc nhở cho ${userData.name}`);
     } catch (error: any) {
-      Alert.alert(
+      showErrorToast(
         'Không thể gửi nhắc nhở',
         error?.error || error?.message || 'Vui lòng thử lại sau.',
       );
