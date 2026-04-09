@@ -45,15 +45,18 @@ jobs:
         run: |
           heroku apps --json > /dev/null
 
-      # 7. Deploy to Heroku
+      # 7. Deploy to Heroku (FIX AUTH)
       - name: Deploy to Heroku
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
         run: |
           cd BackEnd/go-together-server
 
-          # thêm remote heroku
-          heroku git:remote -a ${{ secrets.HEROKU_APP_NAME }}
+          # Xóa remote cũ nếu có (tránh conflict)
+          git remote remove heroku || true
 
-          # deploy
+          # Thêm remote có kèm API KEY (QUAN TRỌNG)
+          git remote add heroku https://heroku:$HEROKU_API_KEY@git.heroku.com/${{ secrets.HEROKU_APP_NAME }}.git
+
+          # Push code
           git push heroku HEAD:master --force
