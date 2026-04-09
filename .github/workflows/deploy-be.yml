@@ -16,7 +16,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0   # 🔥 QUAN TRỌNG: lấy full history
+          fetch-depth: 0
 
       # 2. Setup Node.js
       - name: Setup Node
@@ -40,25 +40,23 @@ jobs:
       - name: Install Heroku CLI
         run: curl https://cli-assets.heroku.com/install.sh | sh
 
-      # 6. Verify Heroku auth (NON-INTERACTIVE)
+      # 6. Verify Heroku auth
       - name: Verify Heroku auth
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
         run: |
           heroku apps --json > /dev/null
 
-      # 7. Deploy to Heroku (FIX AUTH)
+      # 7. Deploy to Heroku (FIX MONOREPO)
       - name: Deploy to Heroku
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
         run: |
-          cd BackEnd/go-together-server
-
-          # Xóa remote cũ nếu có
+          # Xóa remote nếu có
           git remote remove heroku || true
 
           # Thêm remote có auth
           git remote add heroku https://heroku:$HEROKU_API_KEY@git.heroku.com/${{ secrets.HEROKU_APP_NAME }}.git
 
-          # Push
-          git push heroku HEAD:master --force
+          # 🔥 Push đúng subfolder lên Heroku
+          git subtree push --prefix=BackEnd/go-together-server heroku master
