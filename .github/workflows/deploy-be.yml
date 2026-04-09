@@ -22,7 +22,7 @@ jobs:
       # Login Heroku
       - name: Login Heroku
         run: |
-          echo "${{ secrets.HEROKU_API_KEY }}" | heroku auth:token
+          HEROKU_API_KEY=${{ secrets.HEROKU_API_KEY }} heroku auth:whoami
 
       # Deploy bằng git push
       - name: Deploy to Heroku
