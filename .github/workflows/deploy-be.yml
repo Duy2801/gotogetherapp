@@ -12,25 +12,47 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1. Checkout code
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Cài Heroku CLI
+      # 2. Setup Node.js
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # 3. Install dependencies
+      - name: Install dependencies
+        run: |
+          cd BackEnd/go-together-server
+          npm install
+
+      # 4. Build project (NestJS)
+      - name: Build project
+        run: |
+          cd BackEnd/go-together-server
+          npm run build
+
+      # 5. Install Heroku CLI
       - name: Install Heroku CLI
         run: curl https://cli-assets.heroku.com/install.sh | sh
 
-      # Login Heroku
+      # 6. Login Heroku
       - name: Login Heroku
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
         run: |
-          HEROKU_API_KEY=${{ secrets.HEROKU_API_KEY }} heroku auth:whoami
+          echo "Logged into Heroku"
+          heroku auth:whoami
 
-      # Deploy bằng git push
+      # 7. Add Heroku remote + deploy
       - name: Deploy to Heroku
         run: |
           cd BackEnd/go-together-server
-          git init
-          git add .
-          git commit -m "deploy"
 
+          # thêm remote heroku
           heroku git:remote -a ${{ secrets.HEROKU_APP_NAME }}
+
+          # push code hiện tại lên heroku
           git push heroku HEAD:master --force
