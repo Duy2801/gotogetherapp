@@ -12,9 +12,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout code
+      # 1. Checkout code (FIX SHALLOW CLONE)
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # 🔥 QUAN TRỌNG: lấy full history
 
       # 2. Setup Node.js
       - name: Setup Node
@@ -52,11 +54,11 @@ jobs:
         run: |
           cd BackEnd/go-together-server
 
-          # Xóa remote cũ nếu có (tránh conflict)
+          # Xóa remote cũ nếu có
           git remote remove heroku || true
 
-          # Thêm remote có kèm API KEY (QUAN TRỌNG)
+          # Thêm remote có auth
           git remote add heroku https://heroku:$HEROKU_API_KEY@git.heroku.com/${{ secrets.HEROKU_APP_NAME }}.git
 
-          # Push code
+          # Push
           git push heroku HEAD:master --force
