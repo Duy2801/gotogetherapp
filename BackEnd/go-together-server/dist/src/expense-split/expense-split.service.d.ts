@@ -9,12 +9,12 @@ export declare class ExpenseSplitService {
     markAsPaid(userId: string, splitId: string): Promise<{
         id: string;
         createdAt: Date;
-        updatedAt: Date;
         userId: string;
-        amount: import("@prisma/client-runtime-utils").Decimal;
-        splitType: import("../../prisma/generated/enums").SplitType;
         expenseId: string;
+        amount: import("@prisma/client-runtime-utils").Decimal;
+        updatedAt: Date;
         percentage: import("@prisma/client-runtime-utils").Decimal | null;
+        splitType: import("../../prisma/generated/enums").SplitType;
         isPaid: boolean;
         paidAt: Date | null;
         confirmed: boolean;
@@ -23,12 +23,12 @@ export declare class ExpenseSplitService {
     confirmReceived(userId: string, splitId: string): Promise<{
         id: string;
         createdAt: Date;
-        updatedAt: Date;
         userId: string;
-        amount: import("@prisma/client-runtime-utils").Decimal;
-        splitType: import("../../prisma/generated/enums").SplitType;
         expenseId: string;
+        amount: import("@prisma/client-runtime-utils").Decimal;
+        updatedAt: Date;
         percentage: import("@prisma/client-runtime-utils").Decimal | null;
+        splitType: import("../../prisma/generated/enums").SplitType;
         isPaid: boolean;
         paidAt: Date | null;
         confirmed: boolean;

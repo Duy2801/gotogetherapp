@@ -12,21 +12,21 @@ export declare class NotificationController {
     }>;
     getNotifications(req: any, limit?: string, offset?: string): Promise<{
         notifications: {
-            data: import("@prisma/client/runtime/client").JsonValue;
-            id: string;
-            createdAt: Date;
-            userId: string;
             type: import("../../prisma/generated/enums").NotificationType;
             title: string;
             message: string;
+            data: import("@prisma/client/runtime/client").JsonValue;
+            id: string;
             refId: string | null;
             isRead: boolean;
             readAt: Date | null;
+            createdAt: Date;
             sender: {
                 id: string;
                 fullName: string | null;
                 avatar: string | null;
             } | null;
+            userId: string;
             senderId: string | null;
         }[];
         unreadCount: number;
@@ -35,16 +35,16 @@ export declare class NotificationController {
         pageSize: number;
     }>;
     markAsRead(notificationId: string): Promise<{
-        data: import("@prisma/client/runtime/client").JsonValue | null;
-        id: string;
-        createdAt: Date;
-        userId: string;
         type: import("../../prisma/generated/enums").NotificationType;
         title: string;
         message: string;
+        data: import("@prisma/client/runtime/client").JsonValue | null;
+        id: string;
         refId: string | null;
         isRead: boolean;
         readAt: Date | null;
+        createdAt: Date;
+        userId: string;
         senderId: string | null;
     }>;
     clearAllNotifications(req: any): Promise<{

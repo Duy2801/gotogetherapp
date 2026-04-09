@@ -4,8 +4,8 @@ export declare class ExpenseController {
     private expenseService;
     constructor(expenseService: ExpenseService);
     getExpenseCategories(req: Request, tripId: string): Promise<{
-        name: string;
         id: string;
+        name: string;
         icon: string | null;
         color: string | null;
     }[]>;

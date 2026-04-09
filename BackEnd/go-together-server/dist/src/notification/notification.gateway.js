@@ -105,12 +105,6 @@ let NotificationGateway = class NotificationGateway {
         const room = socket_events_enum_1.SocketRooms.user(userId);
         const socketsInRoom = this.server.sockets.adapter.rooms?.get(room);
         const socketCount = socketsInRoom ? socketsInRoom.size : 0;
-        console.log(`[Gateway] Checking room: ${room}`);
-        console.log(`[Gateway] Sockets in room: ${socketCount}`);
-        console.log(`[Gateway] All connected socket IDs:`, Array.from(this.connectedUsers.values()).map(s => ({ id: s.id, userId: s.userId })));
-        console.log(`[Gateway] All rooms on server:`, Array.from(this.server.sockets.adapter.rooms?.keys() || []));
-        console.log(`[Gateway] Emitting REMINDER to room ${room}:`, data);
-        this.server.to(room).emit(socket_events_enum_1.SocketEvents.REMINDER, data);
         if (socketCount === 0) {
             console.warn(`⚠️  WARNING: No sockets found in room ${room}!`);
         }

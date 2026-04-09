@@ -10,8 +10,8 @@ export declare class ExpenseService {
     private notificationService;
     constructor(prisma: PrismaService, tripMember: TripMemberService, notificationGateway: NotificationGateway, notificationService: NotificationService);
     getExpenseCategories(userId: string, tripId: string): Promise<{
-        name: string;
         id: string;
+        name: string;
         icon: string | null;
         color: string | null;
     }[]>;
