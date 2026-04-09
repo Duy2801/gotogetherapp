@@ -29,6 +29,7 @@ import {
   showInfoToast,
   showSuccessToast,
 } from '../../../utils/appToast';
+import { useTranslation } from '../../../hooks/useTranslation';
 
 interface TripDetailScreenProps {
   route: any;
@@ -42,6 +43,7 @@ const TripDetailScreen: React.FC<TripDetailScreenProps> = ({
   const { tripId } = route.params;
   const currentUser = useSelector((state: RootState) => state.login.user);
   const { socket } = useSocket();
+  const { t, locale } = useTranslation();
 
   const [tripDetail, setTripDetail] = useState<TripDetail | null>(null);
   const [expenses, setExpenses] = useState<Expense[]>([]);
@@ -72,10 +74,7 @@ const TripDetailScreen: React.FC<TripDetailScreenProps> = ({
         }
       } catch (expenseError: any) {}
     } catch (error: any) {
-      showErrorToast(
-        'Lỗi',
-        error?.error || 'Không thể tải thông tin chuyến đi',
-      );
+      showErrorToast(t('common.error'), error?.error || t('trip.loadFailed'));
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -191,7 +190,7 @@ const TripDetailScreen: React.FC<TripDetailScreenProps> = ({
       const response = await tripDetailApi.inviteMember(tripId, { email });
 
       if (response.status) {
-        showSuccessToast('Thành công', `Đã gửi lời mời đến ${email}.`);
+        showSuccessToast(t('common.success'), t('trip.inviteSent', { email }));
         fetchTripDetail();
         return true;
       }
@@ -199,46 +198,34 @@ const TripDetailScreen: React.FC<TripDetailScreenProps> = ({
       return false;
     } catch (error: any) {
       const errorMessage =
-        error?.message || error?.error || 'Không thể mời thành viên';
+        error?.message || error?.error || t('trip.inviteFailed');
 
       if (errorMessage.includes('chi tiêu')) {
         showErrorToast(
-          'Không thể thêm thành viên',
-          'Không thể thêm thành viên khi đã có chi tiêu trong chuyến đi.',
+          t('trip.cannotAddMemberTitle'),
+          t('trip.cannotAddMemberBody'),
         );
       } else if (
         errorMessage.toLowerCase().includes('must be an email') ||
         errorMessage.toLowerCase().includes('email không đúng định dạng')
       ) {
-        showErrorToast(
-          'Email không hợp lệ',
-          'Vui lòng nhập đúng định dạng email.',
-        );
+        showErrorToast(t('trip.invalidEmailTitle'), t('trip.invalidEmailBody'));
       } else if (
         errorMessage.includes('email') ||
         errorMessage.includes('người dùng')
       ) {
-        showErrorToast(
-          'Không tìm thấy',
-          'Không tìm thấy người dùng với email này. Vui lòng kiểm tra lại.',
-        );
+        showErrorToast(t('errors.notFound'), t('trip.userNotFoundByEmail'));
       } else if (errorMessage.includes('đã là thành viên')) {
-        showInfoToast(
-          'Thông báo',
-          'Người dùng đã là thành viên của chuyến đi.',
-        );
+        showInfoToast(t('common.warning'), t('trip.alreadyMember'));
       } else if (errorMessage.includes('lời mời đã được gửi')) {
-        showInfoToast('Thông báo', 'Lời mời đã được gửi trước đó.');
+        showInfoToast(t('common.warning'), t('trip.inviteAlreadySent'));
       } else if (
         errorMessage.includes('không thuộc chuyến đi') ||
         errorMessage.includes('không có quyền')
       ) {
-        showErrorToast(
-          'Lỗi',
-          'Bạn không có quyền mời thành viên vào chuyến đi này. Chỉ chủ chuyến đi mới có quyền này.',
-        );
+        showErrorToast(t('common.error'), t('trip.noInvitePermission'));
       } else {
-        showErrorToast('Lỗi', errorMessage);
+        showErrorToast(t('common.error'), errorMessage);
       }
 
       return false;
@@ -246,24 +233,22 @@ const TripDetailScreen: React.FC<TripDetailScreenProps> = ({
   };
 
   const handleLeaveTrip = async () => {
-    Alert.alert('Rời nhóm', 'Bạn chắc chắn muốn rời khỏi chuyến đi này?', [
-      { text: 'Huỷ', style: 'cancel' },
+    Alert.alert(t('trip.leaveTripTitle'), t('trip.leaveTripConfirm'), [
+      { text: t('common.cancel'), style: 'cancel' },
       {
-        text: 'Rời nhóm',
+        text: t('trip.leaveTripTitle'),
         style: 'destructive',
         onPress: async () => {
           try {
             setActionLoading(true);
             await tripDetailApi.leaveTrip(tripId);
             setShowActionModal(false);
-            showSuccessToast('Thành công', 'Bạn đã rời khỏi chuyến đi.');
+            showSuccessToast(t('common.success'), t('trip.leftTrip'));
             navigation.goBack();
           } catch (error: any) {
             showErrorToast(
-              'Không thể rời nhóm',
-              error?.error ||
-                error?.message ||
-                'Đã có lỗi xảy ra khi rời chuyến đi.',
+              t('trip.leaveTripFailedTitle'),
+              error?.error || error?.message || t('trip.leaveTripFailed'),
             );
           } finally {
             setActionLoading(false);
@@ -274,53 +259,44 @@ const TripDetailScreen: React.FC<TripDetailScreenProps> = ({
   };
 
   const handleDeleteTrip = async () => {
-    Alert.alert(
-      'Xóa chuyến đi',
-      'Bạn chắc chắn muốn xóa chuyến đi này? Hành động này không thể hoàn tác.',
-      [
-        { text: 'Huỷ', style: 'cancel' },
-        {
-          text: 'Xóa',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              setActionLoading(true);
-              const response = await tripDetailApi.deleteTrip(tripId);
-              setShowActionModal(false);
+    Alert.alert(t('trip.deleteTripTitle'), t('trip.deleteTripConfirm'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      {
+        text: t('common.delete'),
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            setActionLoading(true);
+            const response = await tripDetailApi.deleteTrip(tripId);
+            setShowActionModal(false);
 
-              if (response.status) {
-                showSuccessToast('Thành công', 'Đã xóa chuyến đi.');
-                navigation.goBack();
-                return;
-              }
-
-              showInfoToast('Thông báo', 'Chưa thể xóa chuyến đi lúc này.');
-            } catch (error: any) {
-              showErrorToast(
-                'Không thể xóa chuyến đi',
-                error?.error ||
-                  error?.message ||
-                  'Đã có lỗi xảy ra khi xóa chuyến đi.',
-              );
-            } finally {
-              setActionLoading(false);
+            if (response.status) {
+              showSuccessToast(t('common.success'), t('trip.deleteSuccess'));
+              navigation.goBack();
+              return;
             }
-          },
+
+            showInfoToast(t('common.warning'), t('trip.deleteUnavailable'));
+          } catch (error: any) {
+            showErrorToast(
+              t('trip.deleteFailedTitle'),
+              error?.error || error?.message || t('trip.deleteFailed'),
+            );
+          } finally {
+            setActionLoading(false);
+          }
         },
-      ],
-    );
+      },
+    ]);
   };
 
   const handleOpenTransferOwner = () => {
     if (!isCurrentUserOwner) {
-      showInfoToast('Thông báo', 'Chỉ chủ chuyến đi mới có thể chuyển quyền.');
+      showInfoToast(t('common.warning'), t('trip.ownerOnlyTransfer'));
       return;
     }
     if (!transferableMembers.length) {
-      showInfoToast(
-        'Thông báo',
-        'Không có thành viên phù hợp để chuyển quyền.',
-      );
+      showInfoToast(t('common.warning'), t('trip.noTransferCandidate'));
       return;
     }
     setShowActionModal(false);
@@ -329,12 +305,12 @@ const TripDetailScreen: React.FC<TripDetailScreenProps> = ({
 
   const handleTransferOwner = async (member: Member) => {
     Alert.alert(
-      'Chuyển quyền chủ chuyến',
-      `Bạn muốn chuyển quyền chủ chuyến cho ${member.fullName}?`,
+      t('trip.transferOwnerTitle'),
+      t('trip.transferOwnerConfirm', { name: member.fullName }),
       [
-        { text: 'Huỷ', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Xác nhận',
+          text: t('common.confirm'),
           onPress: async () => {
             try {
               setActionLoading(true);
@@ -342,15 +318,13 @@ const TripDetailScreen: React.FC<TripDetailScreenProps> = ({
               setShowTransferModal(false);
               await fetchTripDetail();
               showSuccessToast(
-                'Thành công',
-                `Đã chuyển quyền chủ chuyến cho ${member.fullName}.`,
+                t('common.success'),
+                t('trip.transferOwnerSuccess', { name: member.fullName }),
               );
             } catch (error: any) {
               showErrorToast(
-                'Không thể chuyển quyền',
-                error?.error ||
-                  error?.message ||
-                  'Đã có lỗi xảy ra khi chuyển quyền.',
+                t('trip.transferOwnerFailedTitle'),
+                error?.error || error?.message || t('trip.transferOwnerFailed'),
               );
             } finally {
               setActionLoading(false);
@@ -375,8 +349,8 @@ const TripDetailScreen: React.FC<TripDetailScreenProps> = ({
     } catch (error: any) {
       setAllExpenses(expenses);
       showInfoToast(
-        'Thông báo',
-        error?.error || error?.message || 'Không thể tải toàn bộ chi tiêu.',
+        t('common.warning'),
+        error?.error || error?.message || t('trip.loadAllExpensesFailed'),
       );
     } finally {
       setLoadingAllExpenses(false);
@@ -387,12 +361,12 @@ const TripDetailScreen: React.FC<TripDetailScreenProps> = ({
     return (
       <Body
         hideHeader={false}
-        title="Chi tiết chuyến đi"
+        title={t('trip.title')}
         backgroundColor="#f0f5f1"
       >
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={PRIMARY_COLOR} />
-          <Text style={styles.loadingText}>Đang tải...</Text>
+          <Text style={styles.loadingText}>{t('common.loading')}</Text>
         </View>
       </Body>
     );
@@ -402,18 +376,16 @@ const TripDetailScreen: React.FC<TripDetailScreenProps> = ({
     return (
       <Body
         hideHeader={false}
-        title="Chi tiết chuyến đi"
+        title={t('trip.title')}
         backgroundColor="#f0f5f1"
       >
         <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>
-            Không tìm thấy thông tin chuyến đi
-          </Text>
+          <Text style={styles.errorText}>{t('trip.loadFailed')}</Text>
           <TouchableOpacity
             style={styles.retryButton}
             onPress={fetchTripDetail}
           >
-            <Text style={styles.retryText}>Thử lại</Text>
+            <Text style={styles.retryText}>{t('common.retry')}</Text>
           </TouchableOpacity>
         </View>
       </Body>
@@ -483,11 +455,13 @@ const TripDetailScreen: React.FC<TripDetailScreenProps> = ({
                   color="#25B55F"
                   iconStyle="solid"
                 />
-                <Text style={styles.ownerBadgeText}>Chủ chuyến đi</Text>
+                <Text style={styles.ownerBadgeText}>
+                  {t('trip.ownerBadge')}
+                </Text>
               </View>
 
               <Text style={styles.ownerName} numberOfLines={1}>
-                {ownerMember?.fullName || 'Thành viên'}
+                {ownerMember?.fullName || t('trip.memberFallback')}
               </Text>
 
               <View style={styles.tripMetaRow}>
@@ -513,7 +487,7 @@ const TripDetailScreen: React.FC<TripDetailScreenProps> = ({
                   />
                   <Text style={styles.dayChipText}>
                     {calculateDays(tripDetail.startDate, tripDetail.endDate)}{' '}
-                    ngày
+                    {t('trip.days')}
                   </Text>
                 </View>
               </View>
@@ -528,10 +502,7 @@ const TripDetailScreen: React.FC<TripDetailScreenProps> = ({
                   setShowAddMemberModal(true);
                   return;
                 }
-                showInfoToast(
-                  'Thông báo',
-                  'Chỉ chủ chuyến đi mới có thể mời thành viên mới.',
-                );
+                showInfoToast(t('common.warning'), t('trip.ownerOnlyInvite'));
               }}
               onViewAll={() => {
                 setShowMembersModal(true);
@@ -542,7 +513,9 @@ const TripDetailScreen: React.FC<TripDetailScreenProps> = ({
 
         <View style={styles.budgetCard}>
           <View style={styles.budgetHeaderRow}>
-            <Text style={styles.budgetHeaderLabel}>TÌNH TRẠNG NGÂN SÁCH</Text>
+            <Text style={styles.budgetHeaderLabel}>
+              {t('trip.budgetStatus')}
+            </Text>
             <View style={styles.budgetHeaderIconWrap}>
               <FontAwesome6
                 name="wallet"
@@ -555,7 +528,9 @@ const TripDetailScreen: React.FC<TripDetailScreenProps> = ({
 
           <Text style={styles.budgetMainValue}>
             {hasEstimatedBudget
-              ? `${remainingAmount.toLocaleString('vi-VN')}đ`
+              ? `${remainingAmount.toLocaleString(
+                  locale === 'en' ? 'en-US' : 'vi-VN',
+                )}đ`
               : '0đ'}
           </Text>
 
@@ -568,9 +543,11 @@ const TripDetailScreen: React.FC<TripDetailScreenProps> = ({
             >
               {hasEstimatedBudget
                 ? isOverBudget
-                  ? `Vượt mức ${exceedAmount.toLocaleString('vi-VN')}đ`
-                  : `Còn lại (${remainingPercent}%)`
-                : 'Chưa thiết lập ngân sách'}
+                  ? `${t('trip.overBudget')} ${exceedAmount.toLocaleString(
+                      locale === 'en' ? 'en-US' : 'vi-VN',
+                    )}đ`
+                  : `${t('trip.remainingBudget')} (${remainingPercent}%)`
+                : t('trip.noBudget')}
             </Text>
           </View>
 
@@ -588,18 +565,25 @@ const TripDetailScreen: React.FC<TripDetailScreenProps> = ({
 
           <View style={styles.budgetSummaryRow}>
             <View>
-              <Text style={styles.budgetSummaryLabel}>DỰ TÍNH</Text>
+              <Text style={styles.budgetSummaryLabel}>
+                {t('trip.estimated')}
+              </Text>
               <Text style={styles.budgetSummaryValue}>
                 {hasEstimatedBudget
-                  ? estimatedBudget.toLocaleString('vi-VN')
+                  ? estimatedBudget.toLocaleString(
+                      locale === 'en' ? 'en-US' : 'vi-VN',
+                    )
                   : '0'}
                 đ
               </Text>
             </View>
             <View style={styles.summaryRightCol}>
-              <Text style={styles.budgetSummaryLabel}>ĐÃ CHI</Text>
+              <Text style={styles.budgetSummaryLabel}>{t('trip.spent')}</Text>
               <Text style={styles.budgetSpentValue}>
-                {totalExpense.toLocaleString('vi-VN')}đ
+                {totalExpense.toLocaleString(
+                  locale === 'en' ? 'en-US' : 'vi-VN',
+                )}
+                đ
               </Text>
             </View>
           </View>
@@ -607,9 +591,9 @@ const TripDetailScreen: React.FC<TripDetailScreenProps> = ({
 
         <View style={styles.expensesContainer}>
           <View style={styles.expenseHeaderRow}>
-            <Text style={styles.expenseTitle}>Chi tiêu gần đây</Text>
+            <Text style={styles.expenseTitle}>{t('trip.recentExpenses')}</Text>
             <TouchableOpacity onPress={handleOpenAllExpenses}>
-              <Text style={styles.seeAllText}>Xem tất cả</Text>
+              <Text style={styles.seeAllText}>{t('common.viewAll')}</Text>
             </TouchableOpacity>
           </View>
 
@@ -621,9 +605,9 @@ const TripDetailScreen: React.FC<TripDetailScreenProps> = ({
             </View>
           ) : (
             <View style={styles.emptyContainer}>
-              <Text style={styles.emptyText}>Chưa có chi tiêu nào</Text>
+              <Text style={styles.emptyText}>{t('trip.noExpenses')}</Text>
               <Text style={styles.emptySubText}>
-                Nhấn nút + để thêm chi tiêu mới
+                {t('trip.addExpenseHint')}
               </Text>
             </View>
           )}
@@ -644,7 +628,7 @@ const TripDetailScreen: React.FC<TripDetailScreenProps> = ({
             onPress={() => setShowMembersModal(false)}
           />
           <View style={styles.transferCard}>
-            <Text style={styles.actionTitle}>Tất cả thành viên</Text>
+            <Text style={styles.actionTitle}>{t('trip.allMembers')}</Text>
 
             <ScrollView
               style={styles.allListWrap}
@@ -673,7 +657,9 @@ const TripDetailScreen: React.FC<TripDetailScreenProps> = ({
                     <Text style={styles.transferName}>{member.fullName}</Text>
                   </View>
                   <Text style={styles.memberRoleBadge}>
-                    {member.role === 'OWNER' ? 'Chủ chuyến' : 'Thành viên'}
+                    {member.role === 'OWNER'
+                      ? t('trip.owner')
+                      : t('trip.member')}
                   </Text>
                 </View>
               ))}
@@ -683,7 +669,7 @@ const TripDetailScreen: React.FC<TripDetailScreenProps> = ({
               style={styles.actionCancelBtn}
               onPress={() => setShowMembersModal(false)}
             >
-              <Text style={styles.actionCancelText}>Đóng</Text>
+              <Text style={styles.actionCancelText}>{t('common.close')}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -701,12 +687,14 @@ const TripDetailScreen: React.FC<TripDetailScreenProps> = ({
             onPress={() => setShowExpensesModal(false)}
           />
           <View style={styles.expensesModalCard}>
-            <Text style={styles.actionTitle}>Tất cả chi tiêu</Text>
+            <Text style={styles.actionTitle}>{t('trip.allExpenses')}</Text>
 
             {loadingAllExpenses ? (
               <View style={styles.modalLoadingWrap}>
                 <ActivityIndicator size="small" color={PRIMARY_COLOR} />
-                <Text style={styles.modalLoadingText}>Đang tải dữ liệu...</Text>
+                <Text style={styles.modalLoadingText}>
+                  {t('common.loading')}
+                </Text>
               </View>
             ) : (
               <ScrollView
@@ -719,7 +707,7 @@ const TripDetailScreen: React.FC<TripDetailScreenProps> = ({
 
                 {!allExpenses.length && !expenses.length && (
                   <Text style={styles.emptyTransferText}>
-                    Chưa có chi tiêu nào.
+                    {t('trip.noExpenses')}
                   </Text>
                 )}
               </ScrollView>
@@ -729,7 +717,7 @@ const TripDetailScreen: React.FC<TripDetailScreenProps> = ({
               style={styles.actionCancelBtn}
               onPress={() => setShowExpensesModal(false)}
             >
-              <Text style={styles.actionCancelText}>Đóng</Text>
+              <Text style={styles.actionCancelText}>{t('common.close')}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -747,7 +735,7 @@ const TripDetailScreen: React.FC<TripDetailScreenProps> = ({
             onPress={() => setShowActionModal(false)}
           />
           <View style={styles.actionCard}>
-            <Text style={styles.actionTitle}>Quản lý chuyến đi</Text>
+            <Text style={styles.actionTitle}>{t('trip.manageTrip')}</Text>
 
             {isCurrentUserOwner && (
               <TouchableOpacity
@@ -762,7 +750,7 @@ const TripDetailScreen: React.FC<TripDetailScreenProps> = ({
                   iconStyle="solid"
                 />
                 <Text style={styles.actionItemText}>
-                  Chuyển quyền chủ chuyến
+                  {t('trip.transferOwner')}
                 </Text>
               </TouchableOpacity>
             )}
@@ -780,7 +768,7 @@ const TripDetailScreen: React.FC<TripDetailScreenProps> = ({
                   iconStyle="solid"
                 />
                 <Text style={[styles.actionItemText, styles.actionDangerText]}>
-                  Xóa chuyến đi
+                  {t('trip.deleteTrip')}
                 </Text>
               </TouchableOpacity>
             ) : (
@@ -796,7 +784,7 @@ const TripDetailScreen: React.FC<TripDetailScreenProps> = ({
                   iconStyle="solid"
                 />
                 <Text style={[styles.actionItemText, styles.actionDangerText]}>
-                  Rời nhóm
+                  {t('trip.leaveTrip')}
                 </Text>
               </TouchableOpacity>
             )}
@@ -805,7 +793,7 @@ const TripDetailScreen: React.FC<TripDetailScreenProps> = ({
               style={styles.actionCancelBtn}
               onPress={() => setShowActionModal(false)}
             >
-              <Text style={styles.actionCancelText}>Đóng</Text>
+              <Text style={styles.actionCancelText}>{t('common.close')}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -823,7 +811,9 @@ const TripDetailScreen: React.FC<TripDetailScreenProps> = ({
             onPress={() => setShowTransferModal(false)}
           />
           <View style={styles.transferCard}>
-            <Text style={styles.actionTitle}>Chọn thành viên nhận quyền</Text>
+            <Text style={styles.actionTitle}>
+              {t('trip.selectTransferMember')}
+            </Text>
 
             {transferableMembers.map(member => (
               <TouchableOpacity
@@ -855,7 +845,7 @@ const TripDetailScreen: React.FC<TripDetailScreenProps> = ({
 
             {!transferableMembers.length && (
               <Text style={styles.emptyTransferText}>
-                Không có thành viên phù hợp để chuyển quyền.
+                {t('trip.noTransferCandidate')}
               </Text>
             )}
 
@@ -863,7 +853,7 @@ const TripDetailScreen: React.FC<TripDetailScreenProps> = ({
               style={styles.actionCancelBtn}
               onPress={() => setShowTransferModal(false)}
             >
-              <Text style={styles.actionCancelText}>Đóng</Text>
+              <Text style={styles.actionCancelText}>{t('common.close')}</Text>
             </TouchableOpacity>
           </View>
         </View>

@@ -10,7 +10,7 @@ import HomeScreen from '../features/home/HomeScreen';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import LoginScreen from '../features/auth/login/LoginScreen';
 import RegisterScreen from '../features/auth/register/RegisterScreen';
-import UpdateInfoScreen from '../features/profile/UpdateInfoScreen';
+import { UpdateInfoScreen } from '../features/profile';
 import TabNavigator from './Tabs';
 import SpendingScreen from '../features/spending/SpedingScreen';
 import PaymentDetailScreen from '../features/spending/components/PaymentDetailScreen';
@@ -20,6 +20,8 @@ import { TripDetailScreen, AddExpenseScreen } from '../features/tripdetail';
 import AddTripScreen from '../features/home/components/AddTripScreen';
 import SpendingDetail from '../features/spending/components/SpendingDetail';
 import SpendingStatisticsScreen from '../features/statistic/SpendingStatisticsScreen';
+import ChangePasswordScreen from '../features/setting/screens/ChangePasswordScreen';
+import HistoryScreen from '../features/setting/screens/HistoryScreen';
 import { CustomToastComponent } from '../config/Toast';
 const Stack = createNativeStackNavigator();
 
@@ -85,6 +87,8 @@ function ApplicationNavigator() {
     { name: SCREEN_NAME.TABS, component: TabNavigator },
     { name: SCREEN_NAME.CELEBRATE, component: CelebrateScreen },
     { name: SCREEN_NAME.SETTING, component: SettingScreen },
+    { name: SCREEN_NAME.CHANGE_PASSWORD, component: ChangePasswordScreen },
+    { name: SCREEN_NAME.HISTORY, component: HistoryScreen },
     { name: SCREEN_NAME.SPENDING, component: SpendingScreen },
     { name: SCREEN_NAME.PAYMENT_DETAIL, component: PaymentDetailScreen },
     {

@@ -9,6 +9,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { ICONTAB } from '../../assets';
 import { IsAndroid } from '../../constants';
+import { useTranslation } from '../../hooks/useTranslation';
 
 const TAB_WIDTH = IsAndroid ? 94 : 80;
 const TAB_HEIGHT = 44;
@@ -17,22 +18,22 @@ const ICON_MAP = {
   HomeTab: {
     default: ICONTAB.HOME,
     active: ICONTAB.HOME_ACTIVE,
-    name: 'Home',
+    name: 'tabs.home',
   },
   CelebrateTab: {
     default: ICONTAB.HOME,
     active: ICONTAB.HOME_ACTIVE,
-    name: 'Kỷ niệm',
+    name: 'tabs.celebrate',
   },
-  SpendingTab: {
+  BudgetTab: {
     default: ICONTAB.HOME,
     active: ICONTAB.HOME_ACTIVE,
-    name: 'Chi tiêu',
+    name: 'tabs.budget',
   },
   SettingTab: {
     default: ICONTAB.HOME,
     active: ICONTAB.HOME_ACTIVE,
-    name: 'Cài đặt',
+    name: 'tabs.settings',
   },
 } as const;
 
@@ -42,6 +43,7 @@ type CustomTabBarProps = {
 };
 
 export default function CustomTabBar({ state, navigation }: CustomTabBarProps) {
+  const { t } = useTranslation();
   const hideTabBar = state.routes[state.index]?.params?.hideTabBar;
 
   if (hideTabBar) return null;
@@ -92,7 +94,7 @@ export default function CustomTabBar({ state, navigation }: CustomTabBarProps) {
               activeOpacity={0.8}
             >
               <Image source={iconSource} style={styles.icon} />
-              {isFocused && <Text style={styles.activeText}>{nameTab}</Text>}
+              {isFocused && <Text style={styles.activeText}>{t(nameTab)}</Text>}
             </TouchableOpacity>
           );
         })}

@@ -5,61 +5,61 @@ export declare class CelebrateService {
     private prisma;
     constructor(prisma: PrismaService);
     getAllCelebrate(userId: string): Promise<({
-        images: {
-            id: string;
-            createdAt: Date;
-            celebrateId: string;
-            imageUrl: string;
-        }[];
         user: {
             id: string;
             fullName: string | null;
             avatar: string | null;
         };
         trip: {
+            name: string;
             id: string;
             status: import("../../prisma/generated/enums").TripStatus;
-            name: string;
             startDate: Date;
             endDate: Date;
             images: string | null;
         };
+        images: {
+            id: string;
+            createdAt: Date;
+            imageUrl: string;
+            celebrateId: string;
+        }[];
     } & {
+        description: string | null;
         id: string;
         createdAt: Date;
-        description: string | null;
         userId: string;
-        tripId: string;
         date: Date;
+        tripId: string;
     })[]>;
     createCelebrate(userId: string, data: CreateCelebrateDTO): Promise<{
         images: {
             id: string;
             createdAt: Date;
-            celebrateId: string;
             imageUrl: string;
+            celebrateId: string;
         }[];
     } & {
+        description: string | null;
         id: string;
         createdAt: Date;
-        description: string | null;
         userId: string;
-        tripId: string;
         date: Date;
+        tripId: string;
     }>;
     updateCelebrate(celebrateId: string, userId: string, data: UpdateCelebrateDTO): Promise<{
         images: {
             id: string;
             createdAt: Date;
-            celebrateId: string;
             imageUrl: string;
+            celebrateId: string;
         }[];
     } & {
+        description: string | null;
         id: string;
         createdAt: Date;
-        description: string | null;
         userId: string;
-        tripId: string;
         date: Date;
+        tripId: string;
     }>;
 }

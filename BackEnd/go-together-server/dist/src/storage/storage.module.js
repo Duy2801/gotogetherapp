@@ -11,14 +11,15 @@ const common_1 = require("@nestjs/common");
 const cloudinary_provider_1 = require("./cloudinary.provider");
 const cloudinary_service_1 = require("./cloudinary.service");
 const storage_controller_1 = require("./storage.controller");
+const s3_service_1 = require("./s3.service");
 let StorageModule = class StorageModule {
 };
 exports.StorageModule = StorageModule;
 exports.StorageModule = StorageModule = __decorate([
     (0, common_1.Module)({
-        providers: [cloudinary_provider_1.CloudinaryProvider, cloudinary_service_1.CloudinaryService],
+        providers: [cloudinary_provider_1.CloudinaryProvider, cloudinary_service_1.CloudinaryService, s3_service_1.S3Service],
         controllers: [storage_controller_1.StorageController],
-        exports: [cloudinary_service_1.CloudinaryService],
+        exports: [cloudinary_service_1.CloudinaryService, s3_service_1.S3Service],
     })
 ], StorageModule);
 //# sourceMappingURL=storage.module.js.map

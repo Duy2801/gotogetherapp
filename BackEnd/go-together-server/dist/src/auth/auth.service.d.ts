@@ -7,6 +7,7 @@ import { loginDTO } from "./dto/login.dto";
 import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
 import { UserReponse } from "src/user/dto/user.reponse";
+import { ChangePasswordDto } from "./dto/change-password.dto";
 export declare class AuthService {
     private userService;
     private prisma;
@@ -27,6 +28,9 @@ export declare class AuthService {
     private signAccessToken;
     private signRefreshToken;
     logout(userId: string, deviceId?: string): Promise<{
+        message: string;
+    }>;
+    changePassword(userId: string, data: ChangePasswordDto): Promise<{
         message: string;
     }>;
     refreshToken(userId: string): Promise<{

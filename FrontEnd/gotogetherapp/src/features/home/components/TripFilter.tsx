@@ -1,23 +1,25 @@
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { PRIMARY_COLOR, SECONDARY_COLOR } from '../../../constants/color';
+import { useTranslation } from '../../../hooks/useTranslation';
 
 interface TripFilterProps {
   selectedFilter: string;
   onFilterChange: (filter: string) => void;
 }
 
-const filters = [
-  { label: 'Tất cả', value: 'ALL' },
-  { label: 'Sắp tới', value: 'UPCOMING' },
-  { label: 'Đang diễn ra', value: 'ONGOING' },
-  { label: 'Đã hoàn thành', value: 'COMPLETED' },
-];
-
 const TripFilter: React.FC<TripFilterProps> = ({
   selectedFilter,
   onFilterChange,
 }) => {
+  const { t } = useTranslation();
+
+  const filters = [
+    { label: t('home.filterAll'), value: 'ALL' },
+    { label: t('home.filterUpcoming'), value: 'UPCOMING' },
+    { label: t('home.filterOngoing'), value: 'ONGOING' },
+    { label: t('home.filterCompleted'), value: 'COMPLETED' },
+  ];
   return (
     <View style={styles.container}>
       {filters.map(filter => (

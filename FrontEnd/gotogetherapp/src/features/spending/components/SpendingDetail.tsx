@@ -26,6 +26,7 @@ import {
   formatCompactMoney,
 } from '../../../utils/format';
 import { useSocket } from '../../../services/useSocket';
+import { useTranslation } from '../../../hooks/useTranslation';
 
 type TabType = 'info' | 'expenses' | 'settlement';
 
@@ -47,6 +48,7 @@ const SpendingDetail = ({
   const tripIds = route.params?.tripIds;
   const currentUser = useSelector((state: RootState) => state.login.user);
   const { socket } = useSocket();
+  const { t } = useTranslation();
 
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -484,13 +486,13 @@ const MultiTripInfoTab = ({
           color={SECONDARY_COLOR}
           iconStyle="solid"
         />
-        <Text style={styles.cardTitle}>Tổng hợp tất cả chuyến đi</Text>
+        <Text style={styles.cardTitle}>{t('spending.allTripsSummary')}</Text>
       </View>
       <View style={styles.cardBody}>
         <View style={styles.breakdownHeader}>
-          <Text style={styles.breakdownLabel}>Người</Text>
-          <Text style={styles.breakdownLabel}>Đã trả</Text>
-          <Text style={styles.breakdownLabel}>Nợ</Text>
+          <Text style={styles.breakdownLabel}>{t('spending.personLabel')}</Text>
+          <Text style={styles.breakdownLabel}>{t('spending.paidLabel')}</Text>
+          <Text style={styles.breakdownLabel}>{t('spending.debtLabel')}</Text>
           <Text style={styles.breakdownLabel}>Chênh lệch</Text>
         </View>
 
@@ -556,7 +558,7 @@ const ExpensesTab = ({ expenses }: { expenses: Expense[] }) => (
           color="#D1D5DB"
           iconStyle="solid"
         />
-        <Text style={styles.emptyText}>Chưa có chi phí nào</Text>
+        <Text style={styles.emptyText}>{t('expense.noExpenses')}</Text>
       </View>
     ) : (
       expenses.map((expense, idx) => (
@@ -570,7 +572,7 @@ const ExpensesTab = ({ expenses }: { expenses: Expense[] }) => (
                 iconStyle="solid"
               />
               <Text style={styles.expenseCategoryText}>
-                {expense.category?.name || 'Khác'}
+                {expense.category?.name || t('common.other')}
               </Text>
             </View>
             <Text style={styles.expenseAmount}>
@@ -595,7 +597,7 @@ const ExpensesTab = ({ expenses }: { expenses: Expense[] }) => (
               </View>
             )}
             <View style={styles.payerInfo}>
-              <Text style={styles.payerLabel}>Người trả tiền</Text>
+              <Text style={styles.payerLabel}>{t('expense.paidBy')}</Text>
               <Text style={styles.payerName}>{expense.paidBy.fullName}</Text>
             </View>
           </View>
@@ -604,7 +606,8 @@ const ExpensesTab = ({ expenses }: { expenses: Expense[] }) => (
           {expense.splits && expense.splits.length > 0 && (
             <View style={styles.splitsContainer}>
               <Text style={styles.splitsTitle}>
-                Chia cho {expense.splits.length} người (mỗi{' '}
+                {t('expense.splitWith')} {expense.splits.length}{' '}
+                {t('common.user')} (
                 {formatMoney(expense.amount / expense.splits.length)}):
               </Text>
               {expense.splits.map((split, i) => (
@@ -653,10 +656,10 @@ const ExpensesTab = ({ expenses }: { expenses: Expense[] }) => (
                         ]}
                       >
                         {split.confirmed
-                          ? 'Đã xác nhận'
+                          ? t('common.success')
                           : split.isPaid
-                          ? 'Đã trả'
-                          : 'Chưa trả'}
+                          ? t('common.yes')
+                          : t('common.no')}
                       </Text>
                     </View>
                   </View>
@@ -687,19 +690,19 @@ const SettlementTab = ({
           color={PRIMARY_COLOR}
           iconStyle="solid"
         />
-        <Text style={styles.cardTitle}>Bảng tính toán chia tiền</Text>
+        <Text style={styles.cardTitle}>{t('spending.overviewTitle')}</Text>
       </View>
       <View style={styles.cardBody}>
         <Text style={styles.settlementSummary}>
-          Tổng chi tiêu: {formatMoney(totalSpent)}
+          {t('spending.spent')}: {formatMoney(totalSpent)}
         </Text>
 
         {items.length === 0 ? (
-          <Text style={styles.emptySettlement}>✓ Đã hoàn tất thanh toán</Text>
+          <Text style={styles.emptySettlement}>{t('common.success')}</Text>
         ) : (
           <>
             <Text style={styles.settlementInfo}>
-              {items.length} khoản cần thanh toán
+              {items.length} {t('spending.paymentTitle')}
             </Text>
             {items.map((item, idx) => (
               <View key={idx} style={styles.settlementRow}>
@@ -771,9 +774,9 @@ const SettlementTab = ({
                         { color: getStatusColor(item.status) },
                       ]}
                     >
-                      {item.status === 'CONFIRMED' && 'Xác nhận'}
-                      {item.status === 'PAID' && 'Đã trả'}
-                      {item.status === 'UNPAID' && 'Chưa trả'}
+                      {item.status === 'CONFIRMED' && t('common.success')}
+                      {item.status === 'PAID' && t('common.yes')}
+                      {item.status === 'UNPAID' && t('common.no')}
                     </Text>
                   </View>
                 </View>

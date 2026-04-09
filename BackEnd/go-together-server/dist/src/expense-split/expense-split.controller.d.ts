@@ -8,9 +8,9 @@ export declare class ExpenseSplitController {
         updatedAt: Date;
         userId: string;
         amount: import("@prisma/client-runtime-utils").Decimal;
+        splitType: import("../../prisma/generated/enums").SplitType;
         expenseId: string;
         percentage: import("@prisma/client-runtime-utils").Decimal | null;
-        splitType: import("../../prisma/generated/enums").SplitType;
         isPaid: boolean;
         paidAt: Date | null;
         confirmed: boolean;
@@ -22,9 +22,9 @@ export declare class ExpenseSplitController {
         updatedAt: Date;
         userId: string;
         amount: import("@prisma/client-runtime-utils").Decimal;
+        splitType: import("../../prisma/generated/enums").SplitType;
         expenseId: string;
         percentage: import("@prisma/client-runtime-utils").Decimal | null;
-        splitType: import("../../prisma/generated/enums").SplitType;
         isPaid: boolean;
         paidAt: Date | null;
         confirmed: boolean;

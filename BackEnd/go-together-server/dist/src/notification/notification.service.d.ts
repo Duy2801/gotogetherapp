@@ -5,6 +5,7 @@ export declare class NotificationService {
     private notificationGateway;
     constructor(prisma: PrismaService, notificationGateway: NotificationGateway);
     createPaymentMarkedNotification(toUserId: string, fromUserId: string, splitId: string, expenseId: string, tripId: string, message: string, data?: any): Promise<{
+        data: import("@prisma/client/runtime/client").JsonValue | null;
         id: string;
         createdAt: Date;
         userId: string;
@@ -12,12 +13,12 @@ export declare class NotificationService {
         title: string;
         message: string;
         refId: string | null;
-        senderId: string | null;
-        data: import("@prisma/client/runtime/client").JsonValue | null;
         isRead: boolean;
         readAt: Date | null;
+        senderId: string | null;
     }>;
     createPaymentConfirmedNotification(toUserId: string, fromUserId: string, splitId: string, expenseId: string, tripId: string, message: string, data?: any): Promise<{
+        data: import("@prisma/client/runtime/client").JsonValue | null;
         id: string;
         createdAt: Date;
         userId: string;
@@ -25,12 +26,12 @@ export declare class NotificationService {
         title: string;
         message: string;
         refId: string | null;
-        senderId: string | null;
-        data: import("@prisma/client/runtime/client").JsonValue | null;
         isRead: boolean;
         readAt: Date | null;
+        senderId: string | null;
     }>;
     createExpenseCreatedNotification(toUserId: string, fromUserId: string, expenseId: string, tripId: string, message: string, data?: any): Promise<{
+        data: import("@prisma/client/runtime/client").JsonValue | null;
         id: string;
         createdAt: Date;
         userId: string;
@@ -38,12 +39,12 @@ export declare class NotificationService {
         title: string;
         message: string;
         refId: string | null;
-        senderId: string | null;
-        data: import("@prisma/client/runtime/client").JsonValue | null;
         isRead: boolean;
         readAt: Date | null;
+        senderId: string | null;
     }>;
     createTripInviteNotification(toUserId: string, fromUserId: string, tripId: string, message: string, data?: any): Promise<{
+        data: import("@prisma/client/runtime/client").JsonValue | null;
         id: string;
         createdAt: Date;
         userId: string;
@@ -51,12 +52,12 @@ export declare class NotificationService {
         title: string;
         message: string;
         refId: string | null;
-        senderId: string | null;
-        data: import("@prisma/client/runtime/client").JsonValue | null;
         isRead: boolean;
         readAt: Date | null;
+        senderId: string | null;
     }>;
     createMemberJoinedNotification(toUserId: string, fromUserId: string, tripId: string, message: string, data?: any): Promise<{
+        data: import("@prisma/client/runtime/client").JsonValue | null;
         id: string;
         createdAt: Date;
         userId: string;
@@ -64,12 +65,12 @@ export declare class NotificationService {
         title: string;
         message: string;
         refId: string | null;
-        senderId: string | null;
-        data: import("@prisma/client/runtime/client").JsonValue | null;
         isRead: boolean;
         readAt: Date | null;
+        senderId: string | null;
     }>;
     createInviteRejectedNotification(toUserId: string, fromUserId: string, tripId: string, message: string, data?: any): Promise<{
+        data: import("@prisma/client/runtime/client").JsonValue | null;
         id: string;
         createdAt: Date;
         userId: string;
@@ -77,13 +78,13 @@ export declare class NotificationService {
         title: string;
         message: string;
         refId: string | null;
-        senderId: string | null;
-        data: import("@prisma/client/runtime/client").JsonValue | null;
         isRead: boolean;
         readAt: Date | null;
+        senderId: string | null;
     }>;
     sendReminder(toUserId: string, fromUserId: string, fromUserName: string, amount: number, message?: string, splitId?: string): Promise<void>;
     markAsRead(notificationId: string): Promise<{
+        data: import("@prisma/client/runtime/client").JsonValue | null;
         id: string;
         createdAt: Date;
         userId: string;
@@ -91,12 +92,12 @@ export declare class NotificationService {
         title: string;
         message: string;
         refId: string | null;
-        senderId: string | null;
-        data: import("@prisma/client/runtime/client").JsonValue | null;
         isRead: boolean;
         readAt: Date | null;
+        senderId: string | null;
     }>;
     deleteNotification(notificationId: string): Promise<{
+        data: import("@prisma/client/runtime/client").JsonValue | null;
         id: string;
         createdAt: Date;
         userId: string;
@@ -104,14 +105,14 @@ export declare class NotificationService {
         title: string;
         message: string;
         refId: string | null;
-        senderId: string | null;
-        data: import("@prisma/client/runtime/client").JsonValue | null;
         isRead: boolean;
         readAt: Date | null;
+        senderId: string | null;
     }>;
     clearAllNotifications(userId: string): Promise<import("../../prisma/generated/internal/prismaNamespace").BatchPayload>;
     getUserNotifications(userId: string, limit?: number, offset?: number): Promise<{
         notifications: {
+            data: import("@prisma/client/runtime/client").JsonValue;
             id: string;
             createdAt: Date;
             userId: string;
@@ -119,8 +120,6 @@ export declare class NotificationService {
             title: string;
             message: string;
             refId: string | null;
-            senderId: string | null;
-            data: import("@prisma/client/runtime/client").JsonValue;
             isRead: boolean;
             readAt: Date | null;
             sender: {
@@ -128,6 +127,7 @@ export declare class NotificationService {
                 fullName: string | null;
                 avatar: string | null;
             } | null;
+            senderId: string | null;
         }[];
         unreadCount: number;
         total: number;

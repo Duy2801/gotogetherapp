@@ -23,6 +23,52 @@ let UserService = class UserService {
     async findByEmail(email) {
         return await this.prisma.user.findUnique({ where: { email } });
     }
+    async findById(userId) {
+        return await this.prisma.user.findUnique({
+            where: { id: userId },
+            select: {
+                id: true,
+                email: true,
+                fullName: true,
+                dateOfBirth: true,
+                gender: true,
+                avatar: true,
+                status: true,
+                isVerified: true,
+                createdAt: true,
+                updatedAt: true,
+            },
+        });
+    }
+    async updateProfile(userId, dto) {
+        const user = await this.findById(userId);
+        if (!user) {
+            throw new common_1.NotFoundException("user.not_found");
+        }
+        return await this.prisma.user.update({
+            where: { id: userId },
+            data: {
+                ...(dto.fullName !== undefined && { fullName: dto.fullName }),
+                ...(dto.dateOfBirth !== undefined && {
+                    dateOfBirth: dto.dateOfBirth ? new Date(dto.dateOfBirth) : null,
+                }),
+                ...(dto.gender !== undefined && { gender: dto.gender }),
+                ...(dto.avatar !== undefined && { avatar: dto.avatar }),
+            },
+            select: {
+                id: true,
+                email: true,
+                fullName: true,
+                dateOfBirth: true,
+                gender: true,
+                avatar: true,
+                status: true,
+                isVerified: true,
+                createdAt: true,
+                updatedAt: true,
+            },
+        });
+    }
 };
 exports.UserService = UserService;
 exports.UserService = UserService = __decorate([

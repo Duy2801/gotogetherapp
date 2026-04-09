@@ -15,10 +15,11 @@ export const api = axios.create({
 api.interceptors.request.use(
   async function (config) {
     const token = await getItem(KEY_STORAGE.token);
+    const locale = (await getItem(KEY_STORAGE.locale)) || 'vi';
     if (token) {
       config.headers['authorization'] = `Bearer ${token}`;
     }
-    config.headers['x-locale'] = 'vi';
+    config.headers['x-locale'] = locale;
     config.params = {
       ...config.params,
     };

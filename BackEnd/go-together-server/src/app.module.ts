@@ -15,6 +15,7 @@ import { ExpenseSplitModule } from "./expense-split/expense-split.module";
 import { BudgetModule } from "./budget/budget.module";
 import { NotificationModule } from "./notification/notification.module";
 import { StatisticsModule } from "./statistics/statistics.module";
+import { I18nModule } from "./i18n/i18n.module";
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { StatisticsModule } from "./statistics/statistics.module";
         fileSize: 10 * 1024 * 1024, // 10MB
       },
     }),
+    I18nModule,
     PrismaModule,
     UserModule,
     AuthModule,
@@ -36,7 +38,7 @@ import { StatisticsModule } from "./statistics/statistics.module";
     ExpenseSplitModule,
     BudgetModule,
     NotificationModule,
-    StatisticsModule
+    StatisticsModule,
   ],
   controllers: [AppController],
   providers: [],

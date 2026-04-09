@@ -14,6 +14,7 @@ import FontAwesome6 from '@react-native-vector-icons/fontawesome6';
 import { PRIMARY_COLOR, SECONDARY_COLOR } from '../../constants/color';
 import { spendingApi, SpendingStatisticsResponse } from '../spending/api';
 import { formatCompactMoney, formatMoney } from '../../utils/format';
+import { useTranslation } from '../../hooks/useTranslation';
 
 const currentMonth = new Date().getMonth() + 1;
 const currentYear = new Date().getFullYear();
@@ -23,6 +24,7 @@ const SpendingStatisticsScreen = ({ navigation }: { navigation: any }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [errorText, setErrorText] = useState('');
   const [selectedTripId, setSelectedTripId] = useState<string | null>(null);
+  const { t } = useTranslation();
   const [stats, setStats] = useState<SpendingStatisticsResponse>({
     totalAcrossTrips: 0,
     selectedTripId: null,
@@ -57,7 +59,9 @@ const SpendingStatisticsScreen = ({ navigation }: { navigation: any }) => {
           null,
       );
     } catch (error: any) {
-      setErrorText(error?.error || error?.message || 'Không thể tải thống kê');
+      setErrorText(
+        error?.error || error?.message || t('statistics.loadFailed'),
+      );
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -135,7 +139,7 @@ const SpendingStatisticsScreen = ({ navigation }: { navigation: any }) => {
             iconStyle="solid"
           />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Thống kê chi tiêu</Text>
+        <Text style={styles.headerTitle}>{t('statistics.title')}</Text>
         <View style={styles.headerRightPlaceholder} />
       </View>
 
@@ -152,13 +156,13 @@ const SpendingStatisticsScreen = ({ navigation }: { navigation: any }) => {
         {loading ? (
           <View style={styles.loadingWrap}>
             <ActivityIndicator size="large" color={PRIMARY_COLOR} />
-            <Text style={styles.loadingText}>Đang tải thống kê...</Text>
+            <Text style={styles.loadingText}>{t('statistics.loading')}</Text>
           </View>
         ) : (
           <>
             <View style={styles.sectionHeaderRow}>
               <Text style={styles.sectionTitle}>
-                Theo chuyến đi trong tháng
+                {t('statistics.monthlyTrips')}
               </Text>
               <Text style={styles.sectionSubTitle}>
                 {stats.monthLabel || `${currentMonth}/${currentYear}`}
@@ -170,15 +174,17 @@ const SpendingStatisticsScreen = ({ navigation }: { navigation: any }) => {
                 <View style={styles.chartTopRow}>
                   <View>
                     <Text style={styles.chartTitle}>
-                      Biểu đồ thanh chi tiêu
+                      {t('statistics.barChart')}
                     </Text>
                     <Text style={styles.chartSubtitle}>
-                      Chạm vào từng chuyến đi để xem danh mục chi tiêu
+                      {t('statistics.barChartDesc')}
                     </Text>
                   </View>
                   <View style={styles.chartLegend}>
                     <View style={styles.legendDot} />
-                    <Text style={styles.legendText}>Số tiền</Text>
+                    <Text style={styles.legendText}>
+                      {t('statistics.amount')}
+                    </Text>
                   </View>
                 </View>
 
@@ -271,14 +277,14 @@ const SpendingStatisticsScreen = ({ navigation }: { navigation: any }) => {
                   color="#D1D5DB"
                   iconStyle="solid"
                 />
-                <Text style={styles.emptyText}>
-                  Tháng này chưa có chuyến đi nào có chi tiêu.
-                </Text>
+                <Text style={styles.emptyText}>{t('statistics.noTrips')}</Text>
               </View>
             )}
 
             <View style={styles.sectionHeaderRow}>
-              <Text style={styles.sectionTitle}>Danh mục đã chi</Text>
+              <Text style={styles.sectionTitle}>
+                {t('statistics.categoriesTitle')}
+              </Text>
               {!!selectedTrip && (
                 <Text style={styles.selectedTripText} numberOfLines={1}>
                   {selectedTrip.tripName}
@@ -326,7 +332,7 @@ const SpendingStatisticsScreen = ({ navigation }: { navigation: any }) => {
                   iconStyle="solid"
                 />
                 <Text style={styles.emptyText}>
-                  Chưa có dữ liệu danh mục cho chuyến đi này.
+                  {t('statistics.noCategoryData')}
                 </Text>
               </View>
             )}

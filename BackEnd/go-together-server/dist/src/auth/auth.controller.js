@@ -20,6 +20,7 @@ const auth_service_1 = require("./auth.service");
 const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
 const google_login_dto_1 = require("./dto/google-login.dto");
+const change_password_dto_1 = require("./dto/change-password.dto");
 let AuthController = class AuthController {
     authService;
     constructor(authService) {
@@ -33,6 +34,9 @@ let AuthController = class AuthController {
     }
     logout(req, deviceId) {
         return this.authService.logout(req.user.sub, deviceId);
+    }
+    changePassword(req, dto) {
+        return this.authService.changePassword(req.user.userId, dto);
     }
     loginWithGoogle(dto) {
         return this.loginWithGoogle(dto);
@@ -62,6 +66,16 @@ __decorate([
     __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", void 0)
 ], AuthController.prototype, "logout", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.Post)("change-password"),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, change_password_dto_1.ChangePasswordDto]),
+    __metadata("design:returntype", void 0)
+], AuthController.prototype, "changePassword", null);
 __decorate([
     (0, common_1.Post)("google"),
     __param(0, (0, common_1.Body)()),

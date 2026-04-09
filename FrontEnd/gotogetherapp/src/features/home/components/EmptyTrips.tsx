@@ -2,22 +2,22 @@ import React from 'react';
 import { StyleSheet, Text, View, Image } from 'react-native';
 import { PRIMARY_COLOR, SECONDARY_COLOR } from '../../../constants/color';
 import { LOCATED } from '../../../assets';
+import { useTranslation } from '../../../hooks/useTranslation';
 
 interface EmptyTripsProps {
   onCreateTrip: () => void;
 }
 
 const EmptyTrips: React.FC<EmptyTripsProps> = ({ onCreateTrip }) => {
+  const { t } = useTranslation();
+
   return (
     <View style={styles.container}>
       <View style={styles.iconContainer}>
         <Image source={LOCATED.LOCATED} style={{ width: 100, height: 100 }} />
       </View>
-      <Text style={styles.title}>Đi đâu tiếp theo?</Text>
-      <Text style={styles.subtitle}>
-        Bắt đầu hành trình mới ngay hôm nay!{'\n'}
-        Thêm chuyến đi và lên kế hoạch cho trải nghiệm tiếp theo của bạn.
-      </Text>
+      <Text style={styles.title}>{t('home.emptyTitle')}</Text>
+      <Text style={styles.subtitle}>{t('home.emptySubtitle')}</Text>
     </View>
   );
 };

@@ -18,6 +18,7 @@ import { apiLogin } from './api';
 import { useDispatch } from 'react-redux';
 import { login } from '../../../reducers/loginReducer';
 import { ApiError } from '../../../api';
+import { useTranslation } from '../../../hooks/useTranslation';
 
 const LoginScreen = () => {
   const navigation = useNavigation<any>();
@@ -26,6 +27,7 @@ const LoginScreen = () => {
   const [password, setPassword] = React.useState('password123');
 
   const dispatch = useDispatch();
+  const { t } = useTranslation();
 
   const handleShowPassword = () => {
     setShowPassword(!showPassword);
@@ -33,21 +35,21 @@ const LoginScreen = () => {
 
   const validate = () => {
     if (!email) {
-      Toast.show({ type: 'error', text1: 'Vui lòng nhập email' });
+      Toast.show({ type: 'error', text1: t('validation.emailRequired') });
       return false;
     }
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
-      Toast.show({ type: 'error', text1: 'Email không hợp lệ' });
+      Toast.show({ type: 'error', text1: t('validation.invalidEmail') });
       return false;
     }
     if (!password) {
-      Toast.show({ type: 'error', text1: 'Vui lòng nhập mật khẩu' });
+      Toast.show({ type: 'error', text1: t('validation.passwordRequired') });
       return false;
     }
     if (password.length < 6) {
       Toast.show({
         type: 'error',
-        text1: 'Mật khẩu phải có ít nhất 6 ký tự',
+        text1: t('validation.passwordTooShort'),
       });
       return false;
     }
@@ -61,7 +63,7 @@ const LoginScreen = () => {
     try {
       const response = await apiLogin({ email, password });
       if (response.status) {
-        Toast.show({ type: 'success', text1: 'Đăng nhập thành công' });
+        Toast.show({ type: 'success', text1: t('auth.loginSuccess') });
         dispatch(
           login({
             user: response.data.user,
@@ -78,20 +80,22 @@ const LoginScreen = () => {
           if (isInfoComplete) {
             navigation.navigate(SCREEN_NAME.TABS);
           } else {
-            navigation.navigate(SCREEN_NAME.UPDATE_INFO);
+            navigation.replace(SCREEN_NAME.UPDATE_INFO, {
+              fromAuthFlow: true,
+            });
           }
         }, 300);
       } else {
         Toast.show({
           type: 'warning',
-          text1: 'Response không có status',
+          text1: t('auth.invalidResponse'),
         });
       }
     } catch (error) {
       const err = error as ApiError;
       Toast.show({
         type: 'error',
-        text1: err.message || 'Đăng nhập thất bại',
+        text1: err.message || t('auth.loginFailed'),
       });
     }
   };
@@ -114,18 +118,18 @@ const LoginScreen = () => {
       <View style={styles.container}>
         <View style={styles.card}>
           <Image style={styles.imageLogo} source={LOGO.MAIN} />
-          <Text style={styles.title}>Đăng nhập</Text>
+          <Text style={styles.title}>{t('auth.login')}</Text>
         </View>
         <View style={styles.card}>
           <TouchableOpacity style={styles.containerGoogle}>
             <Image style={styles.imageGoogle} source={ICONGOOGLE.GOOGLE} />
-            <Text style={styles.textGoogle}>Đăng nhập bằng Google</Text>
+            <Text style={styles.textGoogle}>{t('auth.loginWithGoogle')}</Text>
           </TouchableOpacity>
         </View>
         <View>
           <TextInput
             style={styles.input}
-            placeholder="Email"
+            placeholder={t('auth.email')}
             value={email}
             onChangeText={e => setEmail(e)}
             // placeholderTextColor={'black'}
@@ -133,7 +137,7 @@ const LoginScreen = () => {
           <View style={styles.containerPassword}>
             <TextInput
               style={styles.inputPassword}
-              placeholder="Mật khẩu"
+              placeholder={t('auth.password')}
               value={password}
               onChangeText={e => setPassword(e)}
               secureTextEntry={!showPassword}
@@ -149,21 +153,21 @@ const LoginScreen = () => {
         </View>
         <TouchableOpacity style={styles.boxRegister}>
           <View style={[styles.checkbox]} />
-          <Text style={styles.rememberText}>Ghi nhớ đăng nhập</Text>
+          <Text style={styles.rememberText}>{t('auth.rememberLogin')}</Text>
         </TouchableOpacity>
 
         <View style={styles.buttonWrapper}>
-          <Button title="Đăng nhập" onPress={handleLogin} />
+          <Button title={t('auth.login')} onPress={handleLogin} />
         </View>
         <TouchableOpacity>
-          <Text style={styles.textLogin}>Quên mật khẩu?</Text>
+          <Text style={styles.textLogin}>{t('auth.forgotPassword')}</Text>
         </TouchableOpacity>
         <View style={styles.footerResgister}>
-          <Text style={styles.rememberText}>Chưa có tài khoản? </Text>
+          <Text style={styles.rememberText}>{t('auth.dontHaveAccount')} </Text>
           <TouchableOpacity
             onPress={() => navigation.navigate(SCREEN_NAME.REGISTER)}
           >
-            <Text style={styles.textLogin}>Đăng ký</Text>
+            <Text style={styles.textLogin}>{t('auth.signup')}</Text>
           </TouchableOpacity>
         </View>
       </View>

@@ -29,10 +29,12 @@ import {
   showInfoToast,
   showSuccessToast,
 } from '../../utils/appToast';
+import { useTranslation } from '../../hooks/useTranslation';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 function CelebrateScreen() {
+  const { t, locale } = useTranslation();
   const [items, setItems] = useState<CelebrateItem[]>([]);
   const [trips, setTrips] = useState<Trip[]>([]);
   const [loading, setLoading] = useState(true);
@@ -82,7 +84,7 @@ function CelebrateScreen() {
 
       setCelebrateDate(prev => (prev ? prev : getTodayString()));
     } catch (error: any) {
-      setErrorText(error?.error || error?.message || 'Không thể tải kỷ niệm');
+      setErrorText(error?.error || error?.message || t('celebrate.loading'));
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -103,15 +105,15 @@ function CelebrateScreen() {
     if (!isoDate) {
       return '--/--/----';
     }
-    return new Date(isoDate).toLocaleDateString('vi-VN');
+    return new Date(isoDate).toLocaleDateString(
+      locale === 'en' ? 'en-US' : 'vi-VN',
+    );
   };
 
   const renderEmpty = () => (
     <View style={styles.emptyCard}>
-      <Text style={styles.emptyTitle}>Chưa có kỷ niệm nào</Text>
-      <Text style={styles.emptyDesc}>
-        Hãy tham gia chuyến đi và tạo kỷ niệm để hiển thị tại đây.
-      </Text>
+      <Text style={styles.emptyTitle}>{t('celebrate.emptyTitle')}</Text>
+      <Text style={styles.emptyDesc}>{t('celebrate.emptyDesc')}</Text>
     </View>
   );
 
@@ -128,10 +130,8 @@ function CelebrateScreen() {
 
   const renderSearchEmpty = () => (
     <View style={styles.emptyCard}>
-      <Text style={styles.emptyTitle}>Không tìm thấy kỷ niệm phù hợp</Text>
-      <Text style={styles.emptyDesc}>
-        Thử tìm bằng tên chuyến đi khác hoặc xoá từ khoá tìm kiếm.
-      </Text>
+      <Text style={styles.emptyTitle}>{t('celebrate.searchEmptyTitle')}</Text>
+      <Text style={styles.emptyDesc}>{t('celebrate.searchEmptyDesc')}</Text>
     </View>
   );
 
@@ -152,7 +152,9 @@ function CelebrateScreen() {
     if (!gallery.length) {
       return (
         <View style={[styles.cover, styles.coverPlaceholder]}>
-          <Text style={styles.coverPlaceholderText}>Không có ảnh</Text>
+          <Text style={styles.coverPlaceholderText}>
+            {t('celebrate.noImage')}
+          </Text>
         </View>
       );
     }
@@ -218,11 +220,11 @@ function CelebrateScreen() {
           </View>
 
           <Text style={styles.tripName} numberOfLines={1}>
-            {item.trip?.name || 'Chuyến đi'}
+            {item.trip?.name || t('celebrate.noTrip')}
           </Text>
 
           <Text style={styles.description} numberOfLines={3}>
-            {item.description || 'Bạn chưa thêm mô tả cho kỷ niệm này.'}
+            {item.description || t('celebrate.noDescription')}
           </Text>
 
           <View style={styles.metaRow}>
@@ -241,7 +243,7 @@ function CelebrateScreen() {
               )}
 
               <Text style={styles.authorName} numberOfLines={1}>
-                {item.user?.fullName || 'Thành viên'}
+                {item.user?.fullName || t('common.user')}
               </Text>
             </View>
 
@@ -266,9 +268,7 @@ function CelebrateScreen() {
               color="#1E6D48"
               iconStyle="solid"
             />
-            <Text style={styles.readMoreText}>
-              Nhấn để xem toàn bộ ảnh và nội dung
-            </Text>
+            <Text style={styles.readMoreText}>{t('celebrate.readMore')}</Text>
           </View>
         </View>
       </Pressable>
@@ -277,7 +277,7 @@ function CelebrateScreen() {
 
   const handleCreatePress = () => {
     if (!trips.length) {
-      showInfoToast('Thông báo', 'Bạn chưa có chuyến đi để tạo kỷ niệm.');
+      showInfoToast(t('common.warning'), t('celebrate.noTripsForCreate'));
       return;
     }
 
@@ -329,20 +329,17 @@ function CelebrateScreen() {
 
   const handleSubmitCreate = async () => {
     if (!selectedTripId) {
-      showInfoToast('Thiếu thông tin', 'Vui lòng chọn chuyến đi.');
+      showInfoToast(t('common.warning'), t('celebrate.selectTripRequired'));
       return;
     }
 
     if (!description.trim()) {
-      showInfoToast('Thiếu thông tin', 'Vui lòng nhập mô tả kỷ niệm.');
+      showInfoToast(t('common.warning'), t('celebrate.descriptionRequired'));
       return;
     }
 
     if (!celebrateDate.trim()) {
-      showInfoToast(
-        'Thiếu thông tin',
-        'Vui lòng nhập ngày theo định dạng YYYY-MM-DD.',
-      );
+      showInfoToast(t('common.warning'), t('celebrate.dateRequired'));
       return;
     }
 
@@ -376,15 +373,15 @@ function CelebrateScreen() {
       setSelectedImageUris([]);
       await fetchCelebrations();
       showSuccessToast(
-        'Thành công',
+        t('common.success'),
         editingCelebrateId
-          ? 'Đã cập nhật thông tin kỷ niệm.'
-          : 'Đã thêm kỷ niệm mới.',
+          ? t('celebrate.updatedSuccess')
+          : t('celebrate.createdSuccess'),
       );
     } catch (error: any) {
       showErrorToast(
-        'Lỗi',
-        error?.error || error?.message || 'Không thể thêm kỷ niệm',
+        t('common.error'),
+        error?.error || error?.message || t('celebrate.addFailed'),
       );
     } finally {
       setCreateLoading(false);
@@ -395,7 +392,7 @@ function CelebrateScreen() {
     <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
       <View style={styles.headerRow}>
         <View style={styles.headerSide} />
-        <Text style={styles.headerTitle}>Kỷ niệm</Text>
+        <Text style={styles.headerTitle}>{t('celebrate.title')}</Text>
         <View style={styles.headerSide} />
       </View>
 
@@ -403,15 +400,13 @@ function CelebrateScreen() {
         <TextInput
           value={celebrationSearchText}
           onChangeText={setCelebrationSearchText}
-          placeholder="Tìm kỷ niệm theo tên chuyến đi..."
+          placeholder={t('celebrate.searchPlaceholder')}
           style={styles.searchInput}
           returnKeyType="search"
         />
       </View>
 
-      <Text style={styles.headerSubtitle}>
-        Những khoảnh khắc đáng nhớ của chuyến đi
-      </Text>
+      <Text style={styles.headerSubtitle}>{t('celebrate.subtitle')}</Text>
 
       <FlatList
         data={filteredItems}
@@ -437,7 +432,7 @@ function CelebrateScreen() {
           loading ? (
             <View style={styles.loadingWrap}>
               <ActivityIndicator size="large" color={PRIMARY_COLOR} />
-              <Text style={styles.loadingText}>Đang tải kỷ niệm...</Text>
+              <Text style={styles.loadingText}>{t('celebrate.loading')}</Text>
             </View>
           ) : null
         }
@@ -447,7 +442,7 @@ function CelebrateScreen() {
       />
 
       <TouchableOpacity style={styles.actionButton} onPress={handleCreatePress}>
-        <Text style={styles.actionButtonText}>Thêm kỷ niệm mới</Text>
+        <Text style={styles.actionButtonText}>{t('celebrate.addNew')}</Text>
       </TouchableOpacity>
 
       <SimpleFloatingButton
@@ -474,20 +469,23 @@ function CelebrateScreen() {
           <View style={styles.detailCard}>
             <View style={styles.detailHeader}>
               <Text style={styles.detailTitle} numberOfLines={1}>
-                {selectedDetail?.trip?.name || 'Kỷ niệm chuyến đi'}
+                {selectedDetail?.trip?.name ||
+                  t('celebrate.detailTripFallback')}
               </Text>
               <View style={styles.detailHeaderActions}>
                 <TouchableOpacity
                   onPress={handleEditPress}
                   style={styles.detailEdit}
                 >
-                  <Text style={styles.detailEditText}>Cập nhật</Text>
+                  <Text style={styles.detailEditText}>{t('common.edit')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => setSelectedDetail(null)}
                   style={styles.detailClose}
                 >
-                  <Text style={styles.detailCloseText}>Đóng</Text>
+                  <Text style={styles.detailCloseText}>
+                    {t('common.close')}
+                  </Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -510,7 +508,7 @@ function CelebrateScreen() {
                 ) : (
                   <View style={[styles.detailImage, styles.coverPlaceholder]}>
                     <Text style={styles.coverPlaceholderText}>
-                      Không có ảnh
+                      {t('celebrate.noImage')}
                     </Text>
                   </View>
                 )}
@@ -529,14 +527,15 @@ function CelebrateScreen() {
                   </Text>
                 </View>
 
-                <Text style={styles.detailSectionTitle}>Nội dung</Text>
+                <Text style={styles.detailSectionTitle}>
+                  {t('celebrate.content')}
+                </Text>
                 <Text style={styles.detailDescription}>
-                  {selectedDetail?.description ||
-                    'Bạn chưa thêm mô tả cho kỷ niệm này.'}
+                  {selectedDetail?.description || t('celebrate.noDescription')}
                 </Text>
 
                 <Text style={styles.detailSectionTitle}>
-                  Thông tin chuyến đi
+                  {t('celebrate.tripInfo')}
                 </Text>
                 <View style={styles.detailInfoRow}>
                   <FontAwesome6
@@ -558,7 +557,8 @@ function CelebrateScreen() {
                     iconStyle="solid"
                   />
                   <Text style={styles.detailInfoText}>
-                    Người tạo: {selectedDetail?.user?.fullName || 'Thành viên'}
+                    {t('celebrate.creator')}:{' '}
+                    {selectedDetail?.user?.fullName || t('common.user')}
                   </Text>
                 </View>
                 <View style={styles.detailInfoRow}>
@@ -569,7 +569,7 @@ function CelebrateScreen() {
                     iconStyle="solid"
                   />
                   <Text style={styles.detailInfoText}>
-                    Số ảnh:{' '}
+                    {t('celebrate.photoCount')}{' '}
                     {selectedDetail ? getItemImages(selectedDetail).length : 0}
                   </Text>
                 </View>
@@ -596,12 +596,16 @@ function CelebrateScreen() {
 
           <View style={styles.modalCard}>
             <Text style={styles.modalTitle}>
-              {editingCelebrateId ? 'Cập nhật kỷ niệm' : 'Thêm kỷ niệm'}
+              {editingCelebrateId
+                ? t('celebrate.editTitle')
+                : t('celebrate.addTitle')}
             </Text>
 
             {!editingCelebrateId && (
               <>
-                <Text style={styles.inputLabel}>Chọn chuyến đi</Text>
+                <Text style={styles.inputLabel}>
+                  {t('celebrate.selectTrip')}
+                </Text>
                 <ScrollView
                   horizontal
                   showsHorizontalScrollIndicator={false}
@@ -639,24 +643,26 @@ function CelebrateScreen() {
               </>
             )}
 
-            <Text style={styles.inputLabel}>Ngày (YYYY-MM-DD)</Text>
+            <Text style={styles.inputLabel}>{t('celebrate.dateLabel')}</Text>
             <TextInput
               value={celebrateDate}
               onChangeText={setCelebrateDate}
-              placeholder="2026-03-14"
+              placeholder={t('celebrate.datePlaceholder')}
               style={styles.input}
             />
 
-            <Text style={styles.inputLabel}>Mô tả</Text>
+            <Text style={styles.inputLabel}>
+              {t('celebrate.descriptionLabel')}
+            </Text>
             <TextInput
               value={description}
               onChangeText={setDescription}
-              placeholder="Khoảnh khắc đáng nhớ của chuyến đi"
+              placeholder={t('celebrate.descriptionPlaceholder')}
               multiline
               style={[styles.input, styles.textArea]}
             />
 
-            <Text style={styles.inputLabel}>Ảnh kỷ niệm (tối đa 5 ảnh)</Text>
+            <Text style={styles.inputLabel}>{t('celebrate.imagesLabel')}</Text>
             <TouchableOpacity
               style={styles.imagePickerButton}
               onPress={handlePickImages}
@@ -664,8 +670,10 @@ function CelebrateScreen() {
             >
               <Text style={styles.imagePickerButtonText}>
                 {selectedImageUris.length
-                  ? `Đã chọn ${selectedImageUris.length} ảnh`
-                  : 'Chọn ảnh từ thư viện'}
+                  ? t('celebrate.selectedImages', {
+                      count: String(selectedImageUris.length),
+                    })
+                  : t('celebrate.chooseImages')}
               </Text>
             </TouchableOpacity>
 
@@ -687,7 +695,9 @@ function CelebrateScreen() {
 
             {!!existingImageUrls.length && (
               <>
-                <Text style={styles.inputLabel}>Ảnh hiện tại</Text>
+                <Text style={styles.inputLabel}>
+                  {t('celebrate.currentImages')}
+                </Text>
                 <ScrollView
                   horizontal
                   showsHorizontalScrollIndicator={false}
@@ -710,7 +720,7 @@ function CelebrateScreen() {
                 onPress={() => setShowCreateModal(false)}
                 disabled={createLoading}
               >
-                <Text style={styles.cancelText}>Huỷ</Text>
+                <Text style={styles.cancelText}>{t('common.cancel')}</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.submitButton}
@@ -720,7 +730,7 @@ function CelebrateScreen() {
                 {createLoading ? (
                   <ActivityIndicator size="small" color="#fff" />
                 ) : (
-                  <Text style={styles.submitText}>Lưu kỷ niệm</Text>
+                  <Text style={styles.submitText}>{t('celebrate.save')}</Text>
                 )}
               </TouchableOpacity>
             </View>

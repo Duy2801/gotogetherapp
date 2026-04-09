@@ -1,3 +1,4 @@
+import React, { useMemo } from 'react';
 import {
   createBottomTabNavigator,
   BottomTabBar,
@@ -13,6 +14,7 @@ import SettingScreen from '../../features/setting/SettingScreen';
 import CelebrateScreen from '../../features/celebrate/CelebrateScreen';
 import HomeScreen from '../../features/home/HomeScreen';
 import { ICONTAB } from '../../assets';
+import { useTranslation } from '../../hooks/useTranslation';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -27,7 +29,19 @@ const ICON_MAP = {
   SettingTab: ICONTAB.SETTING,
 };
 const TabNavigator = () => {
+  const { t } = useTranslation();
   const translateY = useSharedValue(0);
+
+  // Memoize tab labels to ensure they update when language changes
+  const tabLabels = useMemo(
+    () => ({
+      home: t('tabs.home'),
+      celebrate: t('tabs.celebrate'),
+      budget: t('tabs.budget'),
+      settings: t('tabs.settings'),
+    }),
+    [t],
+  );
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: translateY.value }],
@@ -72,22 +86,27 @@ const TabNavigator = () => {
       <Tab.Screen
         name="HomeTab"
         component={HomeScreen}
-        options={{ tabBarLabel: 'Home' }}
+        options={{ tabBarLabel: tabLabels.home }}
+        listeners={() => ({
+          tabPress: () => {
+            // Trigger re-render when tab is pressed
+          },
+        })}
       />
       <Tab.Screen
         name="CelebrateTab"
         component={CelebrateScreen}
-        options={{ tabBarLabel: 'Kỷ niệm' }}
+        options={{ tabBarLabel: tabLabels.celebrate }}
       />
       <Tab.Screen
         name="BudgetTab"
         component={BudgetScreen}
-        options={{ tabBarLabel: 'Ngân sách' }}
+        options={{ tabBarLabel: tabLabels.budget }}
       />
       <Tab.Screen
         name="SettingTab"
         component={SettingScreen}
-        options={{ tabBarLabel: 'Cài đặt' }}
+        options={{ tabBarLabel: tabLabels.settings }}
       />
     </Tab.Navigator>
   );

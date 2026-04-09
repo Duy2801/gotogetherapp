@@ -1,6 +1,7 @@
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import FontAwesome6 from '@react-native-vector-icons/fontawesome6';
 import { Budget } from '../api';
+import { useTranslation } from '../../../hooks/useTranslation';
 
 interface BudgetItemProps {
   budget: Budget;
@@ -17,6 +18,7 @@ const BudgetItem = ({
   formatCurrency,
   formatCompactMoney,
 }: BudgetItemProps) => {
+  const { t } = useTranslation();
   const getProgressColor = () => {
     if (budget.isOverBudget) return '#EF4444';
     if (budget.isWarning) return '#F59E0B';
@@ -57,10 +59,12 @@ const BudgetItem = ({
             />
           </View>
           <View style={styles.titleContainer}>
-            <Text style={styles.title}>{'Tổng ngân sách'}</Text>
+            <Text style={styles.title}>{t('budget.totalBudgetLabel')}</Text>
             <Text style={styles.subtitle}>
-              Đã dùng {budget.percentage}% • Còn{' '}
-              {formatCompactMoney(budget.remaining)}
+              {t('budget.usedSummary', {
+                percent: String(budget.percentage),
+                amount: formatCompactMoney(budget.remaining),
+              })}
             </Text>
           </View>
         </View>
@@ -105,14 +109,14 @@ const BudgetItem = ({
 
       <View style={styles.amountRow}>
         <View style={styles.amountItem}>
-          <Text style={styles.amountLabel}>Đã chi</Text>
+          <Text style={styles.amountLabel}>{t('budget.spentShort')}</Text>
           <Text style={[styles.amountValue, { color: getProgressColor() }]}>
             {formatCompactMoney(budget.spent)}
           </Text>
         </View>
         <View style={styles.divider} />
         <View style={styles.amountItem}>
-          <Text style={styles.amountLabel}>Ngân sách</Text>
+          <Text style={styles.amountLabel}>{t('budget.budgetShort')}</Text>
           <Text style={styles.amountValue}>
             {formatCompactMoney(budget.amount)}
           </Text>
@@ -127,7 +131,9 @@ const BudgetItem = ({
             color="#DC2626"
             iconStyle="solid"
           />
-          <Text style={styles.warningText}>Đã vượt ngân sách!</Text>
+          <Text style={styles.warningText}>
+            {t('budget.overBudgetWarning')}
+          </Text>
         </View>
       )}
 
@@ -140,7 +146,9 @@ const BudgetItem = ({
             iconStyle="solid"
           />
           <Text style={[styles.warningText, { color: '#92400E' }]}>
-            Sắp hết ngân sách ({budget.warningAt}%)
+            {t('budget.almostOverWarning', {
+              percent: String(budget.warningAt),
+            })}
           </Text>
         </View>
       )}

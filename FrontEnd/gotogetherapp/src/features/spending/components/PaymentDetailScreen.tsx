@@ -26,10 +26,12 @@ import { showErrorToast, showSuccessToast } from '../../../utils/appToast';
 import { PaymentFilter, FilterType } from './PaymentFilter';
 import { SCREEN_NAME } from '../../../constants/screenName';
 import { useSocket } from '../../../services/useSocket';
+import { useTranslation } from '../../../hooks/useTranslation';
 
 const PaymentDetailScreen = ({ navigation }: { navigation: any }) => {
   const currentUser = useSelector((state: RootState) => state.login.user);
   const { socket } = useSocket();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
@@ -266,7 +268,9 @@ const PaymentDetailScreen = ({ navigation }: { navigation: any }) => {
             {/* Modal Header */}
             <View style={styles.modalHeader}>
               <View style={styles.modalDragHandle} />
-              <Text style={styles.modalTitle}>Chi tiết thanh toán</Text>
+              <Text style={styles.modalTitle}>
+                {t('spending.paymentDetail')}
+              </Text>
               <TouchableOpacity
                 onPress={() => setDetailModalGroup(null)}
                 style={styles.modalCloseBtn}
@@ -551,7 +555,9 @@ const PaymentDetailScreen = ({ navigation }: { navigation: any }) => {
                   color="#374151"
                   iconStyle="solid"
                 />
-                <Text style={styles.detailButtonText}>Chi tiết</Text>
+                <Text style={styles.detailButtonText}>
+                  {t('spending.detail')}
+                </Text>
               </TouchableOpacity>
             </>
           ) : (
@@ -567,7 +573,9 @@ const PaymentDetailScreen = ({ navigation }: { navigation: any }) => {
                   })
                 }
               >
-                <Text style={styles.secondaryActionText}>Nhắc nhở</Text>
+                <Text style={styles.secondaryActionText}>
+                  {t('spending.remind')}
+                </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.detailButton}
@@ -579,7 +587,9 @@ const PaymentDetailScreen = ({ navigation }: { navigation: any }) => {
                   color="#374151"
                   iconStyle="solid"
                 />
-                <Text style={styles.detailButtonText}>Chi tiết</Text>
+                <Text style={styles.detailButtonText}>
+                  {t('spending.detail')}
+                </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[
@@ -592,7 +602,9 @@ const PaymentDetailScreen = ({ navigation }: { navigation: any }) => {
                 {actionLoading ? (
                   <ActivityIndicator size="small" color="#063B12" />
                 ) : (
-                  <Text style={styles.confirmActionText}>Đã nhận</Text>
+                  <Text style={styles.confirmActionText}>
+                    {t('spending.received')}
+                  </Text>
                 )}
               </TouchableOpacity>
             </>
@@ -617,7 +629,7 @@ const PaymentDetailScreen = ({ navigation }: { navigation: any }) => {
             iconStyle="solid"
           />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Thanh toán & Ngân sách</Text>
+        <Text style={styles.headerTitle}>{t('spending.headerTitle')}</Text>
         <TouchableOpacity
           style={styles.headerIconWrapper}
           onPress={navigateToStatistics}
@@ -717,7 +729,7 @@ const PaymentDetailScreen = ({ navigation }: { navigation: any }) => {
                     <Text style={styles.emptyText}>
                       {selectedTripId
                         ? 'Không có khoản nhận tiền nào cho chuyến đi này.'
-                        : 'Chưa có ai nợ bạn ở thời điểm này.'}
+                        : t('spending.noReceivable')}
                     </Text>
                   </View>
                 )}

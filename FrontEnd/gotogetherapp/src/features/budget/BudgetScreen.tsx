@@ -18,6 +18,7 @@ import { Budget, budgetApi } from './api';
 import { spendingApi, SpendingPaymentSummary } from '../spending/api';
 import { formatCompactMoney, formatCurrency } from '../../utils/format';
 import { showErrorToast, showSuccessToast } from '../../utils/appToast';
+import { useTranslation } from '../../hooks/useTranslation';
 
 const currentMonth = new Date().getMonth() + 1;
 const currentYear = new Date().getFullYear();
@@ -40,6 +41,7 @@ const getBudgetDisplayState = (budget: Budget) => {
 };
 
 const BudgetScreen = ({ navigation }: { navigation: any }) => {
+  const { t } = useTranslation();
   const [budget, setBudget] = useState<Budget | null>(null);
   const [paymentSummary, setPaymentSummary] =
     useState<SpendingPaymentSummary | null>(null);
@@ -100,12 +102,12 @@ const BudgetScreen = ({ navigation }: { navigation: any }) => {
 
   const handleSave = async () => {
     if (!budgetAmount || parseFloat(budgetAmount) <= 0) {
-      showErrorToast('Lỗi', 'Vui lòng nhập ngân sách hợp lệ');
+      showErrorToast(t('common.error'), t('budget.invalidAmount'));
       return;
     }
     const warningAtNum = parseInt(warningAt) || 80;
     if (warningAtNum < 0 || warningAtNum > 100) {
-      showErrorToast('Lỗi', 'Ngưỡng cảnh báo phải từ 0–100%');
+      showErrorToast(t('common.error'), t('budget.invalidWarningAt'));
       return;
     }
 
@@ -126,15 +128,15 @@ const BudgetScreen = ({ navigation }: { navigation: any }) => {
           year: currentYear,
           warningAt: warningAtNum,
         });
-        showSuccessToast('Thành công', 'Đã tạo ngân sách tháng');
+        showSuccessToast(t('common.success'), t('budget.createSuccess'));
       }
 
       closeForm();
       fetchBudget();
     } catch (error: any) {
       showErrorToast(
-        'Lỗi',
-        error?.error || error?.message || 'Không thể lưu ngân sách',
+        t('common.error'),
+        error?.error || error?.message || t('budget.saveFailed'),
       );
     } finally {
       setSaving(false);
@@ -161,7 +163,7 @@ const BudgetScreen = ({ navigation }: { navigation: any }) => {
         }
       >
         <View style={styles.headerRow}>
-          <Text style={styles.screenTitle}>Quản lý tài chính</Text>
+          <Text style={styles.screenTitle}>{t('budget.title')}</Text>
         </View>
 
         {/* Hero Card - Budget Overview */}
@@ -170,7 +172,7 @@ const BudgetScreen = ({ navigation }: { navigation: any }) => {
             <>
               <View style={styles.tabContainer}>
                 <View>
-                  <Text style={styles.tabLabel}>Đã tiêu</Text>
+                  <Text style={styles.tabLabel}>{t('budget.spentLabel')}</Text>
                   <Text
                     style={[
                       styles.tabValueSpent,
@@ -181,7 +183,7 @@ const BudgetScreen = ({ navigation }: { navigation: any }) => {
                   </Text>
                 </View>
                 <View>
-                  <Text style={styles.tabLabel}>Hạn mức chi tiêu</Text>
+                  <Text style={styles.tabLabel}>{t('budget.limitLabel')}</Text>
                   <Text style={styles.tabValueBudget}>
                     {formatCurrency(budgetDisplay?.amount || 0)}
                   </Text>
@@ -208,11 +210,15 @@ const BudgetScreen = ({ navigation }: { navigation: any }) => {
               {/* Remaining Amount */}
               {budgetDisplay?.isOverBudget ? (
                 <Text style={[styles.remainingText, styles.overBudgetText]}>
-                  Vượt ngân sách: {formatCurrency(budgetDisplay.overflowAmount)}
+                  {t('budget.overBudgetText', {
+                    amount: formatCurrency(budgetDisplay.overflowAmount),
+                  })}
                 </Text>
               ) : (
                 <Text style={styles.remainingText}>
-                  Còn lại: {formatCurrency(budgetDisplay?.remaining || 0)}
+                  {t('budget.remainingText', {
+                    amount: formatCurrency(budgetDisplay?.remaining || 0),
+                  })}
                 </Text>
               )}
 
@@ -229,7 +235,7 @@ const BudgetScreen = ({ navigation }: { navigation: any }) => {
                     iconStyle="solid"
                   />
                   <Text style={styles.updateTargetButtonText}>
-                    Cập nhật mục tiêu
+                    {t('budget.updateTarget')}
                   </Text>
                 </TouchableOpacity>
               )}
@@ -242,10 +248,11 @@ const BudgetScreen = ({ navigation }: { navigation: any }) => {
                 color="#CBD5E1"
                 iconStyle="solid"
               />
-              <Text style={styles.emptyBudgetTitle}>Quản lý ngân sách</Text>
+              <Text style={styles.emptyBudgetTitle}>
+                {t('budget.emptyTitle')}
+              </Text>
               <Text style={styles.emptyBudgetDesc}>
-                Nhấn "Cập nhật" để thiết lập hoặc điều chỉnh ngân sách tháng của
-                bạn
+                {t('budget.emptyDesc')}
               </Text>
               {!showForm && (
                 <TouchableOpacity
@@ -259,7 +266,7 @@ const BudgetScreen = ({ navigation }: { navigation: any }) => {
                     iconStyle="solid"
                   />
                   <Text style={styles.createBudgetButtonText}>
-                    Cập nhật ngân sách
+                    {t('budget.createBudget')}
                   </Text>
                 </TouchableOpacity>
               )}
@@ -282,9 +289,12 @@ const BudgetScreen = ({ navigation }: { navigation: any }) => {
                   />
                 </View>
                 <View>
-                  <Text style={styles.formTitle}>Cập nhật ngân sách</Text>
+                  <Text style={styles.formTitle}>{t('budget.formTitle')}</Text>
                   <Text style={styles.formSubtitle}>
-                    Tháng {currentMonth}/{currentYear}
+                    {t('budget.monthYear', {
+                      month: currentMonth,
+                      year: currentYear,
+                    })}
                   </Text>
                 </View>
               </View>
@@ -303,7 +313,7 @@ const BudgetScreen = ({ navigation }: { navigation: any }) => {
 
             {/* Số tiền */}
             <View style={styles.formSection}>
-              <Text style={styles.formLabel}>Số tiền (VND)</Text>
+              <Text style={styles.formLabel}>{t('budget.amountLabel')}</Text>
               <View style={styles.inputContainer}>
                 <FontAwesome6
                   name="money-bill-wave"
@@ -314,7 +324,7 @@ const BudgetScreen = ({ navigation }: { navigation: any }) => {
                 <TextInput
                   ref={amountInputRef}
                   style={styles.input}
-                  placeholder="Nhập số tiền"
+                  placeholder={t('budget.amountPlaceholder')}
                   keyboardType="numeric"
                   value={
                     budgetAmount
@@ -332,7 +342,7 @@ const BudgetScreen = ({ navigation }: { navigation: any }) => {
                 style={[styles.formBtn, styles.cancelBtn]}
                 onPress={closeForm}
               >
-                <Text style={styles.cancelBtnText}>Hủy</Text>
+                <Text style={styles.cancelBtnText}>{t('common.cancel')}</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.formBtn, styles.saveBtn]}
@@ -342,7 +352,7 @@ const BudgetScreen = ({ navigation }: { navigation: any }) => {
                 {saving ? (
                   <ActivityIndicator size="small" color="#FFFFFF" />
                 ) : (
-                  <Text style={styles.saveBtnText}>Lưu</Text>
+                  <Text style={styles.saveBtnText}>{t('common.save')}</Text>
                 )}
               </TouchableOpacity>
             </View>
@@ -361,11 +371,11 @@ const BudgetScreen = ({ navigation }: { navigation: any }) => {
                   iconStyle="solid"
                 />
                 <Text style={styles.settlementTitle}>
-                  Tình trạng thanh toán
+                  {t('budget.settlementTitle')}
                 </Text>
               </View>
               <Text style={styles.settlementSubtitle}>
-                Tổng quan các khoản chi tiêu của bạn
+                {t('budget.settlementSubtitle')}
               </Text>
             </View>
 
@@ -384,7 +394,9 @@ const BudgetScreen = ({ navigation }: { navigation: any }) => {
                     iconStyle="solid"
                   />
                 </View>
-                <Text style={styles.settlementItemLabel}>Bạn đã trả</Text>
+                <Text style={styles.settlementItemLabel}>
+                  {t('budget.youPaid')}
+                </Text>
                 <Text style={styles.settlementItemValue}>
                   {formatCompactMoney(paymentSummary.totalSpent)}
                 </Text>
@@ -405,7 +417,7 @@ const BudgetScreen = ({ navigation }: { navigation: any }) => {
                   />
                 </View>
                 <Text style={styles.settlementItemLabel}>
-                  Bạn nợ người khác
+                  {t('budget.youOweOthers')}
                 </Text>
                 <Text
                   style={[styles.settlementItemValue, { color: '#DC2626' }]}
@@ -429,7 +441,7 @@ const BudgetScreen = ({ navigation }: { navigation: any }) => {
                   />
                 </View>
                 <Text style={styles.settlementItemLabel}>
-                  Người khác nợ bạn
+                  {t('budget.othersOweYou')}
                 </Text>
                 <Text
                   style={[styles.settlementItemValue, { color: '#059669' }]}
@@ -444,7 +456,7 @@ const BudgetScreen = ({ navigation }: { navigation: any }) => {
               onPress={() => navigation.navigate(SCREEN_NAME.PAYMENT_DETAIL)}
             >
               <Text style={styles.settlementDetailButtonText}>
-                Xem chi tiết thanh toán
+                {t('budget.viewPaymentDetail')}
               </Text>
               <FontAwesome6
                 name="chevron-right"
@@ -465,9 +477,8 @@ const BudgetScreen = ({ navigation }: { navigation: any }) => {
             iconStyle="solid"
           />
           <Text style={styles.infoText}>
-            <Text style={styles.infoTextBold}>Mẹo: </Text>
-            Ngân sách sẽ tự động reset vào đầu tháng mới dựa trên ngân sách
-            tháng trước. Bạn có thể cập nhật bất kỳ lúc nào.
+            <Text style={styles.infoTextBold}>{t('budget.tipPrefix')}</Text>
+            {t('budget.tipBody')}
           </Text>
         </View>
       </ScrollView>

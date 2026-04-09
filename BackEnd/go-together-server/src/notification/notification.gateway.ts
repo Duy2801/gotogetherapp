@@ -179,17 +179,8 @@ export class NotificationGateway
   emitReminder(userId: string, data: any) {
     const room = SocketRooms.user(userId);
 
-    // Debug: Check if room has any sockets
     const socketsInRoom = this.server.sockets.adapter.rooms?.get(room);
     const socketCount = socketsInRoom ? socketsInRoom.size : 0;
-
-    console.log(`[Gateway] Checking room: ${room}`);
-    console.log(`[Gateway] Sockets in room: ${socketCount}`);
-    console.log(`[Gateway] All connected socket IDs:`, Array.from(this.connectedUsers.values()).map(s => ({ id: s.id, userId: s.userId })));
-    console.log(`[Gateway] All rooms on server:`, Array.from(this.server.sockets.adapter.rooms?.keys() || []));
-
-    console.log(`[Gateway] Emitting REMINDER to room ${room}:`, data);
-    this.server.to(room).emit(SocketEvents.REMINDER, data);
 
     if (socketCount === 0) {
       console.warn(`⚠️  WARNING: No sockets found in room ${room}!`);

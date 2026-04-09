@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import { Text } from 'react-native';
 import { SECONDARY_COLOR } from '../../../constants/color';
+import { useTranslation } from '../../../hooks/useTranslation';
 
 interface MonthSelectorProps {
   selectedDate: Date;
@@ -21,6 +22,7 @@ const MonthSelector: React.FC<MonthSelectorProps> = ({
   availableYears = [],
 }) => {
   const [modalVisible, setModalVisible] = useState(false);
+  const { t } = useTranslation();
   const currentYear = new Date().getFullYear();
   const currentMonth = new Date().getMonth();
 
@@ -53,9 +55,13 @@ const MonthSelector: React.FC<MonthSelectorProps> = ({
 
   const getButtonText = () => {
     if (isCurrentMonth) {
-      return `Tháng này ${selectedDate.getMonth() + 1}`;
+      return t('monthFilter.thisMonth', {
+        month: String(selectedDate.getMonth() + 1),
+      });
     }
-    return `Tháng ${selectedDate.getMonth() + 1}`;
+    return t('monthFilter.month', {
+      month: String(selectedDate.getMonth() + 1),
+    });
   };
 
   return (
@@ -81,7 +87,7 @@ const MonthSelector: React.FC<MonthSelectorProps> = ({
         >
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Chọn tháng</Text>
+              <Text style={styles.modalTitle}>{t('monthFilter.title')}</Text>
               <TouchableOpacity onPress={() => setModalVisible(false)}>
                 <Text style={styles.closeIcon}>✕</Text>
               </TouchableOpacity>
@@ -91,13 +97,15 @@ const MonthSelector: React.FC<MonthSelectorProps> = ({
               {years.length === 0 ? (
                 <View style={styles.emptyWrap}>
                   <Text style={styles.emptyText}>
-                    Chưa có chuyến đi để chọn theo năm.
+                    {t('monthFilter.noTrips')}
                   </Text>
                 </View>
               ) : (
                 years.map(year => (
                   <View key={year} style={styles.yearSection}>
-                    <Text style={styles.yearText}>Năm {year}</Text>
+                    <Text style={styles.yearText}>
+                      {t('monthFilter.year', { year: String(year) })}
+                    </Text>
                     <View style={styles.monthGrid}>
                       {months.map((month, index) => {
                         const isSelected =

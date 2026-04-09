@@ -17,6 +17,7 @@ import { tripApi, createTripPayload } from '../api';
 import { PRIMARY_COLOR, SECONDARY_COLOR } from '../../../constants/color';
 import { uploadService } from '../../../services/uploadService';
 import { showErrorToast, showSuccessToast } from '../../../utils/appToast';
+import { useTranslation } from '../../../hooks/useTranslation';
 
 interface AddTripScreenProps {
   visible: boolean;
@@ -29,6 +30,7 @@ const AddTripScreen: React.FC<AddTripScreenProps> = ({
   onClose,
   onSuccess,
 }) => {
+  const { t } = useTranslation();
   const [name, setName] = useState('');
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
@@ -71,11 +73,11 @@ const AddTripScreen: React.FC<AddTripScreenProps> = ({
 
   const handleSubmit = async () => {
     if (!name.trim()) {
-      showErrorToast('Lỗi', 'Vui lòng nhập địa điểm chuyến đi');
+      showErrorToast(t('common.error'), t('trip.invalidDestination'));
       return;
     }
     if (endDate < startDate) {
-      showErrorToast('Lỗi', 'Ngày kết thúc phải sau ngày bắt đầu');
+      showErrorToast(t('common.error'), t('trip.invalidDateRange'));
       return;
     }
 
@@ -88,7 +90,10 @@ const AddTripScreen: React.FC<AddTripScreenProps> = ({
         try {
           imageUrl = await uploadService.uploadTripImage(imageUri);
         } catch (uploadError: any) {
-          showErrorToast('Lỗi', uploadError?.message || 'Không thể upload ảnh');
+          showErrorToast(
+            t('common.error'),
+            uploadError?.message || t('trip.uploadImageFailed'),
+          );
           setLoading(false);
           return;
         }
@@ -105,12 +110,15 @@ const AddTripScreen: React.FC<AddTripScreenProps> = ({
 
       const response = await tripApi.createTrip(payload);
       if (response.status) {
-        showSuccessToast('Thành công', 'Đã thêm chuyến đi mới.');
+        showSuccessToast(t('common.success'), t('trip.addTripSuccess'));
         handleClose();
         onSuccess();
       }
     } catch (error: any) {
-      showErrorToast('Lỗi', error?.error || 'Không thể thêm chuyến đi');
+      showErrorToast(
+        t('common.error'),
+        error?.error || t('trip.addTripFailed'),
+      );
     } finally {
       setLoading(false);
     }
@@ -137,22 +145,22 @@ const AddTripScreen: React.FC<AddTripScreenProps> = ({
         <View style={styles.card}>
           {/* Header */}
           <View style={styles.cardHeader}>
-            <Text style={styles.cardTitle}>Thêm chuyến đi</Text>
+            <Text style={styles.cardTitle}>{t('trip.addTripTitle')}</Text>
           </View>
 
           <ScrollView showsVerticalScrollIndicator={false}>
             {/* Destination */}
-            <Text style={styles.label}>Địa điểm chuyến đi</Text>
+            <Text style={styles.label}>{t('trip.destinationLabel')}</Text>
             <TextInput
               style={styles.input}
-              placeholder="Vũng tàu"
+              placeholder={t('trip.destinationPlaceholder')}
               placeholderTextColor="#bbb"
               value={name}
               onChangeText={setName}
             />
 
             {/* Start Date */}
-            <Text style={styles.label}>Ngày bắt đầu</Text>
+            <Text style={styles.label}>{t('trip.startDateLabel')}</Text>
             <TouchableOpacity
               style={styles.dateInput}
               onPress={() => setOpenStartPicker(true)}
@@ -162,7 +170,7 @@ const AddTripScreen: React.FC<AddTripScreenProps> = ({
             </TouchableOpacity>
 
             {/* End Date */}
-            <Text style={styles.label}>Ngày kết thúc</Text>
+            <Text style={styles.label}>{t('trip.endDateLabel')}</Text>
             <TouchableOpacity
               style={styles.dateInput}
               onPress={() => setOpenEndPicker(true)}
@@ -171,10 +179,10 @@ const AddTripScreen: React.FC<AddTripScreenProps> = ({
               <Text style={styles.calendarIcon}>📅</Text>
             </TouchableOpacity>
 
-            <Text style={styles.label}>Ngân sách dự tính</Text>
+            <Text style={styles.label}>{t('trip.estimatedBudgetLabel')}</Text>
             <TextInput
               style={styles.input}
-              placeholder="Ngân sách chuyến đi"
+              placeholder={t('trip.budgetPlaceholder')}
               placeholderTextColor="#bbb"
               keyboardType="numeric"
               value={totalBudget ? totalBudget.toString() : ''}
@@ -182,13 +190,13 @@ const AddTripScreen: React.FC<AddTripScreenProps> = ({
             />
 
             {/* Image */}
-            <Text style={styles.label}>Hình ảnh</Text>
+            <Text style={styles.label}>{t('trip.imageLabel')}</Text>
             <TouchableOpacity
               style={styles.imageButton}
               onPress={handlePickImage}
             >
               <Text style={styles.imageButtonText}>
-                {imageUri ? '✅ Đã chọn ảnh' : 'File image 🖼️'}
+                {imageUri ? t('trip.imageSelected') : t('trip.imageDefault')}
               </Text>
             </TouchableOpacity>
 
@@ -201,7 +209,7 @@ const AddTripScreen: React.FC<AddTripScreenProps> = ({
               {loading ? (
                 <ActivityIndicator color="#fff" />
               ) : (
-                <Text style={styles.submitText}>Thêm chuyến đi</Text>
+                <Text style={styles.submitText}>{t('trip.submitAdd')}</Text>
               )}
             </TouchableOpacity>
           </ScrollView>
@@ -214,9 +222,9 @@ const AddTripScreen: React.FC<AddTripScreenProps> = ({
         open={openStartPicker}
         date={startDate}
         mode="date"
-        title="Ngày bắt đầu"
-        confirmText="Xác nhận"
-        cancelText="Hủy"
+        title={t('trip.startDateLabel')}
+        confirmText={t('common.confirm')}
+        cancelText={t('common.cancel')}
         onConfirm={date => {
           setOpenStartPicker(false);
           setStartDate(date);
@@ -228,9 +236,9 @@ const AddTripScreen: React.FC<AddTripScreenProps> = ({
         open={openEndPicker}
         date={endDate}
         mode="date"
-        title="Ngày kết thúc"
-        confirmText="Xác nhận"
-        cancelText="Hủy"
+        title={t('trip.endDateLabel')}
+        confirmText={t('common.confirm')}
+        cancelText={t('common.cancel')}
         minimumDate={startDate}
         onConfirm={date => {
           setOpenEndPicker(false);

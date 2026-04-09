@@ -24,6 +24,7 @@ const expense_split_module_1 = require("./expense-split/expense-split.module");
 const budget_module_1 = require("./budget/budget.module");
 const notification_module_1 = require("./notification/notification.module");
 const statistics_module_1 = require("./statistics/statistics.module");
+const i18n_module_1 = require("./i18n/i18n.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -37,6 +38,7 @@ exports.AppModule = AppModule = __decorate([
                     fileSize: 10 * 1024 * 1024,
                 },
             }),
+            i18n_module_1.I18nModule,
             prisma_module_1.PrismaModule,
             user_module_1.UserModule,
             auth_module_1.AuthModule,
@@ -48,7 +50,7 @@ exports.AppModule = AppModule = __decorate([
             expense_split_module_1.ExpenseSplitModule,
             budget_module_1.BudgetModule,
             notification_module_1.NotificationModule,
-            statistics_module_1.StatisticsModule
+            statistics_module_1.StatisticsModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [],

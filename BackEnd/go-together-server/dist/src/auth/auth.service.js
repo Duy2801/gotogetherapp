@@ -162,6 +162,28 @@ let AuthService = class AuthService {
             message: "auth.logout_success",
         };
     }
+    async changePassword(userId, data) {
+        const user = await this.prisma.user.findUnique({
+            where: { id: userId },
+            select: { id: true, password: true },
+        });
+        if (!user) {
+            throw new common_1.UnauthorizedException("user not exists");
+        }
+        if (!user.password) {
+            throw new common_1.BadRequestException("auth.password_not_set");
+        }
+        const match = await bcrypt.compare(data.oldPassword, user.password);
+        if (!match) {
+            throw new common_1.BadRequestException("auth.password_incorrect");
+        }
+        const hashedPassword = await bcrypt.hash(data.newPassword, 10);
+        await this.prisma.user.update({
+            where: { id: userId },
+            data: { password: hashedPassword },
+        });
+        return { message: "auth.password_change_success" };
+    }
     async refreshToken(userId) {
         try {
             const key = `refresh_token:${userId}`;

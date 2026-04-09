@@ -13,6 +13,7 @@ import {
 } from "@nestjs/common";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { GoogleLoginDto } from "./dto/google-login.dto";
+import { ChangePasswordDto } from "./dto/change-password.dto";
 @ApiTags("Auth")
 @Controller("auth")
 export class AuthController {
@@ -31,6 +32,13 @@ export class AuthController {
   @Post("logout")
   logout(@Req() req: any, deviceId?: string) {
     return this.authService.logout(req.user.sub, deviceId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @Post("change-password")
+  changePassword(@Req() req: any, @Body() dto: ChangePasswordDto) {
+    return this.authService.changePassword(req.user.userId, dto);
   }
   @Post("google")
   loginWithGoogle(@Body() dto: GoogleLoginDto) {

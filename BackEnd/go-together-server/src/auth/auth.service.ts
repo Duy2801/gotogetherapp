@@ -14,10 +14,10 @@ import type { Queue } from "bull";
 import { loginDTO } from "./dto/login.dto";
 import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
-import { use } from "passport";
 import { plainToInstance } from "class-transformer";
 import { UserReponse } from "src/user/dto/user.reponse";
 import { OAuth2Client } from "google-auth-library";
+import { ChangePasswordDto } from "./dto/change-password.dto";
 @Injectable()
 export class AuthService {
   private googleClient: OAuth2Client;
@@ -144,6 +144,34 @@ export class AuthService {
     return {
       message: "auth.logout_success",
     };
+  }
+
+  async changePassword(userId: string, data: ChangePasswordDto) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, password: true },
+    });
+
+    if (!user) {
+      throw new UnauthorizedException("user not exists");
+    }
+
+    if (!user.password) {
+      throw new BadRequestException("auth.password_not_set");
+    }
+
+    const match = await bcrypt.compare(data.oldPassword, user.password);
+    if (!match) {
+      throw new BadRequestException("auth.password_incorrect");
+    }
+
+    const hashedPassword = await bcrypt.hash(data.newPassword, 10);
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { password: hashedPassword },
+    });
+
+    return { message: "auth.password_change_success" };
   }
   async refreshToken(userId: string) {
     try {

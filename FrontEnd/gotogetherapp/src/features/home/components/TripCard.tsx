@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native';
 import { Trip } from '../api';
+import { useTranslation } from '../../../hooks/useTranslation';
 
 interface TripCardProps {
   trip: Trip;
@@ -8,6 +9,7 @@ interface TripCardProps {
 }
 
 const TripCard: React.FC<TripCardProps> = ({ trip, onPress }) => {
+  const { t } = useTranslation();
   const isOwner = trip.members?.[0]?.role === 'OWNER';
 
   const formatDate = (dateString: string) => {
@@ -37,13 +39,13 @@ const TripCard: React.FC<TripCardProps> = ({ trip, onPress }) => {
   const getStatusText = (status: string) => {
     switch (status) {
       case 'UPCOMING':
-        return 'Sắp tới';
+        return t('home.statusUpcoming');
       case 'ONGOING':
-        return 'Đang diễn ra';
+        return t('home.statusOngoing');
       case 'COMPLETED':
-        return 'Đã hoàn thành';
+        return t('home.statusCompleted');
       case 'ARCHIVED':
-        return 'Đã lưu trữ';
+        return t('home.statusArchived');
       default:
         return status;
     }

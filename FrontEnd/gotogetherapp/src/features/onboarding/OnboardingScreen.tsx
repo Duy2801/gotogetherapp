@@ -9,28 +9,38 @@ import {
   StyleSheet,
   TouchableOpacity,
 } from 'react-native';
-import ONBOARDING_DATA from './data';
 import { useNavigation } from '@react-navigation/native';
 import { SCREEN_NAME } from '../../constants/screenName';
 import Body from '../../components/Layout/Body';
 import Button from '../../components/Button/Button';
+import { useTranslation } from '../../hooks/useTranslation';
+import { getOnboardingData } from './data';
 
 const { width } = Dimensions.get('window');
 
 const OnboardingScreen = () => {
+  const { t, locale } = useTranslation();
   const [index, setIndex] = useState(0);
   const flatListRef = useRef<FlatList>(null);
   const navigation = useNavigation();
+  const onboardingData = getOnboardingData(locale);
+  const totalSlides = onboardingData.length;
+  const currentSlide = onboardingData[index];
 
   const handleNext = () => {
-    if (index < ONBOARDING_DATA.length - 1) {
+    if (!totalSlides) {
+      navigation.navigate(SCREEN_NAME.LOGIN as never);
+      return;
+    }
+
+    if (index < totalSlides - 1) {
       flatListRef.current?.scrollToIndex({ index: index + 1, animated: true });
     } else {
       navigation.navigate(SCREEN_NAME.LOGIN as never);
     }
   };
 
-  const dotWidth = ONBOARDING_DATA.map((_, i) => {
+  const dotWidth = onboardingData.map((_, i) => {
     const animated = useRef(new Animated.Value(i === index ? 16 : 8)).current;
     useEffect(() => {
       Animated.timing(animated, {
@@ -47,7 +57,7 @@ const OnboardingScreen = () => {
       <View style={styles.container}>
         <FlatList
           ref={flatListRef}
-          data={ONBOARDING_DATA}
+          data={onboardingData}
           horizontal
           pagingEnabled
           showsHorizontalScrollIndicator={false}
@@ -82,7 +92,7 @@ const OnboardingScreen = () => {
                 )}
               </View>
               <View style={styles.dots}>
-                {ONBOARDING_DATA.map((_, i) => (
+                {onboardingData.map((_, i) => (
                   <Animated.View
                     key={i}
                     style={[styles.dot, { width: dotWidth[i] }]}
@@ -96,17 +106,20 @@ const OnboardingScreen = () => {
             </View>
           )}
         />
-        <Button title={ONBOARDING_DATA[index].button} onPress={handleNext} />
+        <Button
+          title={currentSlide?.button || 'Continue'}
+          onPress={handleNext}
+        />
 
         <View style={styles.footerContainer}>
           {index === 0 && (
             <>
-              <Text>Đã có tài khoản? </Text>
+              <Text>{t('auth.alreadyHaveAccount')} </Text>
               <TouchableOpacity
                 onPress={() => navigation.navigate(SCREEN_NAME.LOGIN as never)}
               >
                 <Text style={styles.loginRedirectText}>
-                  {ONBOARDING_DATA[index].LoginRedirectText}
+                  {currentSlide?.LoginRedirectText || t('auth.login')}
                 </Text>
               </TouchableOpacity>
             </>

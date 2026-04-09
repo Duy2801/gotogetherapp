@@ -16,6 +16,7 @@ import { PRIMARY_COLOR, SECONDARY_COLOR } from '../../../constants/color';
 import { RootState } from '../../../reducers/store';
 import { showErrorToast, showSuccessToast } from '../../../utils/appToast';
 import { Category, Member, tripDetailApi } from '../api';
+import { useTranslation } from '../../../hooks/useTranslation';
 
 interface AddExpenseScreenProps {
   route: {
@@ -74,6 +75,7 @@ const AddExpenseScreen: React.FC<AddExpenseScreenProps> = ({
 }) => {
   const { tripId, onExpenseAdded } = route.params;
   const user = useSelector((state: RootState) => state.login.user);
+  const { t, locale } = useTranslation();
 
   const [amountText, setAmountText] = useState('');
   const [description, setDescription] = useState('');
@@ -143,8 +145,8 @@ const AddExpenseScreen: React.FC<AddExpenseScreenProps> = ({
         }
       } catch (error: any) {
         showErrorToast(
-          'Lỗi',
-          getApiErrorMessage(error, 'Không thể tải dữ liệu thêm chi tiêu'),
+          t('common.error'),
+          getApiErrorMessage(error, t('expense.loadFailed')),
         );
       } finally {
         setLoading(false);
@@ -155,7 +157,7 @@ const AddExpenseScreen: React.FC<AddExpenseScreenProps> = ({
   }, [tripId]);
 
   const formatDate = (date: Date) =>
-    date.toLocaleDateString('vi-VN', {
+    date.toLocaleDateString(locale === 'en' ? 'en-US' : 'vi-VN', {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
@@ -178,22 +180,22 @@ const AddExpenseScreen: React.FC<AddExpenseScreenProps> = ({
 
   const validateForm = () => {
     if (!amount || amount <= 0) {
-      showErrorToast('Lỗi', 'Vui lòng nhập số tiền hợp lệ');
+      showErrorToast(t('common.error'), t('expense.invalidAmount'));
       return false;
     }
 
     if (!selectedCategoryId) {
-      showErrorToast('Lỗi', 'Vui lòng chọn danh mục');
+      showErrorToast(t('common.error'), t('expense.selectCategory'));
       return false;
     }
 
     if (!paidById) {
-      showErrorToast('Lỗi', 'Không xác định được người trả tiền');
+      showErrorToast(t('common.error'), t('expense.payerNotFound'));
       return false;
     }
 
     if (!selectedParticipants.length) {
-      showErrorToast('Lỗi', 'Không có thành viên để chia chi tiêu');
+      showErrorToast(t('common.error'), t('expense.noMembersToSplit'));
       return false;
     }
 
@@ -252,14 +254,14 @@ const AddExpenseScreen: React.FC<AddExpenseScreenProps> = ({
       });
 
       if (response.status) {
-        showSuccessToast('Thành công', 'Thêm chi phí thành công');
+        showSuccessToast(t('common.success'), t('expense.addSuccess'));
         onExpenseAdded?.();
         navigation.goBack();
       }
     } catch (error: any) {
       showErrorToast(
-        'Lỗi',
-        getApiErrorMessage(error, 'Không thể thêm chi tiêu'),
+        t('common.error'),
+        getApiErrorMessage(error, t('expense.addFailed')),
       );
     } finally {
       setSubmitting(false);
@@ -276,7 +278,7 @@ const AddExpenseScreen: React.FC<AddExpenseScreenProps> = ({
         />
         <View style={styles.loadingCard}>
           <ActivityIndicator size="large" color={PRIMARY_COLOR} />
-          <Text style={styles.loadingText}>Đang tải form...</Text>
+          <Text style={styles.loadingText}>{t('common.loading')}</Text>
         </View>
       </View>
     );
@@ -296,16 +298,16 @@ const AddExpenseScreen: React.FC<AddExpenseScreenProps> = ({
       >
         <View style={styles.formCard}>
           <View style={styles.headerRow}>
-            <Text style={styles.headerTitle}>Thêm chi tiêu</Text>
+            <Text style={styles.headerTitle}>{t('expense.addExpense')}</Text>
           </View>
 
           <View style={styles.formContent}>
-            <Text style={styles.label}>Số tiền</Text>
+            <Text style={styles.label}>{t('expense.amount')}</Text>
             <View style={styles.inputRow}>
               <TextInput
                 value={amountText}
                 onChangeText={handleAmountChange}
-                placeholder="100.000"
+                placeholder={t('expense.amountPlaceholder')}
                 placeholderTextColor="#BDBDBD"
                 keyboardType="numeric"
                 style={styles.input}
@@ -313,16 +315,16 @@ const AddExpenseScreen: React.FC<AddExpenseScreenProps> = ({
               <Text style={styles.inputSuffix}>đ</Text>
             </View>
 
-            <Text style={styles.label}>Mô tả</Text>
+            <Text style={styles.label}>{t('expense.description')}</Text>
             <TextInput
               value={description}
               onChangeText={setDescription}
-              placeholder="Chi tiêu cho việc gì"
+              placeholder={t('expense.descriptionPlaceholder')}
               placeholderTextColor="#BDBDBD"
               style={styles.inputStandalone}
             />
 
-            <Text style={styles.label}>Thời gian chi tiêu</Text>
+            <Text style={styles.label}>{t('expense.date')}</Text>
             <TouchableOpacity
               style={styles.inputRow}
               onPress={() => setOpenDatePicker(true)}
@@ -332,7 +334,7 @@ const AddExpenseScreen: React.FC<AddExpenseScreenProps> = ({
               <Text style={styles.calendarIcon}>🗓️</Text>
             </TouchableOpacity>
 
-            <Text style={styles.label}>Danh mục</Text>
+            <Text style={styles.label}>{t('expense.category')}</Text>
             <View style={styles.categoryGrid}>
               {categories.slice(0, 6).map(category => {
                 const selected = category.id === selectedCategoryId;
@@ -364,7 +366,7 @@ const AddExpenseScreen: React.FC<AddExpenseScreenProps> = ({
               })}
             </View>
 
-            <Text style={styles.label}>Chia với</Text>
+            <Text style={styles.label}>{t('expense.splitWith')}</Text>
             <View style={styles.splitWrapper}>
               <TouchableOpacity
                 style={[
@@ -397,11 +399,13 @@ const AddExpenseScreen: React.FC<AddExpenseScreenProps> = ({
 
             <View style={styles.summaryCard}>
               <View style={styles.summaryRow}>
-                <Text style={styles.summaryLabel}>Bạn đã trả:</Text>
+                <Text style={styles.summaryLabel}>{t('expense.paidBy')}</Text>
                 <Text style={styles.summaryValue}>{amountText || '0'} đ</Text>
               </View>
               <View style={styles.summaryRow}>
-                <Text style={styles.summaryLabel}>Tiền chia:</Text>
+                <Text style={styles.summaryLabel}>
+                  {t('expense.splitAmount')}
+                </Text>
                 <Text style={styles.summaryValueHighlight}>
                   {Math.round(perMemberAmount)
                     .toLocaleString('vi-VN')
@@ -423,7 +427,9 @@ const AddExpenseScreen: React.FC<AddExpenseScreenProps> = ({
               {submitting ? (
                 <ActivityIndicator color="#fff" />
               ) : (
-                <Text style={styles.submitButtonText}>Thêm chi tiêu</Text>
+                <Text style={styles.submitButtonText}>
+                  {t('expense.addExpense')}
+                </Text>
               )}
             </TouchableOpacity>
           </View>
@@ -435,9 +441,9 @@ const AddExpenseScreen: React.FC<AddExpenseScreenProps> = ({
         mode="date"
         open={openDatePicker}
         date={expenseDate}
-        title="Chọn ngày chi tiêu"
-        confirmText="Xác nhận"
-        cancelText="Hủy"
+        title={t('expense.chooseDate')}
+        confirmText={t('common.confirm')}
+        cancelText={t('common.cancel')}
         onConfirm={date => {
           setOpenDatePicker(false);
           setExpenseDate(date);

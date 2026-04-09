@@ -14,6 +14,7 @@ import { PRIMARY_COLOR } from '../../../constants/color';
 import { Budget, budgetApi, CreateBudgetDto, UpdateBudgetDto } from '../api';
 import { formatAmountInput, formatCurrency } from '../../../utils/format';
 import { showErrorToast } from '../../../utils/appToast';
+import { useTranslation } from '../../../hooks/useTranslation';
 
 interface AddBudgetModalProps {
   visible: boolean;
@@ -45,6 +46,7 @@ const AddBudgetModal = ({
   year,
   onClose,
 }: AddBudgetModalProps) => {
+  const { t } = useTranslation();
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(
     null,
   );
@@ -66,13 +68,13 @@ const AddBudgetModal = ({
 
   const handleSave = async () => {
     if (!amount || parseFloat(amount) <= 0) {
-      showErrorToast('Lỗi', 'Vui lòng nhập số tiền hợp lệ');
+      showErrorToast(t('common.error'), t('budget.invalidAmount'));
       return;
     }
 
     const warningAtNum = parseInt(warningAt) || 80;
     if (warningAtNum < 0 || warningAtNum > 100) {
-      showErrorToast('Lỗi', 'Ngưỡng cảnh báo phải từ 0-100%');
+      showErrorToast(t('common.error'), t('budget.invalidWarningAt'));
       return;
     }
 
@@ -97,8 +99,8 @@ const AddBudgetModal = ({
       onClose(true);
     } catch (error: any) {
       showErrorToast(
-        'Lỗi',
-        error?.error || error?.message || 'Không thể lưu ngân sách',
+        t('common.error'),
+        error?.error || error?.message || t('budget.saveFailed'),
       );
     } finally {
       setLoading(false);
@@ -124,7 +126,7 @@ const AddBudgetModal = ({
         <View style={styles.modal}>
           <View style={styles.header}>
             <Text style={styles.title}>
-              {budget ? 'Chỉnh sửa ngân sách' : 'Thêm ngân sách mới'}
+              {budget ? t('budget.editBudget') : t('budget.addBudget')}
             </Text>
             <TouchableOpacity
               onPress={() => onClose(false)}
@@ -141,7 +143,7 @@ const AddBudgetModal = ({
 
           <ScrollView contentContainerStyle={styles.content}>
             <View style={styles.section}>
-              <Text style={styles.label}>Hạng mục</Text>
+              <Text style={styles.label}>{t('budget.category')}</Text>
               <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
@@ -176,14 +178,12 @@ const AddBudgetModal = ({
                 ))}
               </ScrollView>
               {budget && (
-                <Text style={styles.hint}>
-                  Không thể thay đổi hạng mục khi chỉnh sửa
-                </Text>
+                <Text style={styles.hint}>{t('budget.categoryLocked')}</Text>
               )}
             </View>
 
             <View style={styles.section}>
-              <Text style={styles.label}>Số tiền (VND)</Text>
+              <Text style={styles.label}>{t('budget.amount')}</Text>
               <View style={styles.inputContainer}>
                 <FontAwesome6
                   name="money-bill-wave"
@@ -193,7 +193,7 @@ const AddBudgetModal = ({
                 />
                 <TextInput
                   style={styles.input}
-                  placeholder="Nhập số tiền"
+                  placeholder={t('budget.amountPlaceholder')}
                   keyboardType="numeric"
                   value={formatAmountInput(amount)}
                   onChangeText={text => setAmount(formatAmount(text))}
@@ -223,7 +223,7 @@ const AddBudgetModal = ({
                     {formatCurrency(parseInt(amount))}
                   </Text>
                   <Text style={styles.previewHint}>
-                    Cảnh báo khi đã chi {warningAt || 80}%
+                    {t('budget.warningPreview', { percent: warningAt || '80' })}
                   </Text>
                 </View>
               </View>
@@ -235,7 +235,7 @@ const AddBudgetModal = ({
               style={[styles.button, styles.cancelButton]}
               onPress={() => onClose(false)}
             >
-              <Text style={styles.cancelButtonText}>Hủy</Text>
+              <Text style={styles.cancelButtonText}>{t('common.cancel')}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.button, styles.saveButton]}
@@ -246,7 +246,7 @@ const AddBudgetModal = ({
                 <ActivityIndicator size="small" color="#FFFFFF" />
               ) : (
                 <Text style={styles.saveButtonText}>
-                  {budget ? 'Cập nhật' : 'Thêm'}
+                  {budget ? t('common.save') : t('common.add')}
                 </Text>
               )}
             </TouchableOpacity>

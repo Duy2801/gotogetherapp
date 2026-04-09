@@ -23,4 +23,11 @@ export declare class StorageController {
             publicId: any;
         };
     }>;
+    uploadAvatar(file: Express.Multer.File, req: any): Promise<{
+        status: boolean;
+        data: {
+            url: any;
+            publicId: any;
+        };
+    }>;
 }

@@ -1,0 +1,48 @@
+{
+  "errors": {
+    "user": {
+      "not_found": "Người dùng không tìm thấy",
+      "email_exists": "Email đã được sử dụng",
+      "invalid_credentials": "Email hoặc mật khẩu không chính xác",
+      "account_disabled": "Tài khoản đã bị vô hiệu hóa",
+      "email_not_verified": "Email chưa được xác thực"
+    },
+    "trip": {
+      "not_found": "Chuyến đi không tìm thấy",
+      "invalid_date": "Ngày bắt đầu phải trước ngày kết thúc",
+      "no_permission": "Bạn không có quyền truy cập chuyến đi này",
+      "members_exist": "Không thể thêm thành viên khi đã có chi tiêu trong chuyến đi"
+    },
+    "expense": {
+      "not_found": "Chi tiêu không tìm thấy",
+      "invalid_amount": "Số tiền không hợp lệ",
+      "no_permission": "Bạn không có quyền chỉnh sửa chi tiêu này",
+      "members_required": "Phải có ít nhất một thành viên để chia chi tiêu"
+    },
+    "auth": {
+      "unauthorized": "Chưa xác thực",
+      "forbidden": "Bạn không có quyền",
+      "token_expired": "Token đã hết hạn",
+      "invalid_token": "Token không hợp lệ"
+    },
+    "upload": {
+      "no_file": "Không có file được tải lên",
+      "invalid_file_type": "Định dạng file không hợp lệ",
+      "file_too_large": "File quá lớn",
+      "upload_failed": "Tải file lên thất bại"
+    },
+    "validation": {
+      "field_required": "{field} là bắt buộc",
+      "invalid_email": "Email không hợp lệ",
+      "password_too_short": "Mật khẩu phải ít nhất 6 ký tự",
+      "invalid_date": "Ngày không hợp lệ"
+    }
+  },
+  "messages": {
+    "success": "Thành công",
+    "created": "{resource} đã được tạo",
+    "updated": "{resource} đã được cập nhật",
+    "deleted": "{resource} đã được xóa",
+    "operation_failed": "Hoạt động thất bại"
+  }
+}

@@ -5,13 +5,13 @@ export declare class TripController {
     constructor(tripService: TripService);
     getAllTrip(req: Request, status?: string, page?: number, limit?: number): Promise<{
         trips: ({
+            _count: {
+                members: number;
+            };
             members: {
                 role: import("../../prisma/generated/enums").MemberRole;
                 inviteStatus: import("../../prisma/generated/enums").InviteStatus;
             }[];
-            _count: {
-                members: number;
-            };
         } & {
             name: string;
             id: string;

@@ -6,6 +6,8 @@ export const SCREEN_NAME = {
   SPLASH: 'Splash',
   ONBOARDING: 'Onboarding',
   UPDATE_INFO: 'UpdateInfo',
+  CHANGE_PASSWORD: 'ChangePassword',
+  HISTORY: 'History',
   TABS: 'Tabs',
   HOME_TAB: 'HomeTab',
   CELEBRATE_TAB: 'CelebrateTab',

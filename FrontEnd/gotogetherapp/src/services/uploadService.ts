@@ -63,6 +63,45 @@ export const uploadService = {
   },
 
   /**
+   * Upload avatar người dùng lên S3
+   */
+  uploadAvatar: async (fileUri: string): Promise<string> => {
+    try {
+      const formData = new FormData();
+
+      const filename = fileUri.split('/').pop() || 'avatar.jpg';
+      const fileType = filename.split('.').pop() || 'jpg';
+
+      formData.append('file', {
+        uri: fileUri,
+        type: `image/${fileType}`,
+        name: filename,
+      } as any);
+
+      const response = await api.post<UploadImageResponse>(
+        '/upload/avatar',
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        },
+      );
+
+      const result = response as unknown as UploadImageResponse;
+
+      if (result.status && result.data?.url) {
+        return result.data.url;
+      }
+
+      throw new Error('Upload failed');
+    } catch (error: any) {
+      console.error('Avatar upload error:', error);
+      throw new Error(error?.message || 'Không thể upload avatar');
+    }
+  },
+
+  /**
    * Upload ảnh hoá đơn
    */
   uploadReceipt: async (fileUri: string): Promise<string> => {

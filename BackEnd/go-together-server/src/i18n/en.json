@@ -1,0 +1,48 @@
+{
+  "errors": {
+    "user": {
+      "not_found": "User not found",
+      "email_exists": "Email already in use",
+      "invalid_credentials": "Invalid email or password",
+      "account_disabled": "Account has been disabled",
+      "email_not_verified": "Email not verified"
+    },
+    "trip": {
+      "not_found": "Trip not found",
+      "invalid_date": "Start date must be before end date",
+      "no_permission": "You don't have permission to access this trip",
+      "members_exist": "Cannot add members when expenses exist in the trip"
+    },
+    "expense": {
+      "not_found": "Expense not found",
+      "invalid_amount": "Invalid amount",
+      "no_permission": "You don't have permission to edit this expense",
+      "members_required": "At least one member is required to split expense"
+    },
+    "auth": {
+      "unauthorized": "Unauthorized",
+      "forbidden": "Forbidden",
+      "token_expired": "Token expired",
+      "invalid_token": "Invalid token"
+    },
+    "upload": {
+      "no_file": "No file uploaded",
+      "invalid_file_type": "Invalid file type",
+      "file_too_large": "File too large",
+      "upload_failed": "Upload failed"
+    },
+    "validation": {
+      "field_required": "{field} is required",
+      "invalid_email": "Invalid email",
+      "password_too_short": "Password must be at least 6 characters",
+      "invalid_date": "Invalid date"
+    }
+  },
+  "messages": {
+    "success": "Success",
+    "created": "{resource} has been created",
+    "updated": "{resource} has been updated",
+    "deleted": "{resource} has been deleted",
+    "operation_failed": "Operation failed"
+  }
+}

@@ -14,6 +14,7 @@ import { PRIMARY_COLOR } from '../../constants/color';
 import { SCREEN_NAME } from '../../constants/screenName';
 import { spendingApi } from './api';
 import { formatCurrency, formatCompactMoney } from '../../utils/format';
+import { useTranslation } from '../../hooks/useTranslation';
 
 type SpendingOverview = {
   quantity: number;
@@ -27,6 +28,7 @@ const SpendingScreen = ({ navigation }: { navigation: any }) => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [errorText, setErrorText] = useState('');
+  const { t } = useTranslation();
   const [overview, setOverview] = useState<SpendingOverview>({
     quantity: 0,
     totalBudget: 0,
@@ -51,9 +53,7 @@ const SpendingScreen = ({ navigation }: { navigation: any }) => {
         totalReceived: paymentSummary.totalReceived,
       });
     } catch (error: any) {
-      setErrorText(
-        error?.error || error?.message || 'Không thể tải dữ liệu chi tiêu',
-      );
+      setErrorText(error?.error || error?.message || t('spending.loadFailed'));
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -85,8 +85,6 @@ const SpendingScreen = ({ navigation }: { navigation: any }) => {
     );
   }, [overview.totalBudget, overview.totalSpent]);
 
-
-
   return (
     <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
       <ScrollView
@@ -101,8 +99,10 @@ const SpendingScreen = ({ navigation }: { navigation: any }) => {
       >
         <View style={styles.headerRow}>
           <View>
-            <Text style={styles.headerEyebrow}>Tổng quan tài chính</Text>
-            <Text style={styles.headerTitle}>Chi tiêu</Text>
+            <Text style={styles.headerEyebrow}>
+              {t('spending.overviewTitle')}
+            </Text>
+            <Text style={styles.headerTitle}>{t('spending.title')}</Text>
           </View>
           <View style={styles.tripCountPill}>
             <FontAwesome6
@@ -111,29 +111,34 @@ const SpendingScreen = ({ navigation }: { navigation: any }) => {
               color="#0F172A"
               iconStyle="solid"
             />
-            <Text style={styles.tripCountText}>{overview.quantity} chuyến</Text>
+            <Text style={styles.tripCountText}>
+              {overview.quantity} {t('trip.title')}
+            </Text>
           </View>
         </View>
 
         {loading ? (
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color={PRIMARY_COLOR} />
-            <Text style={styles.loadingText}>Đang tải dữ liệu...</Text>
+            <Text style={styles.loadingText}>{t('spending.loading')}</Text>
           </View>
         ) : (
           <>
             <View style={styles.heroCard}>
-              <Text style={styles.heroLabel}>Ngân sách còn lại</Text>
+              <Text style={styles.heroLabel}>
+                {t('spending.remainingBudget')}
+              </Text>
               <Text style={styles.heroValue}>
                 {formatCurrency(remainingBudget)}
               </Text>
 
               <View style={styles.progressMetaRow}>
                 <Text style={styles.progressMetaText}>
-                  Đã dùng {spentPercent}%
+                  {t('spending.usedPercent', { percent: String(spentPercent) })}
                 </Text>
                 <Text style={styles.progressMetaText}>
-                  Tổng quỹ {formatCompactMoney(overview.totalBudget)}
+                  {t('spending.totalFund')}{' '}
+                  {formatCompactMoney(overview.totalBudget)}
                 </Text>
               </View>
 
@@ -145,19 +150,21 @@ const SpendingScreen = ({ navigation }: { navigation: any }) => {
 
               <View style={styles.statGrid}>
                 <View style={styles.statItem}>
-                  <Text style={styles.statLabel}>Đã chi</Text>
+                  <Text style={styles.statLabel}>{t('spending.spent')}</Text>
                   <Text style={styles.statValue}>
                     {formatCompactMoney(overview.totalSpent)}
                   </Text>
                 </View>
                 <View style={styles.statItem}>
-                  <Text style={styles.statLabel}>Bạn nợ</Text>
+                  <Text style={styles.statLabel}>{t('spending.youOwe')}</Text>
                   <Text style={styles.statDebt}>
                     {formatCompactMoney(overview.totalDebt)}
                   </Text>
                 </View>
                 <View style={[styles.statItem, styles.statItemLast]}>
-                  <Text style={styles.statLabel}>Người khác nợ bạn</Text>
+                  <Text style={styles.statLabel}>
+                    {t('spending.othersOweYou')}
+                  </Text>
                   <Text style={styles.statReceive}>
                     {formatCompactMoney(overview.totalReceived)}
                   </Text>
@@ -167,14 +174,18 @@ const SpendingScreen = ({ navigation }: { navigation: any }) => {
 
             <View style={styles.paymentCard}>
               <View style={styles.paymentHeader}>
-                <Text style={styles.cardTitle}>Thanh toán của bạn</Text>
+                <Text style={styles.cardTitle}>
+                  {t('spending.paymentTitle')}
+                </Text>
                 <TouchableOpacity
                   style={styles.detailButton}
                   onPress={() =>
                     navigation.navigate(SCREEN_NAME.PAYMENT_DETAIL)
                   }
                 >
-                  <Text style={styles.detailButtonText}>Xem chi tiết</Text>
+                  <Text style={styles.detailButtonText}>
+                    {t('spending.viewDetail')}
+                  </Text>
                 </TouchableOpacity>
               </View>
 
@@ -188,9 +199,11 @@ const SpendingScreen = ({ navigation }: { navigation: any }) => {
                   />
                 </View>
                 <View style={styles.summaryTextWrap}>
-                  <Text style={styles.summaryLabel}>Bạn đang nợ</Text>
+                  <Text style={styles.summaryLabel}>
+                    {t('spending.debtLabel')}
+                  </Text>
                   <Text style={styles.summarySubText}>
-                    Các khoản chưa đánh dấu đã trả
+                    {t('spending.debtDesc')}
                   </Text>
                 </View>
                 <Text style={styles.summaryDebtValue}>
@@ -208,9 +221,11 @@ const SpendingScreen = ({ navigation }: { navigation: any }) => {
                   />
                 </View>
                 <View style={styles.summaryTextWrap}>
-                  <Text style={styles.summaryLabel}>Người khác nợ bạn</Text>
+                  <Text style={styles.summaryLabel}>
+                    {t('spending.receiveLabel')}
+                  </Text>
                   <Text style={styles.summarySubText}>
-                    Các khoản bạn đã đứng ra thanh toán
+                    {t('spending.receiveDesc')}
                   </Text>
                 </View>
                 <Text style={styles.summaryReceiveValue}>

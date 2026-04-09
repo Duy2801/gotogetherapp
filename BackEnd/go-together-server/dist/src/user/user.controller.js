@@ -14,7 +14,10 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserController = void 0;
 const common_1 = require("@nestjs/common");
+const swagger_1 = require("@nestjs/swagger");
+const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
 const user_create_dto_1 = require("./dto/user-create.dto");
+const update_user_dto_1 = require("./dto/update-user.dto");
 const user_service_1 = require("./user.service");
 let UserController = class UserController {
     userService;
@@ -23,6 +26,12 @@ let UserController = class UserController {
     }
     create(dto) {
         this.userService.create(dto);
+    }
+    getMe(req) {
+        return this.userService.findById(req.user.userId);
+    }
+    updateMe(req, dto) {
+        return this.userService.updateProfile(req.user.userId, dto);
     }
 };
 exports.UserController = UserController;
@@ -33,6 +42,25 @@ __decorate([
     __metadata("design:paramtypes", [user_create_dto_1.UserCreateDto]),
     __metadata("design:returntype", void 0)
 ], UserController.prototype, "create", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.Get)("me"),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], UserController.prototype, "getMe", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.Put)("me"),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, update_user_dto_1.UpdateUserDto]),
+    __metadata("design:returntype", void 0)
+], UserController.prototype, "updateMe", null);
 exports.UserController = UserController = __decorate([
     (0, common_1.Controller)("user"),
     __metadata("design:paramtypes", [user_service_1.UserService])

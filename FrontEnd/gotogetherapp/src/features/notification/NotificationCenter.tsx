@@ -19,6 +19,7 @@ import { formatDate } from '../../utils/format';
 import { PRIMARY_COLOR, SECONDARY_COLOR } from '../../constants/color';
 import { Notification } from './api';
 import { navigateFromNotification } from './notificationNavigation';
+import { useTranslation } from '../../hooks/useTranslation';
 
 interface NotificationCenterProps {
   visible: boolean;
@@ -34,6 +35,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
   onClose,
 }) => {
   const navigation = useNavigation();
+  const { t } = useTranslation();
   const {
     notifications = [],
     loading,
@@ -72,14 +74,18 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
    * Handle delete with confirmation
    */
   const handleDeleteWithConfirm = (notificationId: string) => {
-    Alert.alert('Xóa thông báo', 'Bạn chắc chắn muốn xóa thông báo này?', [
-      { text: 'Hủy', style: 'cancel' },
-      {
-        text: 'Xóa',
-        style: 'destructive',
-        onPress: () => deleteHandler(notificationId),
-      },
-    ]);
+    Alert.alert(
+      t('notification.deleteTitle'),
+      t('notification.deleteConfirm'),
+      [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: t('common.delete'),
+          style: 'destructive',
+          onPress: () => deleteHandler(notificationId),
+        },
+      ],
+    );
   };
 
   /**
@@ -87,12 +93,12 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
    */
   const handleClearAllWithConfirm = () => {
     Alert.alert(
-      'Xóa tất cả',
-      'Bạn chắc chắn muốn xóa tất cả thông báo? Hành động này không thể hoàn tác.',
+      t('notification.deleteAllTitle'),
+      t('notification.deleteAllConfirm'),
       [
-        { text: 'Hủy', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Xóa',
+          text: t('common.delete'),
           style: 'destructive',
           onPress: () => clearAllHandler(),
         },
@@ -264,10 +270,8 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
         color="#D1D5DB"
         iconStyle="solid"
       />
-      <Text style={styles.emptyText}>Không có thông báo</Text>
-      <Text style={styles.emptySubtext}>
-        Tất cả thông báo sẽ xuất hiện ở đây
-      </Text>
+      <Text style={styles.emptyText}>{t('notification.emptyTitle')}</Text>
+      <Text style={styles.emptySubtext}>{t('notification.emptySubtitle')}</Text>
     </View>
   );
 
@@ -286,7 +290,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
           {/* Header */}
           <View style={styles.header}>
             <View style={styles.dragHandle} />
-            <Text style={styles.headerTitle}>Thông báo</Text>
+            <Text style={styles.headerTitle}>{t('notification.title')}</Text>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
               <FontAwesome6
                 name="xmark"
@@ -301,7 +305,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
           {notifications.length > 0 && (
             <View style={styles.toolbar}>
               <Text style={styles.toolbarText}>
-                {totalNotifications} thông báo
+                {t('notification.count', { count: String(totalNotifications) })}
               </Text>
               {totalNotifications > 0 && (
                 <TouchableOpacity
@@ -314,7 +318,9 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
                     color="#EF4444"
                     iconStyle="solid"
                   />
-                  <Text style={styles.clearButtonText}>Xóa tất cả</Text>
+                  <Text style={styles.clearButtonText}>
+                    {t('notification.clearAll')}
+                  </Text>
                 </TouchableOpacity>
               )}
             </View>

@@ -7,6 +7,8 @@ interface User {
   email: string;
   fullName: string;
   avatar?: string;
+  dateOfBirth?: string;
+  gender?: number;
 }
 
 type LoginState = {
@@ -43,8 +45,15 @@ export const LoginReducer = createSlice({
       setItem(KEY_STORAGE.startDate, '');
       return initialState;
     },
+    updateUser: (state, action) => {
+      setItem(KEY_STORAGE.user, action.payload);
+      return {
+        ...state,
+        user: action.payload,
+      };
+    },
   },
 });
 
-export const { login, logout } = LoginReducer.actions;
+export const { login, logout, updateUser } = LoginReducer.actions;
 export default LoginReducer.reducer;

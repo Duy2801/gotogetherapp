@@ -24,10 +24,12 @@ import SimpleFloatingButton from '../../components/SimpleFloatingButton';
 import NotificationButton from '../../components/NotificationButton';
 import TripTimeFilterModal from './components/TripTimeFilterModal';
 import { showErrorToast, showSuccessToast } from '../../utils/appToast';
+import { useTranslation } from '../../hooks/useTranslation';
 
 const HomeScreen = () => {
   const navigation = useNavigation();
   const user = useSelector((state: RootState) => state.login.user);
+  const { t, locale } = useTranslation();
 
   const [trips, setTrips] = useState<Trip[]>([]);
   const [loading, setLoading] = useState(true);
@@ -51,8 +53,8 @@ const HomeScreen = () => {
     } catch (error: any) {
       console.error('Error fetching trips:', error);
       showErrorToast(
-        'Lỗi',
-        error?.error || 'Không thể tải danh sách chuyến đi',
+        t('common.error'),
+        error?.error || t('home.loadTripsFailed'),
       );
     } finally {
       setLoading(false);
@@ -139,20 +141,18 @@ const HomeScreen = () => {
 
       if (response.status) {
         showSuccessToast(
-          'Thành công',
+          t('common.success'),
           status === 'ACCEPTED'
-            ? 'Bạn đã tham gia chuyến đi.'
-            : 'Bạn đã từ chối lời mời chuyến đi.',
+            ? t('home.inviteAccepted')
+            : t('home.inviteRejected'),
         );
       }
 
       await fetchTrips();
     } catch (error: any) {
       showErrorToast(
-        'Lỗi',
-        error?.error ||
-          error?.message ||
-          'Không thể cập nhật phản hồi lời mời. Vui lòng thử lại.',
+        t('common.error'),
+        error?.error || error?.message || t('home.inviteActionFailed'),
       );
     } finally {
       setInvitationActionTripId(null);
@@ -164,9 +164,7 @@ const HomeScreen = () => {
     if (acceptedTrips.length && !filteredAcceptedTrips.length) {
       return (
         <View style={styles.noResultWrap}>
-          <Text style={styles.noResultText}>
-            Không có chuyến đi nào trong tháng đã chọn.
-          </Text>
+          <Text style={styles.noResultText}>{t('home.noTripsInMonth')}</Text>
         </View>
       );
     }
@@ -190,17 +188,19 @@ const HomeScreen = () => {
               gap: 4,
             }}
           >
-            <Text style={styles.greetingText}>Xin chào</Text>
+            <Text style={styles.greetingText}>{t('common.hello')}</Text>
             <Image source={HELLO.HELLO} style={{ height: 15, width: 15 }} />
           </View>
-          <Text style={styles.userName}>{user?.fullName || 'Người dùng'}</Text>
+          <Text style={styles.userName}>
+            {user?.fullName || t('common.user')}
+          </Text>
         </View>
         <NotificationButton />
       </View>
 
       <View style={styles.bodyContainer}>
         <View style={styles.tabBar}>
-          <Text style={styles.sectionTitle}>Hành trình</Text>
+          <Text style={styles.sectionTitle}>{t('home.title')}</Text>
           <View
             style={[
               styles.calendarButton,
@@ -221,7 +221,9 @@ const HomeScreen = () => {
 
         {pendingTrips.length > 0 && (
           <View style={styles.inviteSection}>
-            <Text style={styles.inviteSectionTitle}>Lời mời chuyến đi</Text>
+            <Text style={styles.inviteSectionTitle}>
+              {t('home.tripInvites')}
+            </Text>
             {pendingTrips.map(trip => {
               const isActing = invitationActionTripId === trip.id;
               return (
@@ -240,8 +242,13 @@ const HomeScreen = () => {
                       {trip.name}
                     </Text>
                     <Text style={styles.inviteDateText}>
-                      {new Date(trip.startDate).toLocaleDateString('vi-VN')} -{' '}
-                      {new Date(trip.endDate).toLocaleDateString('vi-VN')}
+                      {new Date(trip.startDate).toLocaleDateString(
+                        locale === 'en' ? 'en-US' : 'vi-VN',
+                      )}{' '}
+                      -{' '}
+                      {new Date(trip.endDate).toLocaleDateString(
+                        locale === 'en' ? 'en-US' : 'vi-VN',
+                      )}
                     </Text>
                   </View>
 
@@ -253,7 +260,9 @@ const HomeScreen = () => {
                       }
                       disabled={isActing}
                     >
-                      <Text style={styles.rejectButtonText}>Từ chối</Text>
+                      <Text style={styles.rejectButtonText}>
+                        {t('home.rejectInvite')}
+                      </Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                       style={styles.acceptButton}
@@ -265,7 +274,9 @@ const HomeScreen = () => {
                       {isActing ? (
                         <ActivityIndicator size="small" color="white" />
                       ) : (
-                        <Text style={styles.acceptButtonText}>Chấp nhận</Text>
+                        <Text style={styles.acceptButtonText}>
+                          {t('home.acceptInvite')}
+                        </Text>
                       )}
                     </TouchableOpacity>
                   </View>

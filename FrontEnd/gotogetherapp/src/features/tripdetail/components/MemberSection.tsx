@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
 import { Member } from '../api';
+import { useTranslation } from '../../../hooks/useTranslation';
 
 interface MemberSectionProps {
   members: Member[];
@@ -13,6 +14,7 @@ const MemberSection: React.FC<MemberSectionProps> = ({
   onAddMember,
   onViewAll,
 }) => {
+  const { t } = useTranslation();
   const displayMembers = members.slice(0, 4);
 
   const getAvatarColor = (index: number) => {
@@ -23,7 +25,7 @@ const MemberSection: React.FC<MemberSectionProps> = ({
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.label}>Thành viên</Text>
+        <Text style={styles.label}>{t('trip.members')}</Text>
         {!!members.length && (
           <Text style={styles.countText}>{members.length} người</Text>
         )}
@@ -63,7 +65,7 @@ const MemberSection: React.FC<MemberSectionProps> = ({
 
         {onViewAll && members.length > displayMembers.length && (
           <TouchableOpacity style={styles.viewAllLink} onPress={onViewAll}>
-            <Text style={styles.viewText}>Xem tất cả</Text>
+            <Text style={styles.viewText}>{t('home.viewAll')}</Text>
           </TouchableOpacity>
         )}
       </View>

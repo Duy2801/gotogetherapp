@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import FontAwesome6 from '@react-native-vector-icons/fontawesome6';
 import { PRIMARY_COLOR, SECONDARY_COLOR } from '../../../constants/color';
+import { useTranslation } from '../../../hooks/useTranslation';
 
 export type FilterType = 'all' | 'debt' | 'receivable';
 
@@ -28,15 +29,16 @@ export const PaymentFilter: React.FC<PaymentFilterProps> = ({
   setSelectedTripId,
   loading,
 }) => {
+  const { t } = useTranslation();
   return (
     <View style={styles.container}>
       {/* Filter Type Tabs */}
       <View style={styles.filterTabBar}>
         {(
           [
-            { key: 'all', label: 'Tất cả' },
-            { key: 'debt', label: 'Bạn nợ' },
-            { key: 'receivable', label: 'Nhận tiền' },
+            { key: 'all', label: t('spending.allFilter') },
+            { key: 'debt', label: t('spending.debtFilter') },
+            { key: 'receivable', label: t('spending.receivableFilter') },
           ] as { key: FilterType; label: string }[]
         ).map(tab => (
           <TouchableOpacity

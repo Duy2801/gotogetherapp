@@ -9,6 +9,11 @@ import Layout from './src/components/Layout/Layout';
 import ApplicationNavigator from './src/routers';
 import NotificationToast from './src/components/NotificationToast';
 import { SocketProvider } from './src/services/useSocket';
+import { useDispatch } from 'react-redux';
+import { getItem } from './src/utils/storage';
+import { KEY_STORAGE } from './src/constants/KeyStorage';
+import { setLocale } from './src/reducers/localeReducer';
+import { Locale } from './src/i18n';
 
 const queryClient = new QueryClient();
 
@@ -17,18 +22,37 @@ const SocketWrapper = ({ children }: { children: React.ReactNode }) => {
   return <SocketProvider token={token}>{children}</SocketProvider>;
 };
 
+const LocaleBootstrapper = ({ children }: { children: React.ReactNode }) => {
+  const dispatch = useDispatch();
+
+  React.useEffect(() => {
+    const loadLocale = async () => {
+      const savedLocale = (await getItem(KEY_STORAGE.locale)) as
+        | Locale
+        | undefined;
+      dispatch(setLocale(savedLocale === 'en' ? 'en' : 'vi'));
+    };
+
+    loadLocale();
+  }, [dispatch]);
+
+  return <>{children}</>;
+};
+
 const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <Provider store={store}>
-        <SocketWrapper>
-          <PaperProvider>
-            <Layout>
-              <NotificationToast />
-              <ApplicationNavigator />
-            </Layout>
-          </PaperProvider>
-        </SocketWrapper>
+        <LocaleBootstrapper>
+          <SocketWrapper>
+            <PaperProvider>
+              <Layout>
+                <NotificationToast />
+                <ApplicationNavigator />
+              </Layout>
+            </PaperProvider>
+          </SocketWrapper>
+        </LocaleBootstrapper>
       </Provider>
     </QueryClientProvider>
   );
