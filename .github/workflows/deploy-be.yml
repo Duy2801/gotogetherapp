@@ -38,21 +38,22 @@ jobs:
       - name: Install Heroku CLI
         run: curl https://cli-assets.heroku.com/install.sh | sh
 
-      # 6. Login Heroku
-      - name: Login Heroku
+      # 6. Verify Heroku auth (NON-INTERACTIVE)
+      - name: Verify Heroku auth
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
         run: |
-          echo "Logged into Heroku"
-          heroku auth:whoami
+          heroku apps --json > /dev/null
 
-      # 7. Add Heroku remote + deploy
+      # 7. Deploy to Heroku
       - name: Deploy to Heroku
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
         run: |
           cd BackEnd/go-together-server
 
           # thêm remote heroku
           heroku git:remote -a ${{ secrets.HEROKU_APP_NAME }}
 
-          # push code hiện tại lên heroku
+          # deploy
           git push heroku HEAD:master --force
