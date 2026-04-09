@@ -108,9 +108,7 @@ const HistoryScreen = () => {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>
-            {t('history.expenseHistory')}
-          </Text>
+          <Text style={styles.sectionTitle}>{t('history.expenseHistory')}</Text>
           {loading ? (
             <View style={styles.loadingWrap}>
               <ActivityIndicator size="small" color={SECONDARY_COLOR} />
@@ -150,7 +148,9 @@ const HistoryScreen = () => {
                     </Text>
                   </View>
                   <FontAwesome6
-                    name={expandedTripId === trip.id ? 'chevron-up' : 'chevron-down'}
+                    name={
+                      expandedTripId === trip.id ? 'chevron-up' : 'chevron-down'
+                    }
                     size={12}
                     color="#6B7280"
                     iconStyle="solid"

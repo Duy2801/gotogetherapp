@@ -144,7 +144,10 @@ const SettingScreen = () => {
             </Text>
           </View>
 
-          <Pressable style={styles.editButtonFull} onPress={handleOpenUpdateInfo}>
+          <Pressable
+            style={styles.editButtonFull}
+            onPress={handleOpenUpdateInfo}
+          >
             <Text style={styles.editButtonFullText}>
               {t('profile.editProfile')}
             </Text>
