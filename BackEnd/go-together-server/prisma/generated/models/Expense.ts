@@ -8,7 +8,7 @@
  *
  * 🟢 You can import this file directly.
  */
-import type * as runtime from "@prisma/client/runtime/client"
+import type * as runtime from "@prisma/client/runtime/library"
 import type * as $Enums from "../enums.js"
 import type * as Prisma from "../internal/prismaNamespace.js"
 
@@ -304,7 +304,6 @@ export type ExpenseOrderByWithRelationInput = {
   category?: Prisma.CategoryOrderByWithRelationInput
   paidBy?: Prisma.UserOrderByWithRelationInput
   trip?: Prisma.TripOrderByWithRelationInput
-  _relevance?: Prisma.ExpenseOrderByRelevanceInput
 }
 
 export type ExpenseWhereUniqueInput = Prisma.AtLeast<{
@@ -491,12 +490,6 @@ export type ExpenseListRelationFilter = {
 
 export type ExpenseOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
-}
-
-export type ExpenseOrderByRelevanceInput = {
-  fields: Prisma.ExpenseOrderByRelevanceFieldEnum | Prisma.ExpenseOrderByRelevanceFieldEnum[]
-  sort: Prisma.SortOrder
-  search: string
 }
 
 export type ExpenseCountOrderByAggregateInput = {
@@ -1223,7 +1216,43 @@ export type ExpenseSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   _count?: boolean | Prisma.ExpenseCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["expense"]>
 
+export type ExpenseSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  tripId?: boolean
+  amount?: boolean
+  currency?: boolean
+  categoryId?: boolean
+  description?: boolean
+  paidById?: boolean
+  type?: boolean
+  date?: boolean
+  receipt?: boolean
+  isConfirmed?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
+  category?: boolean | Prisma.CategoryDefaultArgs<ExtArgs>
+  paidBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  trip?: boolean | Prisma.TripDefaultArgs<ExtArgs>
+}, ExtArgs["result"]["expense"]>
 
+export type ExpenseSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  tripId?: boolean
+  amount?: boolean
+  currency?: boolean
+  categoryId?: boolean
+  description?: boolean
+  paidById?: boolean
+  type?: boolean
+  date?: boolean
+  receipt?: boolean
+  isConfirmed?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
+  category?: boolean | Prisma.CategoryDefaultArgs<ExtArgs>
+  paidBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  trip?: boolean | Prisma.TripDefaultArgs<ExtArgs>
+}, ExtArgs["result"]["expense"]>
 
 export type ExpenseSelectScalar = {
   id?: boolean
@@ -1248,6 +1277,16 @@ export type ExpenseInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs
   paidBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   trip?: boolean | Prisma.TripDefaultArgs<ExtArgs>
   _count?: boolean | Prisma.ExpenseCountOutputTypeDefaultArgs<ExtArgs>
+}
+export type ExpenseIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  category?: boolean | Prisma.CategoryDefaultArgs<ExtArgs>
+  paidBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  trip?: boolean | Prisma.TripDefaultArgs<ExtArgs>
+}
+export type ExpenseIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  category?: boolean | Prisma.CategoryDefaultArgs<ExtArgs>
+  paidBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  trip?: boolean | Prisma.TripDefaultArgs<ExtArgs>
 }
 
 export type $ExpensePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1390,6 +1429,30 @@ export interface ExpenseDelegate<ExtArgs extends runtime.Types.Extensions.Intern
   createMany<T extends ExpenseCreateManyArgs>(args?: Prisma.SelectSubset<T, ExpenseCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
+   * Create many Expenses and returns the data saved in the database.
+   * @param {ExpenseCreateManyAndReturnArgs} args - Arguments to create many Expenses.
+   * @example
+   * // Create many Expenses
+   * const expense = await prisma.expense.createManyAndReturn({
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Create many Expenses and only return the `id`
+   * const expenseWithIdOnly = await prisma.expense.createManyAndReturn({
+   *   select: { id: true },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  createManyAndReturn<T extends ExpenseCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, ExpenseCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ExpensePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+  /**
    * Delete a Expense.
    * @param {ExpenseDeleteArgs} args - Arguments to delete one Expense.
    * @example
@@ -1452,6 +1515,36 @@ export interface ExpenseDelegate<ExtArgs extends runtime.Types.Extensions.Intern
    * 
    */
   updateMany<T extends ExpenseUpdateManyArgs>(args: Prisma.SelectSubset<T, ExpenseUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
+
+  /**
+   * Update zero or more Expenses and returns the data updated in the database.
+   * @param {ExpenseUpdateManyAndReturnArgs} args - Arguments to update many Expenses.
+   * @example
+   * // Update many Expenses
+   * const expense = await prisma.expense.updateManyAndReturn({
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Update zero or more Expenses and only return the `id`
+   * const expenseWithIdOnly = await prisma.expense.updateManyAndReturn({
+   *   select: { id: true },
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  updateManyAndReturn<T extends ExpenseUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, ExpenseUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ExpensePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one Expense.
@@ -1891,6 +1984,29 @@ export type ExpenseCreateManyArgs<ExtArgs extends runtime.Types.Extensions.Inter
 }
 
 /**
+ * Expense createManyAndReturn
+ */
+export type ExpenseCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Expense
+   */
+  select?: Prisma.ExpenseSelectCreateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the Expense
+   */
+  omit?: Prisma.ExpenseOmit<ExtArgs> | null
+  /**
+   * The data used to create many Expenses.
+   */
+  data: Prisma.ExpenseCreateManyInput | Prisma.ExpenseCreateManyInput[]
+  skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ExpenseIncludeCreateManyAndReturn<ExtArgs> | null
+}
+
+/**
  * Expense update
  */
 export type ExpenseUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1932,6 +2048,36 @@ export type ExpenseUpdateManyArgs<ExtArgs extends runtime.Types.Extensions.Inter
    * Limit how many Expenses to update.
    */
   limit?: number
+}
+
+/**
+ * Expense updateManyAndReturn
+ */
+export type ExpenseUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Expense
+   */
+  select?: Prisma.ExpenseSelectUpdateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the Expense
+   */
+  omit?: Prisma.ExpenseOmit<ExtArgs> | null
+  /**
+   * The data used to update Expenses.
+   */
+  data: Prisma.XOR<Prisma.ExpenseUpdateManyMutationInput, Prisma.ExpenseUncheckedUpdateManyInput>
+  /**
+   * Filter which Expenses to update
+   */
+  where?: Prisma.ExpenseWhereInput
+  /**
+   * Limit how many Expenses to update.
+   */
+  limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ExpenseIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**

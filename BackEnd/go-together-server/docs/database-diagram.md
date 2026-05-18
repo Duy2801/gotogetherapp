@@ -293,7 +293,7 @@ URL mặc định: `http://localhost:5555`
 
 ### 1. TablePlus / DBeaver
 
-- Kết nối trực tiếp vào PostgreSQL/MySQL
+- Kết nối trực tiếp vào PostgreSQL
 - Xem ERD tự động từ database thực tế
 - Export diagram dạng ảnh
 

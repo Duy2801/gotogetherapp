@@ -75,7 +75,7 @@ GoTogether/
 ### Backend
 
 - **Framework**: NestJS (Node.js + TypeScript)
-- **Database**: PostgreSQL / MySQL
+- **Database**: PostgreSQL
 - **ORM**: Prisma
 - **Cache**: Redis
 - **Auth**: JWT + Passport
@@ -110,7 +110,7 @@ GoTogether/
 ## 📋 Prerequisites
 
 - Node.js >= 20.x
-- PostgreSQL >= 14.x / MySQL >= 8.x
+- PostgreSQL >= 14.x
 - Redis >= 7.x
 - Docker & Docker Compose (optional)
 - npm / yarn / pnpm

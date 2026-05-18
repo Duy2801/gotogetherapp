@@ -201,7 +201,7 @@ Mô tả các module và chức năng chính của backend Travel Expense Manage
 
 ## 18. Prisma ORM (`src/prisma/`)
 
-- **Kết nối database MySQL/PostgreSQL**
+- **Kết nối database PostgreSQL**
 - **Migration database**
 - **Seed dữ liệu mẫu**
 - **Quản lý schema**

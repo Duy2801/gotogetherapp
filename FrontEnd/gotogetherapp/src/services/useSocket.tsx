@@ -7,6 +7,7 @@ import React, {
   useState,
 } from 'react';
 import { io, Socket } from 'socket.io-client';
+import { socket_url } from '../api/constant';
 
 interface SocketContextType {
   socket: Socket | null;
@@ -37,7 +38,7 @@ export const SocketProvider = ({ children, token }: SocketProviderProps) => {
     }
 
     // Use same server as API
-    const socketServerUrl = 'http://192.168.2.46:3000';
+    const socketServerUrl = socket_url;
 
     console.log('🔌 Socket connecting to:', socketServerUrl);
 

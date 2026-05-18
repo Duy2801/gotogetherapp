@@ -1,62 +1,24 @@
-name: Deploy Backend to Heroku
+name: Deploy to EC2
 
 on:
   push:
     branches:
-      - master
-    paths:
-      - 'BackEnd/**'
+      - master # branch bạn đang dùng
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout code (FIX SHALLOW CLONE)
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
         with:
-          fetch-depth: 0
-
-      # 2. Setup Node.js
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      # 3. Install dependencies
-      - name: Install dependencies
-        run: |
-          cd BackEnd/go-together-server
-          npm install
-
-      # 4. Build project (NestJS)
-      - name: Build project
-        run: |
-          cd BackEnd/go-together-server
-          npm run build
-
-      # 5. Install Heroku CLI
-      - name: Install Heroku CLI
-        run: curl https://cli-assets.heroku.com/install.sh | sh
-
-      # 6. Verify Heroku auth
-      - name: Verify Heroku auth
-        env:
-          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
-        run: |
-          heroku apps --json > /dev/null
-
-      # 7. Deploy to Heroku (FIX MONOREPO)
-      - name: Deploy to Heroku
-        env:
-          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
-        run: |
-          # Xóa remote nếu có
-          git remote remove heroku || true
-
-          # Thêm remote có auth
-          git remote add heroku https://heroku:$HEROKU_API_KEY@git.heroku.com/${{ secrets.HEROKU_APP_NAME }}.git
-
-          # 🔥 Push đúng subfolder lên Heroku
-          git subtree push --prefix=BackEnd/go-together-server heroku master
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_KEY }}
+          script: |
+            cd /opt/app/gotogetherapp/BackEnd/go-together-server
+            git pull origin master
+            npm install
+            npm run build
+            sudo systemctl restart gotogether

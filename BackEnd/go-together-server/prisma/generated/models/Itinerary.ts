@@ -8,7 +8,7 @@
  *
  * 🟢 You can import this file directly.
  */
-import type * as runtime from "@prisma/client/runtime/client"
+import type * as runtime from "@prisma/client/runtime/library"
 import type * as $Enums from "../enums.js"
 import type * as Prisma from "../internal/prismaNamespace.js"
 
@@ -220,7 +220,6 @@ export type ItineraryOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   trip?: Prisma.TripOrderByWithRelationInput
-  _relevance?: Prisma.ItineraryOrderByRelevanceInput
 }
 
 export type ItineraryWhereUniqueInput = Prisma.AtLeast<{
@@ -360,12 +359,6 @@ export type ItineraryListRelationFilter = {
 
 export type ItineraryOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
-}
-
-export type ItineraryOrderByRelevanceInput = {
-  fields: Prisma.ItineraryOrderByRelevanceFieldEnum | Prisma.ItineraryOrderByRelevanceFieldEnum[]
-  sort: Prisma.SortOrder
-  search: string
 }
 
 export type ItineraryCountOrderByAggregateInput = {
@@ -564,7 +557,31 @@ export type ItinerarySelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   trip?: boolean | Prisma.TripDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["itinerary"]>
 
+export type ItinerarySelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  tripId?: boolean
+  date?: boolean
+  title?: boolean
+  description?: boolean
+  activities?: boolean
+  photos?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
+  trip?: boolean | Prisma.TripDefaultArgs<ExtArgs>
+}, ExtArgs["result"]["itinerary"]>
 
+export type ItinerarySelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  tripId?: boolean
+  date?: boolean
+  title?: boolean
+  description?: boolean
+  activities?: boolean
+  photos?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
+  trip?: boolean | Prisma.TripDefaultArgs<ExtArgs>
+}, ExtArgs["result"]["itinerary"]>
 
 export type ItinerarySelectScalar = {
   id?: boolean
@@ -580,6 +597,12 @@ export type ItinerarySelectScalar = {
 
 export type ItineraryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tripId" | "date" | "title" | "description" | "activities" | "photos" | "createdAt" | "updatedAt", ExtArgs["result"]["itinerary"]>
 export type ItineraryInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  trip?: boolean | Prisma.TripDefaultArgs<ExtArgs>
+}
+export type ItineraryIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  trip?: boolean | Prisma.TripDefaultArgs<ExtArgs>
+}
+export type ItineraryIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   trip?: boolean | Prisma.TripDefaultArgs<ExtArgs>
 }
 
@@ -716,6 +739,30 @@ export interface ItineraryDelegate<ExtArgs extends runtime.Types.Extensions.Inte
   createMany<T extends ItineraryCreateManyArgs>(args?: Prisma.SelectSubset<T, ItineraryCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
+   * Create many Itineraries and returns the data saved in the database.
+   * @param {ItineraryCreateManyAndReturnArgs} args - Arguments to create many Itineraries.
+   * @example
+   * // Create many Itineraries
+   * const itinerary = await prisma.itinerary.createManyAndReturn({
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Create many Itineraries and only return the `id`
+   * const itineraryWithIdOnly = await prisma.itinerary.createManyAndReturn({
+   *   select: { id: true },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  createManyAndReturn<T extends ItineraryCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, ItineraryCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ItineraryPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+  /**
    * Delete a Itinerary.
    * @param {ItineraryDeleteArgs} args - Arguments to delete one Itinerary.
    * @example
@@ -778,6 +825,36 @@ export interface ItineraryDelegate<ExtArgs extends runtime.Types.Extensions.Inte
    * 
    */
   updateMany<T extends ItineraryUpdateManyArgs>(args: Prisma.SelectSubset<T, ItineraryUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
+
+  /**
+   * Update zero or more Itineraries and returns the data updated in the database.
+   * @param {ItineraryUpdateManyAndReturnArgs} args - Arguments to update many Itineraries.
+   * @example
+   * // Update many Itineraries
+   * const itinerary = await prisma.itinerary.updateManyAndReturn({
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Update zero or more Itineraries and only return the `id`
+   * const itineraryWithIdOnly = await prisma.itinerary.updateManyAndReturn({
+   *   select: { id: true },
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  updateManyAndReturn<T extends ItineraryUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, ItineraryUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ItineraryPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one Itinerary.
@@ -1210,6 +1287,29 @@ export type ItineraryCreateManyArgs<ExtArgs extends runtime.Types.Extensions.Int
 }
 
 /**
+ * Itinerary createManyAndReturn
+ */
+export type ItineraryCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Itinerary
+   */
+  select?: Prisma.ItinerarySelectCreateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the Itinerary
+   */
+  omit?: Prisma.ItineraryOmit<ExtArgs> | null
+  /**
+   * The data used to create many Itineraries.
+   */
+  data: Prisma.ItineraryCreateManyInput | Prisma.ItineraryCreateManyInput[]
+  skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ItineraryIncludeCreateManyAndReturn<ExtArgs> | null
+}
+
+/**
  * Itinerary update
  */
 export type ItineraryUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1251,6 +1351,36 @@ export type ItineraryUpdateManyArgs<ExtArgs extends runtime.Types.Extensions.Int
    * Limit how many Itineraries to update.
    */
   limit?: number
+}
+
+/**
+ * Itinerary updateManyAndReturn
+ */
+export type ItineraryUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Itinerary
+   */
+  select?: Prisma.ItinerarySelectUpdateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the Itinerary
+   */
+  omit?: Prisma.ItineraryOmit<ExtArgs> | null
+  /**
+   * The data used to update Itineraries.
+   */
+  data: Prisma.XOR<Prisma.ItineraryUpdateManyMutationInput, Prisma.ItineraryUncheckedUpdateManyInput>
+  /**
+   * Filter which Itineraries to update
+   */
+  where?: Prisma.ItineraryWhereInput
+  /**
+   * Limit how many Itineraries to update.
+   */
+  limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ItineraryIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**

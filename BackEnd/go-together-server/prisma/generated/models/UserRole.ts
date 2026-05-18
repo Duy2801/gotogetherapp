@@ -8,7 +8,7 @@
  *
  * 🟢 You can import this file directly.
  */
-import type * as runtime from "@prisma/client/runtime/client"
+import type * as runtime from "@prisma/client/runtime/library"
 import type * as $Enums from "../enums.js"
 import type * as Prisma from "../internal/prismaNamespace.js"
 
@@ -201,7 +201,6 @@ export type UserRoleOrderByWithRelationInput = {
   roleId?: Prisma.SortOrder
   role?: Prisma.RoleOrderByWithRelationInput
   user?: Prisma.UserOrderByWithRelationInput
-  _relevance?: Prisma.UserRoleOrderByRelevanceInput
 }
 
 export type UserRoleWhereUniqueInput = Prisma.AtLeast<{
@@ -275,12 +274,6 @@ export type UserRoleListRelationFilter = {
 
 export type UserRoleOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
-}
-
-export type UserRoleOrderByRelevanceInput = {
-  fields: Prisma.UserRoleOrderByRelevanceFieldEnum | Prisma.UserRoleOrderByRelevanceFieldEnum[]
-  sort: Prisma.SortOrder
-  search: string
 }
 
 export type UserRoleUserIdRoleIdCompoundUniqueInput = {
@@ -512,7 +505,19 @@ export type UserRoleSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["userRole"]>
 
+export type UserRoleSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  userId?: boolean
+  roleId?: boolean
+  role?: boolean | Prisma.RoleDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+}, ExtArgs["result"]["userRole"]>
 
+export type UserRoleSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  userId?: boolean
+  roleId?: boolean
+  role?: boolean | Prisma.RoleDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+}, ExtArgs["result"]["userRole"]>
 
 export type UserRoleSelectScalar = {
   userId?: boolean
@@ -521,6 +526,14 @@ export type UserRoleSelectScalar = {
 
 export type UserRoleOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"userId" | "roleId", ExtArgs["result"]["userRole"]>
 export type UserRoleInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  role?: boolean | Prisma.RoleDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+}
+export type UserRoleIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  role?: boolean | Prisma.RoleDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+}
+export type UserRoleIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   role?: boolean | Prisma.RoleDefaultArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
@@ -652,6 +665,30 @@ export interface UserRoleDelegate<ExtArgs extends runtime.Types.Extensions.Inter
   createMany<T extends UserRoleCreateManyArgs>(args?: Prisma.SelectSubset<T, UserRoleCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
+   * Create many UserRoles and returns the data saved in the database.
+   * @param {UserRoleCreateManyAndReturnArgs} args - Arguments to create many UserRoles.
+   * @example
+   * // Create many UserRoles
+   * const userRole = await prisma.userRole.createManyAndReturn({
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Create many UserRoles and only return the `userId`
+   * const userRoleWithUserIdOnly = await prisma.userRole.createManyAndReturn({
+   *   select: { userId: true },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  createManyAndReturn<T extends UserRoleCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, UserRoleCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserRolePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+  /**
    * Delete a UserRole.
    * @param {UserRoleDeleteArgs} args - Arguments to delete one UserRole.
    * @example
@@ -714,6 +751,36 @@ export interface UserRoleDelegate<ExtArgs extends runtime.Types.Extensions.Inter
    * 
    */
   updateMany<T extends UserRoleUpdateManyArgs>(args: Prisma.SelectSubset<T, UserRoleUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
+
+  /**
+   * Update zero or more UserRoles and returns the data updated in the database.
+   * @param {UserRoleUpdateManyAndReturnArgs} args - Arguments to update many UserRoles.
+   * @example
+   * // Update many UserRoles
+   * const userRole = await prisma.userRole.updateManyAndReturn({
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Update zero or more UserRoles and only return the `userId`
+   * const userRoleWithUserIdOnly = await prisma.userRole.updateManyAndReturn({
+   *   select: { userId: true },
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  updateManyAndReturn<T extends UserRoleUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, UserRoleUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserRolePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one UserRole.
@@ -1140,6 +1207,29 @@ export type UserRoleCreateManyArgs<ExtArgs extends runtime.Types.Extensions.Inte
 }
 
 /**
+ * UserRole createManyAndReturn
+ */
+export type UserRoleCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the UserRole
+   */
+  select?: Prisma.UserRoleSelectCreateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the UserRole
+   */
+  omit?: Prisma.UserRoleOmit<ExtArgs> | null
+  /**
+   * The data used to create many UserRoles.
+   */
+  data: Prisma.UserRoleCreateManyInput | Prisma.UserRoleCreateManyInput[]
+  skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserRoleIncludeCreateManyAndReturn<ExtArgs> | null
+}
+
+/**
  * UserRole update
  */
 export type UserRoleUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1181,6 +1271,36 @@ export type UserRoleUpdateManyArgs<ExtArgs extends runtime.Types.Extensions.Inte
    * Limit how many UserRoles to update.
    */
   limit?: number
+}
+
+/**
+ * UserRole updateManyAndReturn
+ */
+export type UserRoleUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the UserRole
+   */
+  select?: Prisma.UserRoleSelectUpdateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the UserRole
+   */
+  omit?: Prisma.UserRoleOmit<ExtArgs> | null
+  /**
+   * The data used to update UserRoles.
+   */
+  data: Prisma.XOR<Prisma.UserRoleUpdateManyMutationInput, Prisma.UserRoleUncheckedUpdateManyInput>
+  /**
+   * Filter which UserRoles to update
+   */
+  where?: Prisma.UserRoleWhereInput
+  /**
+   * Limit how many UserRoles to update.
+   */
+  limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserRoleIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**

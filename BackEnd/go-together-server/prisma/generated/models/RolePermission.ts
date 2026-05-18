@@ -8,7 +8,7 @@
  *
  * 🟢 You can import this file directly.
  */
-import type * as runtime from "@prisma/client/runtime/client"
+import type * as runtime from "@prisma/client/runtime/library"
 import type * as $Enums from "../enums.js"
 import type * as Prisma from "../internal/prismaNamespace.js"
 
@@ -511,7 +511,19 @@ export type RolePermissionSelect<ExtArgs extends runtime.Types.Extensions.Intern
   role?: boolean | Prisma.RoleDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["rolePermission"]>
 
+export type RolePermissionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  roleId?: boolean
+  permissionId?: boolean
+  permission?: boolean | Prisma.PermissionDefaultArgs<ExtArgs>
+  role?: boolean | Prisma.RoleDefaultArgs<ExtArgs>
+}, ExtArgs["result"]["rolePermission"]>
 
+export type RolePermissionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  roleId?: boolean
+  permissionId?: boolean
+  permission?: boolean | Prisma.PermissionDefaultArgs<ExtArgs>
+  role?: boolean | Prisma.RoleDefaultArgs<ExtArgs>
+}, ExtArgs["result"]["rolePermission"]>
 
 export type RolePermissionSelectScalar = {
   roleId?: boolean
@@ -520,6 +532,14 @@ export type RolePermissionSelectScalar = {
 
 export type RolePermissionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"roleId" | "permissionId", ExtArgs["result"]["rolePermission"]>
 export type RolePermissionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  permission?: boolean | Prisma.PermissionDefaultArgs<ExtArgs>
+  role?: boolean | Prisma.RoleDefaultArgs<ExtArgs>
+}
+export type RolePermissionIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  permission?: boolean | Prisma.PermissionDefaultArgs<ExtArgs>
+  role?: boolean | Prisma.RoleDefaultArgs<ExtArgs>
+}
+export type RolePermissionIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   permission?: boolean | Prisma.PermissionDefaultArgs<ExtArgs>
   role?: boolean | Prisma.RoleDefaultArgs<ExtArgs>
 }
@@ -651,6 +671,30 @@ export interface RolePermissionDelegate<ExtArgs extends runtime.Types.Extensions
   createMany<T extends RolePermissionCreateManyArgs>(args?: Prisma.SelectSubset<T, RolePermissionCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
+   * Create many RolePermissions and returns the data saved in the database.
+   * @param {RolePermissionCreateManyAndReturnArgs} args - Arguments to create many RolePermissions.
+   * @example
+   * // Create many RolePermissions
+   * const rolePermission = await prisma.rolePermission.createManyAndReturn({
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Create many RolePermissions and only return the `roleId`
+   * const rolePermissionWithRoleIdOnly = await prisma.rolePermission.createManyAndReturn({
+   *   select: { roleId: true },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  createManyAndReturn<T extends RolePermissionCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, RolePermissionCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RolePermissionPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+  /**
    * Delete a RolePermission.
    * @param {RolePermissionDeleteArgs} args - Arguments to delete one RolePermission.
    * @example
@@ -713,6 +757,36 @@ export interface RolePermissionDelegate<ExtArgs extends runtime.Types.Extensions
    * 
    */
   updateMany<T extends RolePermissionUpdateManyArgs>(args: Prisma.SelectSubset<T, RolePermissionUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
+
+  /**
+   * Update zero or more RolePermissions and returns the data updated in the database.
+   * @param {RolePermissionUpdateManyAndReturnArgs} args - Arguments to update many RolePermissions.
+   * @example
+   * // Update many RolePermissions
+   * const rolePermission = await prisma.rolePermission.updateManyAndReturn({
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Update zero or more RolePermissions and only return the `roleId`
+   * const rolePermissionWithRoleIdOnly = await prisma.rolePermission.updateManyAndReturn({
+   *   select: { roleId: true },
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  updateManyAndReturn<T extends RolePermissionUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, RolePermissionUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RolePermissionPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one RolePermission.
@@ -1139,6 +1213,29 @@ export type RolePermissionCreateManyArgs<ExtArgs extends runtime.Types.Extension
 }
 
 /**
+ * RolePermission createManyAndReturn
+ */
+export type RolePermissionCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the RolePermission
+   */
+  select?: Prisma.RolePermissionSelectCreateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the RolePermission
+   */
+  omit?: Prisma.RolePermissionOmit<ExtArgs> | null
+  /**
+   * The data used to create many RolePermissions.
+   */
+  data: Prisma.RolePermissionCreateManyInput | Prisma.RolePermissionCreateManyInput[]
+  skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.RolePermissionIncludeCreateManyAndReturn<ExtArgs> | null
+}
+
+/**
  * RolePermission update
  */
 export type RolePermissionUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1180,6 +1277,36 @@ export type RolePermissionUpdateManyArgs<ExtArgs extends runtime.Types.Extension
    * Limit how many RolePermissions to update.
    */
   limit?: number
+}
+
+/**
+ * RolePermission updateManyAndReturn
+ */
+export type RolePermissionUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the RolePermission
+   */
+  select?: Prisma.RolePermissionSelectUpdateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the RolePermission
+   */
+  omit?: Prisma.RolePermissionOmit<ExtArgs> | null
+  /**
+   * The data used to update RolePermissions.
+   */
+  data: Prisma.XOR<Prisma.RolePermissionUpdateManyMutationInput, Prisma.RolePermissionUncheckedUpdateManyInput>
+  /**
+   * Filter which RolePermissions to update
+   */
+  where?: Prisma.RolePermissionWhereInput
+  /**
+   * Limit how many RolePermissions to update.
+   */
+  limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.RolePermissionIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**

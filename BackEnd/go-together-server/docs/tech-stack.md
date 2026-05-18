@@ -14,7 +14,7 @@ Danh sách công nghệ sử dụng cho dự án GoTogether
 
 ### Database & ORM
 
-- **PostgreSQL** / **MySQL** - Relational database
+- **PostgreSQL** - Relational database
 - **Prisma ORM** v5+ - Type-safe database client
 - **Redis** - Caching & session storage
 

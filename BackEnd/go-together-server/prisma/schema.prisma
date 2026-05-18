@@ -5,7 +5,9 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model User {
@@ -55,7 +57,7 @@ model Permission {
 model UserRole {
   userId String
   roleId Int
-  role   Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  role   Role   @relation(fields: [roleId], references: [id], onDelete: Cascade, map: "user_roles_role_fkey")
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([userId, roleId])
@@ -66,7 +68,7 @@ model UserRole {
 model RolePermission {
   roleId       Int
   permissionId Int
-  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade, map: "role_permissions_permission_fkey")
   role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
 
   @@id([roleId, permissionId])
@@ -103,7 +105,7 @@ model TripMember {
   updatedAt    DateTime     @updatedAt
   leftAt       DateTime?
   trip         Trip         @relation(fields: [tripId], references: [id], onDelete: Cascade)
-  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade, map: "trip_members_user_fkey")
 
   @@unique([tripId, userId])
   @@index([userId], map: "trip_members_userId_fkey")
@@ -138,9 +140,9 @@ model Expense {
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
   splits      ExpenseSplit[]
-  category    Category       @relation(fields: [categoryId], references: [id])
-  paidBy      User           @relation("PaidBy", fields: [paidById], references: [id])
-  trip        Trip           @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  category    Category       @relation(fields: [categoryId], references: [id], map: "expenses_category_fkey")
+  paidBy      User           @relation("PaidBy", fields: [paidById], references: [id], map: "expenses_paidBy_fkey")
+  trip        Trip           @relation(fields: [tripId], references: [id], onDelete: Cascade, map: "expenses_trip_fkey")
 
   @@index([categoryId], map: "expenses_categoryId_fkey")
   @@index([paidById], map: "expenses_paidById_fkey")
@@ -162,7 +164,7 @@ model ExpenseSplit {
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
   expense    Expense   @relation(fields: [expenseId], references: [id], onDelete: Cascade)
-  user       User      @relation(fields: [userId], references: [id])
+  user       User      @relation(fields: [userId], references: [id], map: "expense_splits_user_fkey")
 
   @@unique([expenseId, userId])
   @@index([userId], map: "expense_splits_userId_fkey")
@@ -195,7 +197,7 @@ model Itinerary {
   photos      Json?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  trip        Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  trip        Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade, map: "itineraries_trip_fkey")
 
   @@index([tripId], map: "itineraries_tripId_fkey")
   @@map("itineraries")

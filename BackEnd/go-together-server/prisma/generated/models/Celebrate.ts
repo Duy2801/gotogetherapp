@@ -8,7 +8,7 @@
  *
  * 🟢 You can import this file directly.
  */
-import type * as runtime from "@prisma/client/runtime/client"
+import type * as runtime from "@prisma/client/runtime/library"
 import type * as $Enums from "../enums.js"
 import type * as Prisma from "../internal/prismaNamespace.js"
 
@@ -205,7 +205,6 @@ export type CelebrateOrderByWithRelationInput = {
   trip?: Prisma.TripOrderByWithRelationInput
   user?: Prisma.UserOrderByWithRelationInput
   images?: Prisma.CelebrateImageOrderByRelationAggregateInput
-  _relevance?: Prisma.CelebrateOrderByRelevanceInput
 }
 
 export type CelebrateWhereUniqueInput = Prisma.AtLeast<{
@@ -320,12 +319,6 @@ export type CelebrateListRelationFilter = {
 
 export type CelebrateOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
-}
-
-export type CelebrateOrderByRelevanceInput = {
-  fields: Prisma.CelebrateOrderByRelevanceFieldEnum | Prisma.CelebrateOrderByRelevanceFieldEnum[]
-  sort: Prisma.SortOrder
-  search: string
 }
 
 export type CelebrateCountOrderByAggregateInput = {
@@ -722,7 +715,27 @@ export type CelebrateSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   _count?: boolean | Prisma.CelebrateCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["celebrate"]>
 
+export type CelebrateSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  tripId?: boolean
+  userId?: boolean
+  description?: boolean
+  date?: boolean
+  createdAt?: boolean
+  trip?: boolean | Prisma.TripDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+}, ExtArgs["result"]["celebrate"]>
 
+export type CelebrateSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  tripId?: boolean
+  userId?: boolean
+  description?: boolean
+  date?: boolean
+  createdAt?: boolean
+  trip?: boolean | Prisma.TripDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+}, ExtArgs["result"]["celebrate"]>
 
 export type CelebrateSelectScalar = {
   id?: boolean
@@ -739,6 +752,14 @@ export type CelebrateInclude<ExtArgs extends runtime.Types.Extensions.InternalAr
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   images?: boolean | Prisma.Celebrate$imagesArgs<ExtArgs>
   _count?: boolean | Prisma.CelebrateCountOutputTypeDefaultArgs<ExtArgs>
+}
+export type CelebrateIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  trip?: boolean | Prisma.TripDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+}
+export type CelebrateIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  trip?: boolean | Prisma.TripDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
 
 export type $CelebratePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -873,6 +894,30 @@ export interface CelebrateDelegate<ExtArgs extends runtime.Types.Extensions.Inte
   createMany<T extends CelebrateCreateManyArgs>(args?: Prisma.SelectSubset<T, CelebrateCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
+   * Create many Celebrates and returns the data saved in the database.
+   * @param {CelebrateCreateManyAndReturnArgs} args - Arguments to create many Celebrates.
+   * @example
+   * // Create many Celebrates
+   * const celebrate = await prisma.celebrate.createManyAndReturn({
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Create many Celebrates and only return the `id`
+   * const celebrateWithIdOnly = await prisma.celebrate.createManyAndReturn({
+   *   select: { id: true },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  createManyAndReturn<T extends CelebrateCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, CelebrateCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CelebratePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+  /**
    * Delete a Celebrate.
    * @param {CelebrateDeleteArgs} args - Arguments to delete one Celebrate.
    * @example
@@ -935,6 +980,36 @@ export interface CelebrateDelegate<ExtArgs extends runtime.Types.Extensions.Inte
    * 
    */
   updateMany<T extends CelebrateUpdateManyArgs>(args: Prisma.SelectSubset<T, CelebrateUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
+
+  /**
+   * Update zero or more Celebrates and returns the data updated in the database.
+   * @param {CelebrateUpdateManyAndReturnArgs} args - Arguments to update many Celebrates.
+   * @example
+   * // Update many Celebrates
+   * const celebrate = await prisma.celebrate.updateManyAndReturn({
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Update zero or more Celebrates and only return the `id`
+   * const celebrateWithIdOnly = await prisma.celebrate.updateManyAndReturn({
+   *   select: { id: true },
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  updateManyAndReturn<T extends CelebrateUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, CelebrateUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CelebratePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one Celebrate.
@@ -1366,6 +1441,29 @@ export type CelebrateCreateManyArgs<ExtArgs extends runtime.Types.Extensions.Int
 }
 
 /**
+ * Celebrate createManyAndReturn
+ */
+export type CelebrateCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Celebrate
+   */
+  select?: Prisma.CelebrateSelectCreateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the Celebrate
+   */
+  omit?: Prisma.CelebrateOmit<ExtArgs> | null
+  /**
+   * The data used to create many Celebrates.
+   */
+  data: Prisma.CelebrateCreateManyInput | Prisma.CelebrateCreateManyInput[]
+  skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CelebrateIncludeCreateManyAndReturn<ExtArgs> | null
+}
+
+/**
  * Celebrate update
  */
 export type CelebrateUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1407,6 +1505,36 @@ export type CelebrateUpdateManyArgs<ExtArgs extends runtime.Types.Extensions.Int
    * Limit how many Celebrates to update.
    */
   limit?: number
+}
+
+/**
+ * Celebrate updateManyAndReturn
+ */
+export type CelebrateUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Celebrate
+   */
+  select?: Prisma.CelebrateSelectUpdateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the Celebrate
+   */
+  omit?: Prisma.CelebrateOmit<ExtArgs> | null
+  /**
+   * The data used to update Celebrates.
+   */
+  data: Prisma.XOR<Prisma.CelebrateUpdateManyMutationInput, Prisma.CelebrateUncheckedUpdateManyInput>
+  /**
+   * Filter which Celebrates to update
+   */
+  where?: Prisma.CelebrateWhereInput
+  /**
+   * Limit how many Celebrates to update.
+   */
+  limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CelebrateIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**

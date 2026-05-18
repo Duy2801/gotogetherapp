@@ -8,7 +8,7 @@
  *
  * 🟢 You can import this file directly.
  */
-import type * as runtime from "@prisma/client/runtime/client"
+import type * as runtime from "@prisma/client/runtime/library"
 import type * as $Enums from "../enums.js"
 import type * as Prisma from "../internal/prismaNamespace.js"
 
@@ -295,7 +295,6 @@ export type ExpenseSplitOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   expense?: Prisma.ExpenseOrderByWithRelationInput
   user?: Prisma.UserOrderByWithRelationInput
-  _relevance?: Prisma.ExpenseSplitOrderByRelevanceInput
 }
 
 export type ExpenseSplitWhereUniqueInput = Prisma.AtLeast<{
@@ -468,12 +467,6 @@ export type ExpenseSplitListRelationFilter = {
 
 export type ExpenseSplitOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
-}
-
-export type ExpenseSplitOrderByRelevanceInput = {
-  fields: Prisma.ExpenseSplitOrderByRelevanceFieldEnum | Prisma.ExpenseSplitOrderByRelevanceFieldEnum[]
-  sort: Prisma.SortOrder
-  search: string
 }
 
 export type ExpenseSplitExpenseIdUserIdCompoundUniqueInput = {
@@ -881,7 +874,39 @@ export type ExpenseSplitSelect<ExtArgs extends runtime.Types.Extensions.Internal
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["expenseSplit"]>
 
+export type ExpenseSplitSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  expenseId?: boolean
+  userId?: boolean
+  amount?: boolean
+  percentage?: boolean
+  splitType?: boolean
+  isPaid?: boolean
+  paidAt?: boolean
+  confirmed?: boolean
+  confirmedAt?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
+  expense?: boolean | Prisma.ExpenseDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+}, ExtArgs["result"]["expenseSplit"]>
 
+export type ExpenseSplitSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  expenseId?: boolean
+  userId?: boolean
+  amount?: boolean
+  percentage?: boolean
+  splitType?: boolean
+  isPaid?: boolean
+  paidAt?: boolean
+  confirmed?: boolean
+  confirmedAt?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
+  expense?: boolean | Prisma.ExpenseDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+}, ExtArgs["result"]["expenseSplit"]>
 
 export type ExpenseSplitSelectScalar = {
   id?: boolean
@@ -900,6 +925,14 @@ export type ExpenseSplitSelectScalar = {
 
 export type ExpenseSplitOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "expenseId" | "userId" | "amount" | "percentage" | "splitType" | "isPaid" | "paidAt" | "confirmed" | "confirmedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["expenseSplit"]>
 export type ExpenseSplitInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  expense?: boolean | Prisma.ExpenseDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+}
+export type ExpenseSplitIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  expense?: boolean | Prisma.ExpenseDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+}
+export type ExpenseSplitIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   expense?: boolean | Prisma.ExpenseDefaultArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
@@ -1041,6 +1074,30 @@ export interface ExpenseSplitDelegate<ExtArgs extends runtime.Types.Extensions.I
   createMany<T extends ExpenseSplitCreateManyArgs>(args?: Prisma.SelectSubset<T, ExpenseSplitCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
+   * Create many ExpenseSplits and returns the data saved in the database.
+   * @param {ExpenseSplitCreateManyAndReturnArgs} args - Arguments to create many ExpenseSplits.
+   * @example
+   * // Create many ExpenseSplits
+   * const expenseSplit = await prisma.expenseSplit.createManyAndReturn({
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Create many ExpenseSplits and only return the `id`
+   * const expenseSplitWithIdOnly = await prisma.expenseSplit.createManyAndReturn({
+   *   select: { id: true },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  createManyAndReturn<T extends ExpenseSplitCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, ExpenseSplitCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ExpenseSplitPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+  /**
    * Delete a ExpenseSplit.
    * @param {ExpenseSplitDeleteArgs} args - Arguments to delete one ExpenseSplit.
    * @example
@@ -1103,6 +1160,36 @@ export interface ExpenseSplitDelegate<ExtArgs extends runtime.Types.Extensions.I
    * 
    */
   updateMany<T extends ExpenseSplitUpdateManyArgs>(args: Prisma.SelectSubset<T, ExpenseSplitUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
+
+  /**
+   * Update zero or more ExpenseSplits and returns the data updated in the database.
+   * @param {ExpenseSplitUpdateManyAndReturnArgs} args - Arguments to update many ExpenseSplits.
+   * @example
+   * // Update many ExpenseSplits
+   * const expenseSplit = await prisma.expenseSplit.updateManyAndReturn({
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Update zero or more ExpenseSplits and only return the `id`
+   * const expenseSplitWithIdOnly = await prisma.expenseSplit.updateManyAndReturn({
+   *   select: { id: true },
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  updateManyAndReturn<T extends ExpenseSplitUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, ExpenseSplitUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ExpenseSplitPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one ExpenseSplit.
@@ -1539,6 +1626,29 @@ export type ExpenseSplitCreateManyArgs<ExtArgs extends runtime.Types.Extensions.
 }
 
 /**
+ * ExpenseSplit createManyAndReturn
+ */
+export type ExpenseSplitCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ExpenseSplit
+   */
+  select?: Prisma.ExpenseSplitSelectCreateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the ExpenseSplit
+   */
+  omit?: Prisma.ExpenseSplitOmit<ExtArgs> | null
+  /**
+   * The data used to create many ExpenseSplits.
+   */
+  data: Prisma.ExpenseSplitCreateManyInput | Prisma.ExpenseSplitCreateManyInput[]
+  skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ExpenseSplitIncludeCreateManyAndReturn<ExtArgs> | null
+}
+
+/**
  * ExpenseSplit update
  */
 export type ExpenseSplitUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1580,6 +1690,36 @@ export type ExpenseSplitUpdateManyArgs<ExtArgs extends runtime.Types.Extensions.
    * Limit how many ExpenseSplits to update.
    */
   limit?: number
+}
+
+/**
+ * ExpenseSplit updateManyAndReturn
+ */
+export type ExpenseSplitUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ExpenseSplit
+   */
+  select?: Prisma.ExpenseSplitSelectUpdateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the ExpenseSplit
+   */
+  omit?: Prisma.ExpenseSplitOmit<ExtArgs> | null
+  /**
+   * The data used to update ExpenseSplits.
+   */
+  data: Prisma.XOR<Prisma.ExpenseSplitUpdateManyMutationInput, Prisma.ExpenseSplitUncheckedUpdateManyInput>
+  /**
+   * Filter which ExpenseSplits to update
+   */
+  where?: Prisma.ExpenseSplitWhereInput
+  /**
+   * Limit how many ExpenseSplits to update.
+   */
+  limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ExpenseSplitIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**

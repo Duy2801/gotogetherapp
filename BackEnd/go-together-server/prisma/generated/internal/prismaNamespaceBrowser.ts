@@ -24,30 +24,28 @@ export const Decimal = runtime.Decimal
 
 
 export const NullTypes = {
-  DbNull: runtime.NullTypes.DbNull as (new (secret: never) => typeof runtime.DbNull),
-  JsonNull: runtime.NullTypes.JsonNull as (new (secret: never) => typeof runtime.JsonNull),
-  AnyNull: runtime.NullTypes.AnyNull as (new (secret: never) => typeof runtime.AnyNull),
+  DbNull: runtime.objectEnumValues.classes.DbNull as (new (secret: never) => typeof runtime.objectEnumValues.instances.DbNull),
+  JsonNull: runtime.objectEnumValues.classes.JsonNull as (new (secret: never) => typeof runtime.objectEnumValues.instances.JsonNull),
+  AnyNull: runtime.objectEnumValues.classes.AnyNull as (new (secret: never) => typeof runtime.objectEnumValues.instances.AnyNull),
 }
 /**
  * Helper for filtering JSON entries that have `null` on the database (empty on the db)
  *
  * @see https://www.prisma.io/docs/concepts/components/prisma-client/working-with-fields/working-with-json-fields#filtering-on-a-json-field
  */
-export const DbNull = runtime.DbNull
-
+export const DbNull = runtime.objectEnumValues.instances.DbNull
 /**
  * Helper for filtering JSON entries that have JSON `null` values (not empty on the db)
  *
  * @see https://www.prisma.io/docs/concepts/components/prisma-client/working-with-fields/working-with-json-fields#filtering-on-a-json-field
  */
-export const JsonNull = runtime.JsonNull
-
+export const JsonNull = runtime.objectEnumValues.instances.JsonNull
 /**
  * Helper for filtering JSON entries that are `Prisma.DbNull` or `Prisma.JsonNull`
  *
  * @see https://www.prisma.io/docs/concepts/components/prisma-client/working-with-fields/working-with-json-fields#filtering-on-a-json-field
  */
-export const AnyNull = runtime.AnyNull
+export const AnyNull = runtime.objectEnumValues.instances.AnyNull
 
 
 export const ModelName = {
@@ -315,105 +313,20 @@ export const NullableJsonNullValueInput = {
 export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
 
 
+export const QueryMode = {
+  default: 'default',
+  insensitive: 'insensitive'
+} as const
+
+export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
+
+
 export const NullsOrder = {
   first: 'first',
   last: 'last'
 } as const
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
-
-
-export const UserOrderByRelevanceFieldEnum = {
-  id: 'id',
-  email: 'email',
-  fullName: 'fullName',
-  password: 'password',
-  googleId: 'googleId',
-  avatar: 'avatar'
-} as const
-
-export type UserOrderByRelevanceFieldEnum = (typeof UserOrderByRelevanceFieldEnum)[keyof typeof UserOrderByRelevanceFieldEnum]
-
-
-export const RoleOrderByRelevanceFieldEnum = {
-  name: 'name',
-  description: 'description'
-} as const
-
-export type RoleOrderByRelevanceFieldEnum = (typeof RoleOrderByRelevanceFieldEnum)[keyof typeof RoleOrderByRelevanceFieldEnum]
-
-
-export const PermissionOrderByRelevanceFieldEnum = {
-  name: 'name',
-  description: 'description'
-} as const
-
-export type PermissionOrderByRelevanceFieldEnum = (typeof PermissionOrderByRelevanceFieldEnum)[keyof typeof PermissionOrderByRelevanceFieldEnum]
-
-
-export const UserRoleOrderByRelevanceFieldEnum = {
-  userId: 'userId'
-} as const
-
-export type UserRoleOrderByRelevanceFieldEnum = (typeof UserRoleOrderByRelevanceFieldEnum)[keyof typeof UserRoleOrderByRelevanceFieldEnum]
-
-
-export const TripOrderByRelevanceFieldEnum = {
-  id: 'id',
-  name: 'name',
-  images: 'images'
-} as const
-
-export type TripOrderByRelevanceFieldEnum = (typeof TripOrderByRelevanceFieldEnum)[keyof typeof TripOrderByRelevanceFieldEnum]
-
-
-export const TripMemberOrderByRelevanceFieldEnum = {
-  id: 'id',
-  tripId: 'tripId',
-  userId: 'userId'
-} as const
-
-export type TripMemberOrderByRelevanceFieldEnum = (typeof TripMemberOrderByRelevanceFieldEnum)[keyof typeof TripMemberOrderByRelevanceFieldEnum]
-
-
-export const CategoryOrderByRelevanceFieldEnum = {
-  id: 'id',
-  name: 'name',
-  icon: 'icon',
-  color: 'color'
-} as const
-
-export type CategoryOrderByRelevanceFieldEnum = (typeof CategoryOrderByRelevanceFieldEnum)[keyof typeof CategoryOrderByRelevanceFieldEnum]
-
-
-export const ExpenseOrderByRelevanceFieldEnum = {
-  id: 'id',
-  tripId: 'tripId',
-  currency: 'currency',
-  categoryId: 'categoryId',
-  description: 'description',
-  paidById: 'paidById',
-  receipt: 'receipt'
-} as const
-
-export type ExpenseOrderByRelevanceFieldEnum = (typeof ExpenseOrderByRelevanceFieldEnum)[keyof typeof ExpenseOrderByRelevanceFieldEnum]
-
-
-export const ExpenseSplitOrderByRelevanceFieldEnum = {
-  id: 'id',
-  expenseId: 'expenseId',
-  userId: 'userId'
-} as const
-
-export type ExpenseSplitOrderByRelevanceFieldEnum = (typeof ExpenseSplitOrderByRelevanceFieldEnum)[keyof typeof ExpenseSplitOrderByRelevanceFieldEnum]
-
-
-export const BudgetOrderByRelevanceFieldEnum = {
-  id: 'id',
-  userId: 'userId'
-} as const
-
-export type BudgetOrderByRelevanceFieldEnum = (typeof BudgetOrderByRelevanceFieldEnum)[keyof typeof BudgetOrderByRelevanceFieldEnum]
 
 
 export const JsonNullValueFilter = {
@@ -423,64 +336,4 @@ export const JsonNullValueFilter = {
 } as const
 
 export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
-
-
-export const QueryMode = {
-  default: 'default',
-  insensitive: 'insensitive'
-} as const
-
-export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
-
-
-export const ItineraryOrderByRelevanceFieldEnum = {
-  id: 'id',
-  tripId: 'tripId',
-  title: 'title',
-  description: 'description'
-} as const
-
-export type ItineraryOrderByRelevanceFieldEnum = (typeof ItineraryOrderByRelevanceFieldEnum)[keyof typeof ItineraryOrderByRelevanceFieldEnum]
-
-
-export const NotificationOrderByRelevanceFieldEnum = {
-  id: 'id',
-  userId: 'userId',
-  title: 'title',
-  message: 'message',
-  refId: 'refId',
-  senderId: 'senderId'
-} as const
-
-export type NotificationOrderByRelevanceFieldEnum = (typeof NotificationOrderByRelevanceFieldEnum)[keyof typeof NotificationOrderByRelevanceFieldEnum]
-
-
-export const DeviceOrderByRelevanceFieldEnum = {
-  deviceId: 'deviceId',
-  fcmToken: 'fcmToken',
-  userId: 'userId',
-  platform: 'platform',
-  locale: 'locale'
-} as const
-
-export type DeviceOrderByRelevanceFieldEnum = (typeof DeviceOrderByRelevanceFieldEnum)[keyof typeof DeviceOrderByRelevanceFieldEnum]
-
-
-export const CelebrateOrderByRelevanceFieldEnum = {
-  id: 'id',
-  tripId: 'tripId',
-  userId: 'userId',
-  description: 'description'
-} as const
-
-export type CelebrateOrderByRelevanceFieldEnum = (typeof CelebrateOrderByRelevanceFieldEnum)[keyof typeof CelebrateOrderByRelevanceFieldEnum]
-
-
-export const CelebrateImageOrderByRelevanceFieldEnum = {
-  id: 'id',
-  celebrateId: 'celebrateId',
-  imageUrl: 'imageUrl'
-} as const
-
-export type CelebrateImageOrderByRelevanceFieldEnum = (typeof CelebrateImageOrderByRelevanceFieldEnum)[keyof typeof CelebrateImageOrderByRelevanceFieldEnum]
 

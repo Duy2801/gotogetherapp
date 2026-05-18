@@ -8,7 +8,7 @@
  *
  * 🟢 You can import this file directly.
  */
-import type * as runtime from "@prisma/client/runtime/client"
+import type * as runtime from "@prisma/client/runtime/library"
 import type * as $Enums from "../enums.js"
 import type * as Prisma from "../internal/prismaNamespace.js"
 
@@ -183,7 +183,6 @@ export type CelebrateImageOrderByWithRelationInput = {
   imageUrl?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   celebrate?: Prisma.CelebrateOrderByWithRelationInput
-  _relevance?: Prisma.CelebrateImageOrderByRelevanceInput
 }
 
 export type CelebrateImageWhereUniqueInput = Prisma.AtLeast<{
@@ -273,12 +272,6 @@ export type CelebrateImageListRelationFilter = {
 
 export type CelebrateImageOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
-}
-
-export type CelebrateImageOrderByRelevanceInput = {
-  fields: Prisma.CelebrateImageOrderByRelevanceFieldEnum | Prisma.CelebrateImageOrderByRelevanceFieldEnum[]
-  sort: Prisma.SortOrder
-  search: string
 }
 
 export type CelebrateImageCountOrderByAggregateInput = {
@@ -426,7 +419,21 @@ export type CelebrateImageSelect<ExtArgs extends runtime.Types.Extensions.Intern
   celebrate?: boolean | Prisma.CelebrateDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["celebrateImage"]>
 
+export type CelebrateImageSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  celebrateId?: boolean
+  imageUrl?: boolean
+  createdAt?: boolean
+  celebrate?: boolean | Prisma.CelebrateDefaultArgs<ExtArgs>
+}, ExtArgs["result"]["celebrateImage"]>
 
+export type CelebrateImageSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  celebrateId?: boolean
+  imageUrl?: boolean
+  createdAt?: boolean
+  celebrate?: boolean | Prisma.CelebrateDefaultArgs<ExtArgs>
+}, ExtArgs["result"]["celebrateImage"]>
 
 export type CelebrateImageSelectScalar = {
   id?: boolean
@@ -437,6 +444,12 @@ export type CelebrateImageSelectScalar = {
 
 export type CelebrateImageOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "celebrateId" | "imageUrl" | "createdAt", ExtArgs["result"]["celebrateImage"]>
 export type CelebrateImageInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  celebrate?: boolean | Prisma.CelebrateDefaultArgs<ExtArgs>
+}
+export type CelebrateImageIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  celebrate?: boolean | Prisma.CelebrateDefaultArgs<ExtArgs>
+}
+export type CelebrateImageIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   celebrate?: boolean | Prisma.CelebrateDefaultArgs<ExtArgs>
 }
 
@@ -568,6 +581,30 @@ export interface CelebrateImageDelegate<ExtArgs extends runtime.Types.Extensions
   createMany<T extends CelebrateImageCreateManyArgs>(args?: Prisma.SelectSubset<T, CelebrateImageCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
+   * Create many CelebrateImages and returns the data saved in the database.
+   * @param {CelebrateImageCreateManyAndReturnArgs} args - Arguments to create many CelebrateImages.
+   * @example
+   * // Create many CelebrateImages
+   * const celebrateImage = await prisma.celebrateImage.createManyAndReturn({
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Create many CelebrateImages and only return the `id`
+   * const celebrateImageWithIdOnly = await prisma.celebrateImage.createManyAndReturn({
+   *   select: { id: true },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  createManyAndReturn<T extends CelebrateImageCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, CelebrateImageCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CelebrateImagePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+  /**
    * Delete a CelebrateImage.
    * @param {CelebrateImageDeleteArgs} args - Arguments to delete one CelebrateImage.
    * @example
@@ -630,6 +667,36 @@ export interface CelebrateImageDelegate<ExtArgs extends runtime.Types.Extensions
    * 
    */
   updateMany<T extends CelebrateImageUpdateManyArgs>(args: Prisma.SelectSubset<T, CelebrateImageUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
+
+  /**
+   * Update zero or more CelebrateImages and returns the data updated in the database.
+   * @param {CelebrateImageUpdateManyAndReturnArgs} args - Arguments to update many CelebrateImages.
+   * @example
+   * // Update many CelebrateImages
+   * const celebrateImage = await prisma.celebrateImage.updateManyAndReturn({
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Update zero or more CelebrateImages and only return the `id`
+   * const celebrateImageWithIdOnly = await prisma.celebrateImage.updateManyAndReturn({
+   *   select: { id: true },
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  updateManyAndReturn<T extends CelebrateImageUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, CelebrateImageUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CelebrateImagePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one CelebrateImage.
@@ -1057,6 +1124,29 @@ export type CelebrateImageCreateManyArgs<ExtArgs extends runtime.Types.Extension
 }
 
 /**
+ * CelebrateImage createManyAndReturn
+ */
+export type CelebrateImageCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CelebrateImage
+   */
+  select?: Prisma.CelebrateImageSelectCreateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the CelebrateImage
+   */
+  omit?: Prisma.CelebrateImageOmit<ExtArgs> | null
+  /**
+   * The data used to create many CelebrateImages.
+   */
+  data: Prisma.CelebrateImageCreateManyInput | Prisma.CelebrateImageCreateManyInput[]
+  skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CelebrateImageIncludeCreateManyAndReturn<ExtArgs> | null
+}
+
+/**
  * CelebrateImage update
  */
 export type CelebrateImageUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1098,6 +1188,36 @@ export type CelebrateImageUpdateManyArgs<ExtArgs extends runtime.Types.Extension
    * Limit how many CelebrateImages to update.
    */
   limit?: number
+}
+
+/**
+ * CelebrateImage updateManyAndReturn
+ */
+export type CelebrateImageUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CelebrateImage
+   */
+  select?: Prisma.CelebrateImageSelectUpdateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the CelebrateImage
+   */
+  omit?: Prisma.CelebrateImageOmit<ExtArgs> | null
+  /**
+   * The data used to update CelebrateImages.
+   */
+  data: Prisma.XOR<Prisma.CelebrateImageUpdateManyMutationInput, Prisma.CelebrateImageUncheckedUpdateManyInput>
+  /**
+   * Filter which CelebrateImages to update
+   */
+  where?: Prisma.CelebrateImageWhereInput
+  /**
+   * Limit how many CelebrateImages to update.
+   */
+  limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CelebrateImageIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**

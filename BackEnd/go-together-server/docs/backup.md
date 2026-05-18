@@ -18,8 +18,8 @@
 
 Script được thiết kế để tự động hóa hoàn toàn:
 
-1. **Đọc biến môi trường:** Sử dụng `source .env` để lấy `DB_USER`, `DB_PASS`, `DB_NAME`.
-2. **Dump Database:** Xuất dữ liệu từ Docker MySQL/PostgreSQL bằng lệnh `mysqldump` hoặc `pg_dump`.
+1. **Đọc biến môi trường:** Sử dụng `source .env` để lấy `DATABASE_URL`.
+2. **Dump Database:** Xuất dữ liệu từ Docker PostgreSQL bằng lệnh `pg_dump`.
 3. **Nén dữ liệu:** Dùng `gzip` để giảm dung lượng file trước khi tải lên.
 4. **Upload:** Dùng `rclone copy` đẩy file lên thư mục `gotogether_backups` trên Drive.
 5. **Dọn dẹp:** Tự động xóa file backup cũ trên VPS sau 7 ngày để tránh đầy ổ cứng.
@@ -39,7 +39,6 @@ Log được lưu tại: `~/gotogether-app/backups/backup_history.log`
 - Chạy backup thủ công ngay lập tức: `~/gotogether-app/backup_gdrive.sh`
 - Xem log backup gần nhất: `tail -f ~/gotogether-app/backups/backup_history.log`
 - Restore database từ backup:
-  - MySQL: `gunzip < backup.sql.gz | docker exec -i mysql_container mysql -u user -p database`
   - PostgreSQL: `gunzip < backup.sql.gz | docker exec -i postgres_container psql -U user -d database`
 
 ## 6. Backup Strategy cho Travel Expense App

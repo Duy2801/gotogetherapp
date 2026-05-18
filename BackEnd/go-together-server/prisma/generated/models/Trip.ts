@@ -8,7 +8,7 @@
  *
  * 🟢 You can import this file directly.
  */
-import type * as runtime from "@prisma/client/runtime/client"
+import type * as runtime from "@prisma/client/runtime/library"
 import type * as $Enums from "../enums.js"
 import type * as Prisma from "../internal/prismaNamespace.js"
 
@@ -268,7 +268,6 @@ export type TripOrderByWithRelationInput = {
   itineraries?: Prisma.ItineraryOrderByRelationAggregateInput
   members?: Prisma.TripMemberOrderByRelationAggregateInput
   celebrates?: Prisma.CelebrateOrderByRelationAggregateInput
-  _relevance?: Prisma.TripOrderByRelevanceInput
 }
 
 export type TripWhereUniqueInput = Prisma.AtLeast<{
@@ -420,12 +419,6 @@ export type TripUncheckedUpdateManyInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   images?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-}
-
-export type TripOrderByRelevanceInput = {
-  fields: Prisma.TripOrderByRelevanceFieldEnum | Prisma.TripOrderByRelevanceFieldEnum[]
-  sort: Prisma.SortOrder
-  search: string
 }
 
 export type TripCountOrderByAggregateInput = {
@@ -924,7 +917,29 @@ export type TripSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   _count?: boolean | Prisma.TripCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["trip"]>
 
+export type TripSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  name?: boolean
+  startDate?: boolean
+  endDate?: boolean
+  totalBudget?: boolean
+  status?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
+  images?: boolean
+}, ExtArgs["result"]["trip"]>
 
+export type TripSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  name?: boolean
+  startDate?: boolean
+  endDate?: boolean
+  totalBudget?: boolean
+  status?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
+  images?: boolean
+}, ExtArgs["result"]["trip"]>
 
 export type TripSelectScalar = {
   id?: boolean
@@ -946,6 +961,8 @@ export type TripInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   celebrates?: boolean | Prisma.Trip$celebratesArgs<ExtArgs>
   _count?: boolean | Prisma.TripCountOutputTypeDefaultArgs<ExtArgs>
 }
+export type TripIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type TripIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
 
 export type $TripPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Trip"
@@ -1083,6 +1100,30 @@ export interface TripDelegate<ExtArgs extends runtime.Types.Extensions.InternalA
   createMany<T extends TripCreateManyArgs>(args?: Prisma.SelectSubset<T, TripCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
+   * Create many Trips and returns the data saved in the database.
+   * @param {TripCreateManyAndReturnArgs} args - Arguments to create many Trips.
+   * @example
+   * // Create many Trips
+   * const trip = await prisma.trip.createManyAndReturn({
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Create many Trips and only return the `id`
+   * const tripWithIdOnly = await prisma.trip.createManyAndReturn({
+   *   select: { id: true },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  createManyAndReturn<T extends TripCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, TripCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TripPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+  /**
    * Delete a Trip.
    * @param {TripDeleteArgs} args - Arguments to delete one Trip.
    * @example
@@ -1145,6 +1186,36 @@ export interface TripDelegate<ExtArgs extends runtime.Types.Extensions.InternalA
    * 
    */
   updateMany<T extends TripUpdateManyArgs>(args: Prisma.SelectSubset<T, TripUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
+
+  /**
+   * Update zero or more Trips and returns the data updated in the database.
+   * @param {TripUpdateManyAndReturnArgs} args - Arguments to update many Trips.
+   * @example
+   * // Update many Trips
+   * const trip = await prisma.trip.updateManyAndReturn({
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Update zero or more Trips and only return the `id`
+   * const tripWithIdOnly = await prisma.trip.updateManyAndReturn({
+   *   select: { id: true },
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  updateManyAndReturn<T extends TripUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, TripUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TripPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one Trip.
@@ -1580,6 +1651,25 @@ export type TripCreateManyArgs<ExtArgs extends runtime.Types.Extensions.Internal
 }
 
 /**
+ * Trip createManyAndReturn
+ */
+export type TripCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Trip
+   */
+  select?: Prisma.TripSelectCreateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the Trip
+   */
+  omit?: Prisma.TripOmit<ExtArgs> | null
+  /**
+   * The data used to create many Trips.
+   */
+  data: Prisma.TripCreateManyInput | Prisma.TripCreateManyInput[]
+  skipDuplicates?: boolean
+}
+
+/**
  * Trip update
  */
 export type TripUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1609,6 +1699,32 @@ export type TripUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs
  * Trip updateMany
  */
 export type TripUpdateManyArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * The data used to update Trips.
+   */
+  data: Prisma.XOR<Prisma.TripUpdateManyMutationInput, Prisma.TripUncheckedUpdateManyInput>
+  /**
+   * Filter which Trips to update
+   */
+  where?: Prisma.TripWhereInput
+  /**
+   * Limit how many Trips to update.
+   */
+  limit?: number
+}
+
+/**
+ * Trip updateManyAndReturn
+ */
+export type TripUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Trip
+   */
+  select?: Prisma.TripSelectUpdateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the Trip
+   */
+  omit?: Prisma.TripOmit<ExtArgs> | null
   /**
    * The data used to update Trips.
    */
