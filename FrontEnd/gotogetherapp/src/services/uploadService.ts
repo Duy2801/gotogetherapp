@@ -1,4 +1,6 @@
 import { api } from '../api';
+import { getItem } from '../utils/storage';
+import { KEY_STORAGE } from '../constants/KeyStorage';
 
 export interface UploadImageResponse {
   status: boolean;
@@ -31,15 +33,8 @@ export const uploadService = {
         name: filename,
       } as any);
 
-      const response = await api.post<UploadImageResponse>(
-        `/upload/${type}`,
-        formData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        },
-      );
+      // Let axios set the correct multipart boundary header automatically
+      const response = await api.post<UploadImageResponse>(`/upload/${type}`, formData);
 
       // response đã được interceptor xử lý, trả về response.data
       const result = response as unknown as UploadImageResponse;
@@ -51,6 +46,7 @@ export const uploadService = {
       throw new Error('Upload failed');
     } catch (error: any) {
       console.error('Upload error:', error);
+      console.error('Upload error response:', error?.response);
       throw new Error(error?.message || 'Không thể upload ảnh');
     }
   },
@@ -78,25 +74,45 @@ export const uploadService = {
         name: filename,
       } as any);
 
-      const response = await api.post<UploadImageResponse>(
-        '/upload/avatar',
-        formData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        },
-      );
+      // Let axios set the correct multipart boundary header automatically
+      try {
+        const response = await api.post<UploadImageResponse>('/upload/avatar', formData);
+        const result = response as unknown as UploadImageResponse;
 
-      const result = response as unknown as UploadImageResponse;
+        if (result.status && result.data?.url) {
+          return result.data.url;
+        }
+        throw new Error('Upload failed');
+      } catch (err: any) {
+        // If axios network error on React Native, fall back to fetch implementation
+        console.warn('Axios upload failed, trying fetch fallback:', err?.message);
 
-      if (result.status && result.data?.url) {
-        return result.data.url;
+        const token = await getItem(KEY_STORAGE.token);
+        const uploadUrl = `${(api as any).defaults.baseURL}/upload/avatar`;
+
+        const headers: any = {};
+        if (token) headers.Authorization = `Bearer ${token}`;
+
+        try {
+          const fetchResponse = await fetch(uploadUrl, {
+            method: 'POST',
+            headers,
+            body: formData as any,
+          });
+
+          const json = await fetchResponse.json();
+          if (json?.status && json?.data?.url) {
+            return json.data.url;
+          }
+          throw new Error('Fetch upload failed');
+        } catch (fetchErr: any) {
+          console.error('Fetch avatar upload error:', fetchErr);
+          throw fetchErr;
+        }
       }
-
-      throw new Error('Upload failed');
     } catch (error: any) {
       console.error('Avatar upload error:', error);
+      console.error('Avatar upload error response:', error?.response);
       throw new Error(error?.message || 'Không thể upload avatar');
     }
   },

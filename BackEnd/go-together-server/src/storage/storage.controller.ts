@@ -17,7 +17,7 @@ export class StorageController {
   constructor(private readonly cloudinaryService: CloudinaryService) {}
 
   @Post("image")
-  @UseInterceptors(FileInterceptor("file"))
+  @UseInterceptors(FileInterceptor("file", { limits: { fileSize: 10 * 1024 * 1024 } }))
   async uploadImage(@UploadedFile() file: Express.Multer.File) {
     if (!file) {
       throw new BadRequestException("No file uploaded");
@@ -41,7 +41,7 @@ export class StorageController {
   }
 
   @Post("receipt")
-  @UseInterceptors(FileInterceptor("file"))
+  @UseInterceptors(FileInterceptor("file", { limits: { fileSize: 10 * 1024 * 1024 } }))
   async uploadReceipt(@UploadedFile() file: Express.Multer.File) {
     if (!file) {
       throw new BadRequestException("No file uploaded");
@@ -65,7 +65,7 @@ export class StorageController {
   }
 
   @Post("photo")
-  @UseInterceptors(FileInterceptor("file"))
+  @UseInterceptors(FileInterceptor("file", { limits: { fileSize: 10 * 1024 * 1024 } }))
   async uploadPhoto(@UploadedFile() file: Express.Multer.File) {
     if (!file) {
       throw new BadRequestException("No file uploaded");
@@ -89,7 +89,7 @@ export class StorageController {
   }
 
   @Post("avatar")
-  @UseInterceptors(FileInterceptor("file"))
+  @UseInterceptors(FileInterceptor("file", { limits: { fileSize: 10 * 1024 * 1024 } }))
   async uploadAvatar(
     @UploadedFile() file: Express.Multer.File,
     @Req() req: any,

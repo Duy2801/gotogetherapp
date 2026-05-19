@@ -79,6 +79,13 @@ const UpdateInfoScreen = () => {
       const uploadedUrl = await uploadService.uploadAvatar(image.path);
       if (uploadedUrl) {
         setAvatar(uploadedUrl);
+        // update global user state immediately so other screens reflect new avatar
+        dispatch(
+          updateUser({
+            ...(currentUser || {}),
+            avatar: uploadedUrl,
+          } as any),
+        );
         showSuccessToast(t('common.success'), t('profile.avatarUploadSuccess'));
       }
     } catch (error: any) {
@@ -110,14 +117,11 @@ const UpdateInfoScreen = () => {
       if (response.status) {
         dispatch(updateUser(response.data));
         showSuccessToast(t('common.success'), t('profile.updateSuccess'));
-        if (fromAuthFlow) {
-          navigation.reset({
-            index: 0,
-            routes: [{ name: SCREEN_NAME.TABS }],
-          });
-        } else {
-          navigation.goBack();
-        }
+        // Reset to main tabs so all main screens remount and reflect updated user
+        navigation.reset({
+          index: 0,
+          routes: [{ name: SCREEN_NAME.TABS }],
+        });
       }
     } catch (error: any) {
       showErrorToast(

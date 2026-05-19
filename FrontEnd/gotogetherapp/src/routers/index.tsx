@@ -3,6 +3,7 @@ import {
   NavigationContainer,
 } from '@react-navigation/native';
 import type { ComponentType } from 'react';
+import React from 'react';
 import Toast from 'react-native-toast-message';
 import { SCREEN_NAME } from '../constants/screenName';
 import OnboardingScreen from '../features/onboarding/OnboardingScreen';
@@ -10,6 +11,8 @@ import HomeScreen from '../features/home/HomeScreen';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import LoginScreen from '../features/auth/login/LoginScreen';
 import RegisterScreen from '../features/auth/register/RegisterScreen';
+import VerifyOtpScreen from '../features/auth/verifyOtp/VerifyOtpScreen';
+import ForgotPasswordScreen from '../features/auth/forgotPassword/ForgotPasswordScreen';
 import { UpdateInfoScreen } from '../features/profile';
 import TabNavigator from './Tabs';
 import SpendingScreen from '../features/spending/SpedingScreen';
@@ -23,6 +26,8 @@ import SpendingStatisticsScreen from '../features/statistic/SpendingStatisticsSc
 import ChangePasswordScreen from '../features/setting/screens/ChangePasswordScreen';
 import HistoryScreen from '../features/setting/screens/HistoryScreen';
 import { CustomToastComponent } from '../config/Toast';
+import store from '../reducers/store';
+import { login } from '../reducers/loginReducer';
 const Stack = createNativeStackNavigator();
 
 type AppRouteItem = {
@@ -83,6 +88,8 @@ function ApplicationNavigator() {
     { name: SCREEN_NAME.HOME, component: HomeScreen },
     { name: SCREEN_NAME.LOGIN, component: LoginScreen },
     { name: SCREEN_NAME.REGISTER, component: RegisterScreen },
+    { name: SCREEN_NAME.VERIFY_OTP, component: VerifyOtpScreen },
+    { name: SCREEN_NAME.FORGOT_PASSWORD, component: ForgotPasswordScreen },
     { name: SCREEN_NAME.UPDATE_INFO, component: UpdateInfoScreen },
     { name: SCREEN_NAME.TABS, component: TabNavigator },
     { name: SCREEN_NAME.CELEBRATE, component: CelebrateScreen },

@@ -14,13 +14,25 @@ interface User {
 type LoginState = {
   user: User | null;
   accessToken: string;
+  refreshToken: string;
   startDate: string | null;
 };
 
 const initialState: LoginState = {
   user: null,
   accessToken: '',
+  refreshToken: '',
   startDate: null,
+};
+
+const addAvatarCacheBuster = (avatar?: string) => {
+  if (!avatar) return avatar;
+  try {
+    const base = avatar.split('?')[0];
+    return `${base}?t=${Date.now()}`;
+  } catch {
+    return avatar;
+  }
 };
 
 export const LoginReducer = createSlice({
@@ -28,28 +40,38 @@ export const LoginReducer = createSlice({
   initialState,
   reducers: {
     login: (state, action) => {
+      const user = action.payload.user
+        ? { ...action.payload.user, avatar: addAvatarCacheBuster(action.payload.user.avatar) }
+        : action.payload.user;
+
       setItem(KEY_STORAGE.token, action.payload.accessToken);
-      setItem(KEY_STORAGE.user, action.payload.user);
+      setItem(KEY_STORAGE.refreshToken, action.payload.refreshToken);
+      setItem(KEY_STORAGE.user, user);
       if (action.payload.startDate) {
         setItem(KEY_STORAGE.startDate, action.payload.startDate);
       }
       return {
-        user: action.payload.user,
+        user,
         accessToken: action.payload.accessToken,
+        refreshToken: action.payload.refreshToken,
         startDate: action.payload.startDate ? action.payload.startDate : null,
       };
     },
     logout: () => {
       setItem(KEY_STORAGE.token, '');
+      setItem(KEY_STORAGE.refreshToken, '');
       setItem(KEY_STORAGE.user, '');
       setItem(KEY_STORAGE.startDate, '');
       return initialState;
     },
     updateUser: (state, action) => {
-      setItem(KEY_STORAGE.user, action.payload);
+      const user = action.payload
+        ? { ...action.payload, avatar: addAvatarCacheBuster(action.payload.avatar) }
+        : action.payload;
+      setItem(KEY_STORAGE.user, user);
       return {
         ...state,
-        user: action.payload,
+        user,
       };
     },
   },

@@ -1,16 +1,9 @@
-import {
-  Alert,
-  Image,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import Body from '../../../components/Layout/Body';
-import { ICONGOOGLE, LOGO } from '../../../assets';
+import { LOGO } from '../../../assets';
 import React from 'react';
 import Button from '../../../components/Button/Button';
+import GoogleSignInButton from '../../../components/GoogleSignInButton';
 import { useNavigation } from '@react-navigation/native';
 import { SCREEN_NAME } from '../../../constants/screenName';
 import Toast from 'react-native-toast-message';
@@ -19,7 +12,6 @@ import { useDispatch } from 'react-redux';
 import { login } from '../../../reducers/loginReducer';
 import { ApiError } from '../../../api';
 import { useTranslation } from '../../../hooks/useTranslation';
-
 const LoginScreen = () => {
   const navigation = useNavigation<any>();
   const [showPassword, setShowPassword] = React.useState(false);
@@ -61,18 +53,20 @@ const LoginScreen = () => {
       return;
     }
     try {
-      const response = await apiLogin({ email, password });
-      if (response.status) {
+      const response = (await apiLogin({ email, password })) as any;
+      console.log('apiLogin response:', response);
+      if (response?.accessToken) {
         Toast.show({ type: 'success', text1: t('auth.loginSuccess') });
         dispatch(
           login({
-            user: response.data.user,
-            accessToken: response.data.accessToken,
-            startDate: response.data.startDate,
+            user: response.user,
+            accessToken: response.accessToken,
+            refreshToken: response.refreshToken,
+            startDate: response.startDate,
           }),
         );
 
-        const user = response.data.user;
+        const user = response.user;
 
         const isInfoComplete = checkInfoUser(user);
 
@@ -86,9 +80,11 @@ const LoginScreen = () => {
           }
         }, 300);
       } else {
+        // Show debug info when response doesn't include tokens
+        console.log('Login response missing accessToken:', response);
         Toast.show({
           type: 'warning',
-          text1: t('auth.invalidResponse'),
+          text1: response && typeof response === 'object' ? JSON.stringify(response) : t('auth.invalidResponse'),
         });
       }
     } catch (error) {
@@ -113,6 +109,10 @@ const LoginScreen = () => {
       return true;
     });
   };
+
+  // Google sign-in handling removed — visual-only button remains
+
+  
   return (
     <Body hideHeader>
       <View style={styles.container}>
@@ -120,12 +120,9 @@ const LoginScreen = () => {
           <Image style={styles.imageLogo} source={LOGO.MAIN} />
           <Text style={styles.title}>{t('auth.login')}</Text>
         </View>
-        <View style={styles.card}>
-          <TouchableOpacity style={styles.containerGoogle}>
-            <Image style={styles.imageGoogle} source={ICONGOOGLE.GOOGLE} />
-            <Text style={styles.textGoogle}>{t('auth.loginWithGoogle')}</Text>
-          </TouchableOpacity>
-        </View>
+          <View style={styles.containerGoogle}>
+            <GoogleSignInButton />
+          </View>
         <View>
           <TextInput
             style={styles.input}
@@ -159,7 +156,7 @@ const LoginScreen = () => {
         <View style={styles.buttonWrapper}>
           <Button title={t('auth.login')} onPress={handleLogin} />
         </View>
-        <TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.navigate(SCREEN_NAME.FORGOT_PASSWORD as never)}>
           <Text style={styles.textLogin}>{t('auth.forgotPassword')}</Text>
         </TouchableOpacity>
         <View style={styles.footerResgister}>
@@ -186,11 +183,8 @@ const styles = StyleSheet.create({
   containerGoogle: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 30,
-    borderWidth: 2,
-    padding: 10,
-    borderRadius: 10,
-    borderColor: '#636363',
+    marginTop: 15,
+    paddingHorizontal: 45,
   },
   card: {
     alignItems: 'center',

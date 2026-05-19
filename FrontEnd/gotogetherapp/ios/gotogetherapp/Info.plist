@@ -54,5 +54,16 @@
 		<string>DancingScript-Medium.ttf</string>
 		<string>DancingScript-SemiBold.ttf</string>
 	</array>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>gotogetherapp</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>gotogetherapp</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>

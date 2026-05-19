@@ -2,6 +2,7 @@ export const SCREEN_NAME = {
   HOME: 'Home',
   LOGIN: 'Login',
   REGISTER: 'Register',
+  VERIFY_OTP: 'VerifyOtp',
   FORGOT_PASSWORD: 'ForgotPassword',
   SPLASH: 'Splash',
   ONBOARDING: 'Onboarding',

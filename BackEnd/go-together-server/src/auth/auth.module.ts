@@ -3,7 +3,6 @@ import { AuthService } from "./auth.service";
 import { AuthController } from "./auth.controller";
 import { UserModule } from "src/user/user.module";
 import { RedisModule } from "src/redis/redis.module";
-import { BullModule } from "@nestjs/bull";
 import { JwtModule } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
 import { JwtStrategy } from "./strategies/jwt.strategy";
@@ -18,9 +17,6 @@ import { JwtStrategy } from "./strategies/jwt.strategy";
         secret: configService.get<string>("JWT_SECRET"),
         signOptions: { expiresIn: "7d" },
       }),
-    }),
-    BullModule.registerQueue({
-      name: "mail-queue",
     }),
   ],
   controllers: [AuthController],

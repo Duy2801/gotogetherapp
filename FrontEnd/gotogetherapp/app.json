@@ -1,4 +1,5 @@
 {
   "name": "gotogetherapp",
-  "displayName": "gotogetherapp"
+  "displayName": "gotogetherapp",
+  "scheme": "gotogetherapp"
 }
