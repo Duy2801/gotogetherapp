@@ -8,11 +8,12 @@ import {
   View,
 } from 'react-native';
 import Toast from 'react-native-toast-message';
+import {showSuccessToast, showErrorToast} from '../../../utils/appToast';
 import Body from '../../../components/Layout/Body';
 import Button from '../../../components/Button/Button';
 import { ApiError } from '../../../api';
 import { useTranslation } from '../../../hooks/useTranslation';
-import { apiForgotPassword, apiResetPasswordOtp } from '../login/api';
+import { apiForgotPassword } from '../login/api';
 import { SCREEN_NAME } from '../../../constants/screenName';
 
 const ForgotPasswordScreen = () => {
@@ -21,9 +22,6 @@ const ForgotPasswordScreen = () => {
 
   const [email, setEmail] = useState('');
   const [otpSent, setOtpSent] = useState(false);
-  const [otp, setOtp] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmNewPassword, setConfirmNewPassword] = useState('');
 
   const handleSendOtp = async () => {
     if (!email.trim()) {
@@ -34,43 +32,16 @@ const ForgotPasswordScreen = () => {
     try {
       const response = (await apiForgotPassword({ email })) as any;
       setOtpSent(true);
-      Toast.show({ type: 'success', text1: response.message || t('auth.passwordResetOtpSent') });
+      showSuccessToast(t('common.success'), response.message || t('auth.passwordResetOtpSent'));
+      // navigate to separate OTP verification screen
+      navigation.navigate(SCREEN_NAME.VERIFY_RESET_OTP as never, { email } as never);
     } catch (error) {
       const err = error as ApiError;
-      Toast.show({ type: 'error', text1: err.message || t('auth.forgotPasswordFailed') });
+      showErrorToast(t('common.error'), err.message || t('auth.forgotPasswordFailed'));
     }
   };
 
-  const handleResetPassword = async () => {
-    if (!otpSent) {
-      return;
-    }
-    if (otp.trim().length !== 6) {
-      Toast.show({ type: 'error', text1: t('auth.otpRequired') });
-      return;
-    }
-    if (newPassword.length < 6) {
-      Toast.show({ type: 'error', text1: t('auth.passwordTooShort') });
-      return;
-    }
-    if (newPassword !== confirmNewPassword) {
-      Toast.show({ type: 'error', text1: t('auth.passwordsNotMatch') });
-      return;
-    }
-
-    try {
-      const response = (await apiResetPasswordOtp({
-        email,
-        otp,
-        newPassword,
-      })) as any;
-      Toast.show({ type: 'success', text1: response.message || t('auth.resetSuccess') });
-      navigation.navigate(SCREEN_NAME.LOGIN as never);
-    } catch (error) {
-      const err = error as ApiError;
-      Toast.show({ type: 'error', text1: err.message || t('auth.resetFailed') });
-    }
-  };
+  
 
   return (
     <Body hideHeader>
@@ -87,38 +58,7 @@ const ForgotPasswordScreen = () => {
           editable={!otpSent}
         />
 
-        {otpSent ? (
-          <>
-            <TextInput
-              style={styles.input}
-              value={otp}
-              onChangeText={setOtp}
-              placeholder={t('auth.otp')}
-              keyboardType="number-pad"
-              maxLength={6}
-            />
-            <TextInput
-              style={styles.input}
-              value={newPassword}
-              onChangeText={setNewPassword}
-              placeholder={t('auth.newPassword')}
-              secureTextEntry
-            />
-            <TextInput
-              style={styles.input}
-              value={confirmNewPassword}
-              onChangeText={setConfirmNewPassword}
-              placeholder={t('auth.confirmNewPassword')}
-              secureTextEntry
-            />
-            <Button title={t('auth.resetPassword')} onPress={handleResetPassword} />
-            <TouchableOpacity onPress={handleSendOtp} style={styles.resendButton}>
-              <Text style={styles.resendText}>{t('auth.resendOtp')}</Text>
-            </TouchableOpacity>
-          </>
-        ) : (
-          <Button title={t('auth.sendResetOtp')} onPress={handleSendOtp} />
-        )}
+        <Button title={t('auth.sendResetOtp')} onPress={handleSendOtp} />
 
         <TouchableOpacity onPress={() => navigation.navigate(SCREEN_NAME.LOGIN as never)}>
           <Text style={styles.backText}>{t('common.back')}</Text>

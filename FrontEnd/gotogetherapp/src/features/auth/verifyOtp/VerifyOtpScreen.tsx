@@ -8,6 +8,7 @@ import {
   View,
 } from 'react-native';
 import Toast from 'react-native-toast-message';
+import {showSuccessToast, showErrorToast} from '../../../utils/appToast';
 import Body from '../../../components/Layout/Body';
 import Button from '../../../components/Button/Button';
 import { ApiError } from '../../../api';
@@ -32,26 +33,26 @@ const VerifyOtpScreen = () => {
 
   const handleResend = async () => {
     if (!email.trim()) {
-      Toast.show({ type: 'error', text1: t('auth.emailRequired') });
+      showErrorToast(t('common.error'), t('auth.emailRequired'));
       return;
     }
 
     try {
       await apiResendRegisterOtp({ email });
-      Toast.show({ type: 'success', text1: t('auth.resendOtpSuccess') });
+      showSuccessToast(t('common.success'), t('auth.resendOtpSuccess'));
     } catch (error) {
       const err = error as ApiError;
-      Toast.show({ type: 'error', text1: err.message || t('auth.resendOtpFailed') });
+      showErrorToast(t('common.error'), err.message || t('auth.resendOtpFailed'));
     }
   };
 
   const handleVerify = async () => {
     if (!email.trim()) {
-      Toast.show({ type: 'error', text1: t('auth.emailRequired') });
+      showErrorToast(t('common.error'), t('auth.emailRequired'));
       return;
     }
     if (otp.trim().length !== 6) {
-      Toast.show({ type: 'error', text1: t('auth.otpRequired') });
+      showErrorToast(t('common.error'), t('auth.otpRequired'));
       return;
     }
 
@@ -67,7 +68,7 @@ const VerifyOtpScreen = () => {
         }),
       );
 
-      Toast.show({ type: 'success', text1: response.message || t('auth.verifySuccess') });
+      showSuccessToast(t('common.success'), response.message || t('auth.verifySuccess'));
 
       const requiredFields = ['fullName', 'dateOfBirth', 'gender'];
       const isInfoComplete = requiredFields.every(field => {
@@ -90,7 +91,7 @@ const VerifyOtpScreen = () => {
       }
     } catch (error) {
       const err = error as ApiError;
-      Toast.show({ type: 'error', text1: err.message || t('auth.verifyFailed') });
+      showErrorToast(t('common.error'), err.message || t('auth.verifyFailed'));
     } finally {
       setLoading(false);
     }

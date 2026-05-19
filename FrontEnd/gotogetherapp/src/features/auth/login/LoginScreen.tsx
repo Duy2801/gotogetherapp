@@ -7,6 +7,7 @@ import GoogleSignInButton from '../../../components/GoogleSignInButton';
 import { useNavigation } from '@react-navigation/native';
 import { SCREEN_NAME } from '../../../constants/screenName';
 import Toast from 'react-native-toast-message';
+import {showSuccessToast, showErrorToast} from '../../../utils/appToast';
 import { apiLogin } from './api';
 import { useDispatch } from 'react-redux';
 import { login } from '../../../reducers/loginReducer';
@@ -27,7 +28,7 @@ const LoginScreen = () => {
 
   const validate = () => {
     if (!email) {
-      Toast.show({ type: 'error', text1: t('validation.emailRequired') });
+      showErrorToast(t('common.error'), t('validation.emailRequired'));
       return false;
     }
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
@@ -56,7 +57,7 @@ const LoginScreen = () => {
       const response = (await apiLogin({ email, password })) as any;
       console.log('apiLogin response:', response);
       if (response?.accessToken) {
-        Toast.show({ type: 'success', text1: t('auth.loginSuccess') });
+        showSuccessToast(t('common.success'), t('auth.loginSuccess'));
         dispatch(
           login({
             user: response.user,
@@ -82,17 +83,11 @@ const LoginScreen = () => {
       } else {
         // Show debug info when response doesn't include tokens
         console.log('Login response missing accessToken:', response);
-        Toast.show({
-          type: 'warning',
-          text1: response && typeof response === 'object' ? JSON.stringify(response) : t('auth.invalidResponse'),
-        });
+        showErrorToast(t('common.error'), response && typeof response === 'object' ? JSON.stringify(response) : t('auth.invalidResponse'));
       }
     } catch (error) {
       const err = error as ApiError;
-      Toast.show({
-        type: 'error',
-        text1: err.message || t('auth.loginFailed'),
-      });
+      showErrorToast(t('common.error'), err.message || t('auth.loginFailed'));
     }
   };
   const checkInfoUser = (user: any) => {

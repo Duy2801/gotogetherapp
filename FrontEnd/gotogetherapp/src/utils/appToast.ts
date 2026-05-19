@@ -133,3 +133,48 @@ export const showInfoToast = (
   message?: string,
   duration?: number,
 ) => showAppToast({ kind: 'info', title, message, duration });
+
+// Centralized action messages in Vietnamese for common actions.
+export const ACTION_MESSAGES: Record<string, string> = {
+  loginSuccess: 'Đăng nhập thành công.',
+  logoutSuccess: 'Đăng xuất thành công.',
+  passwordResetSuccess:
+    'Đổi mật khẩu thành công. Vui lòng đăng nhập bằng mật khẩu mới.',
+  passwordChangeSuccess: 'Thay đổi mật khẩu thành công.',
+  sendOtpSuccess: 'Đã gửi mã xác thực tới email của bạn.',
+  verifyOtpSuccess: 'Xác thực thành công.',
+  registerSuccess: 'Đăng ký thành công. Vui lòng đăng nhập.',
+  tripCreateSuccess: 'Thêm chuyến đi thành công.',
+  tripUpdateSuccess: 'Cập nhật chuyến đi thành công.',
+  tripDeleteSuccess: 'Xóa chuyến đi thành công.',
+  expenseCreateSuccess: 'Thêm chi tiêu thành công.',
+  genericSuccess: 'Thao tác thành công.',
+};
+
+/**
+ * Show a standard success toast for a named action.
+ * @param actionKey key from ACTION_MESSAGES
+ * @param override optional custom message to override the default
+ */
+export const showActionSuccessMessage = (
+  actionKey: keyof typeof ACTION_MESSAGES | string,
+  override?: string,
+  duration?: number,
+) => {
+  const message = override ?? ACTION_MESSAGES[actionKey] ?? ACTION_MESSAGES.genericSuccess;
+  return showSuccessToast('Thành công', message, duration);
+};
+
+/**
+ * Show a standard error toast for a named action.
+ * If server message exists, it will be translated to Vietnamese where possible.
+ */
+export const showActionErrorMessage = (
+  actionKey: string,
+  serverMessage?: string,
+  duration?: number,
+) => {
+  const defaultMsg = ACTION_MESSAGES[actionKey] ? `${ACTION_MESSAGES[actionKey]} thất bại.` : 'Thao tác thất bại.';
+  const translated = translateErrorMessageToVi(serverMessage) ?? defaultMsg;
+  return showErrorToast('Lỗi', translated, duration);
+};

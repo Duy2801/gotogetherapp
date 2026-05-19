@@ -56,6 +56,10 @@ export const apiForgotPassword = async (body: ForgotPasswordBody) => {
   return api.post('/auth/forgot-password', body);
 };
 
+export const apiVerifyForgotOtp = async (body: { email: string; otp: string }) => {
+  return api.post('/auth/forgot-password/verify-otp', body);
+};
+
 export const apiResetPasswordOtp = async (body: ResetPasswordOtpBody) => {
   return api.post('/auth/forgot-password/verify-otp', body);
 };

@@ -24,6 +24,8 @@ import {
 import { SCREEN_NAME } from '../../../constants/screenName';
 import { ApiError } from '../../../api';
 
+import { showSuccessToast, showErrorToast } from '../../../utils/appToast';
+
 const RegisterScreen = () => {
   const [showPassword, setShowPassword] = useState(false);
   const { t } = useTranslation();
@@ -46,7 +48,7 @@ const RegisterScreen = () => {
       Toast.show({ type: 'error', text1: t('auth.emailRequired') });
       return false;
     }
-    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { 
       Toast.show({ type: 'error', text1: t('auth.invalidEmail') });
       return false;
     }
@@ -54,7 +56,7 @@ const RegisterScreen = () => {
       Toast.show({ type: 'error', text1: t('auth.passwordTooShort') });
       return false;
     }
-    if (password !== confirmPassword) {
+    if (password !== confirmPassword) { 
       Toast.show({ type: 'error', text1: t('auth.passwordsNotMatch') });
       return false;
     }
@@ -107,7 +109,7 @@ const RegisterScreen = () => {
 
     try {
       await apiResendRegisterOtp({ email });
-      Toast.show({ type: 'success', text1: t('auth.resendOtpSuccess') });
+      showSuccessToast(t('common.success'), t('auth.resendOtpSuccess'));
     } catch (error) {
       const err = error as ApiError;
       Toast.show({ type: 'error', text1: err.message || t('auth.resendOtpFailed') });
@@ -129,7 +131,7 @@ const RegisterScreen = () => {
       const response = await apiVerifyRegisterOtp({ email, otp });
 
       // After successful verification, do NOT auto-login — send user to Login to sign in.
-      Toast.show({ type: 'success', text1: response.message || t('auth.verifySuccess') });
+      showSuccessToast(t('common.success'), response.message || t('auth.verifySuccess'));
       navigation.navigate(SCREEN_NAME.LOGIN as never);
     } catch (error) {
       const err = error as ApiError;

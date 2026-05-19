@@ -13,6 +13,8 @@ import LoginScreen from '../features/auth/login/LoginScreen';
 import RegisterScreen from '../features/auth/register/RegisterScreen';
 import VerifyOtpScreen from '../features/auth/verifyOtp/VerifyOtpScreen';
 import ForgotPasswordScreen from '../features/auth/forgotPassword/ForgotPasswordScreen';
+import VerifyResetOtpScreen from '../features/auth/forgotPassword/VerifyResetOtpScreen';
+import ResetPasswordScreen from '../features/auth/forgotPassword/ResetPasswordScreen';
 import { UpdateInfoScreen } from '../features/profile';
 import TabNavigator from './Tabs';
 import SpendingScreen from '../features/spending/SpedingScreen';
@@ -90,6 +92,8 @@ function ApplicationNavigator() {
     { name: SCREEN_NAME.REGISTER, component: RegisterScreen },
     { name: SCREEN_NAME.VERIFY_OTP, component: VerifyOtpScreen },
     { name: SCREEN_NAME.FORGOT_PASSWORD, component: ForgotPasswordScreen },
+    { name: SCREEN_NAME.VERIFY_RESET_OTP, component: VerifyResetOtpScreen },
+    { name: SCREEN_NAME.RESET_PASSWORD, component: ResetPasswordScreen },
     { name: SCREEN_NAME.UPDATE_INFO, component: UpdateInfoScreen },
     { name: SCREEN_NAME.TABS, component: TabNavigator },
     { name: SCREEN_NAME.CELEBRATE, component: CelebrateScreen },
