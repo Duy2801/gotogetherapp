@@ -1,7 +1,8 @@
 generator client {
-  provider     = "prisma-client"
-  output       = "./generated"
-  moduleFormat = "cjs"
+  provider      = "prisma-client"
+  output        = "./generated"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
+  moduleFormat  = "cjs"
 }
 
 datasource db {
@@ -11,27 +12,28 @@ datasource db {
 }
 
 model User {
-  id            String         @id @default(uuid())
-  email         String         @unique
-  fullName      String?
-  password      String?
-  dateOfBirth   DateTime?
-  gender        Int?
-  status        UserStatus     @default(ACTIVE)
-  isVerified    Boolean        @default(false)
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  googleId      String?        @unique
-  avatar        String?
-  devices       Device[]
-  expenseSplits ExpenseSplit[]
-  expenses      Expense[]      @relation("PaidBy")
-  notifications Notification[]
+  id                String         @id @default(uuid())
+  email             String         @unique
+  fullName          String?
+  password          String?
+  dateOfBirth       DateTime?
+  gender            Int?
+  status            UserStatus     @default(ACTIVE)
+  isVerified        Boolean        @default(false)
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  googleId          String?        @unique
+  avatar            String?
   sentNotifications Notification[] @relation("SentNotifications")
-  tripMembers   TripMember[]
-  userRoles     UserRole[]
-  celebrates    Celebrate[]
-budgets Budget[]
+  notifications     Notification[]
+  budgets           Budget[]
+  celebrates        Celebrate[]
+  devices           Device[]
+  expenseSplits     ExpenseSplit[]
+  expenses          Expense[]      @relation("PaidBy")
+  tripMembers       TripMember[]
+  userRoles         UserRole[]
+
   @@map("users")
 }
 
@@ -77,19 +79,19 @@ model RolePermission {
 }
 
 model Trip {
-  id              String       @id @default(uuid())
-  name            String
-  startDate       DateTime
-  endDate         DateTime
-  totalBudget     Decimal?     @db.Decimal(15, 2)
-  status          TripStatus   @default(UPCOMING)
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
-  expenses        Expense[]
-  itineraries     Itinerary[]
-  members         TripMember[]
-  celebrates      Celebrate[]
+  id          String       @id @default(uuid())
+  name        String
+  startDate   DateTime
+  endDate     DateTime
+  totalBudget Decimal?     @db.Decimal(15, 2)
+  status      TripStatus   @default(UPCOMING)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
   images      String?
+  celebrates  Celebrate[]
+  expenses    Expense[]
+  itineraries Itinerary[]
+  members     TripMember[]
 
   @@map("trips")
 }
@@ -151,20 +153,20 @@ model Expense {
 }
 
 model ExpenseSplit {
-  id         String    @id @default(uuid())
-  expenseId  String
-  userId     String
-  amount     Decimal   @db.Decimal(15, 2)
-  percentage Decimal?  @db.Decimal(5, 2)
-  splitType  SplitType @default(EQUAL)
-  isPaid     Boolean   @default(false)
-  paidAt     DateTime?
-  confirmed    Boolean   @default(false)
-  confirmedAt  DateTime?
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
-  expense    Expense   @relation(fields: [expenseId], references: [id], onDelete: Cascade)
-  user       User      @relation(fields: [userId], references: [id], map: "expense_splits_user_fkey")
+  id          String    @id @default(uuid())
+  expenseId   String
+  userId      String
+  amount      Decimal   @db.Decimal(15, 2)
+  percentage  Decimal?  @db.Decimal(5, 2)
+  splitType   SplitType @default(EQUAL)
+  isPaid      Boolean   @default(false)
+  paidAt      DateTime?
+  confirmed   Boolean   @default(false)
+  confirmedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  expense     Expense   @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id], map: "expense_splits_user_fkey")
 
   @@unique([expenseId, userId])
   @@index([userId], map: "expense_splits_userId_fkey")
@@ -172,17 +174,17 @@ model ExpenseSplit {
 }
 
 model Budget {
-  id         String    @id @default(uuid())
-  userId     String
-  amount     Decimal   @db.Decimal(15,2)
-  month      Int
-  year       Int
-  warningAt  Int       @default(80)
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
-  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id        String   @id @default(uuid())
+  userId    String
+  amount    Decimal  @db.Decimal(15, 2)
+  month     Int
+  year      Int
+  warningAt Int      @default(80)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([userId,month, year])
+  @@unique([userId, month, year])
   @@index([userId])
   @@map("budgets")
 }
@@ -192,7 +194,7 @@ model Itinerary {
   tripId      String
   date        DateTime
   title       String
-  description String?  @db.Text
+  description String?
   activities  Json?
   photos      Json?
   createdAt   DateTime @default(now())
@@ -204,23 +206,19 @@ model Itinerary {
 }
 
 model Notification {
-  id          String           @id @default(uuid())
-  userId      String
-  type        NotificationType
-  title       String
-  message     String
-
-  refId       String?   // id của object liên quan (expense, split,...)
-  senderId    String?   // ai gửi (người nhắc nợ)
-
-  data        Json?
-
-  isRead      Boolean   @default(false)
-  readAt      DateTime?
-  createdAt   DateTime  @default(now())
-
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  sender      User?     @relation("SentNotifications", fields: [senderId], references: [id], onDelete: SetNull)
+  id        String           @id @default(uuid())
+  userId    String
+  type      NotificationType
+  title     String
+  message   String
+  refId     String?
+  senderId  String?
+  data      Json?
+  isRead    Boolean          @default(false)
+  readAt    DateTime?
+  createdAt DateTime         @default(now())
+  sender    User?            @relation("SentNotifications", fields: [senderId], references: [id])
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([refId])
@@ -234,25 +232,23 @@ model Device {
   userId    String
   platform  String?
   locale    String?
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("devices")
 }
 
 model Celebrate {
-  id          String   @id @default(uuid())
+  id          String           @id @default(uuid())
   tripId      String
   userId      String
-  description String?  @db.Text
+  description String?
   date        DateTime
-  createdAt   DateTime @default(now())
-
-  trip        Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
+  createdAt   DateTime         @default(now())
   images      CelebrateImage[]
+  trip        Trip             @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("celebrates")
 }
@@ -262,7 +258,6 @@ model CelebrateImage {
   celebrateId String
   imageUrl    String
   createdAt   DateTime  @default(now())
-
   celebrate   Celebrate @relation(fields: [celebrateId], references: [id], onDelete: Cascade)
 
   @@index([celebrateId])
@@ -315,4 +310,3 @@ enum NotificationType {
   PAYMENT_CONFIRMED
   INVITATION_REJECTED
 }
-
