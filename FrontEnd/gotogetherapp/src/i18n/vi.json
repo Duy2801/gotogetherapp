@@ -186,6 +186,14 @@
     "deleteAllConfirm": "Bạn chắc chắn muốn xóa tất cả thông báo? Hành động này không thể hoàn tác.",
     "clearAll": "Xóa tất cả",
     "count": "{count} thông báo"
+    ,
+    "paymentReminder": "Nhắc nhở thanh toán",
+    "paymentMarked": "Thanh toán được đánh dấu",
+    "paymentConfirmed": "Thanh toán đã được xác nhận",
+    "expenseCreated": "Khoản chi phí mới",
+    "tripInvite": "Lời mời tham gia chuyến đi",
+    "memberJoined": "Thành viên mới tham gia",
+    "inviteRejected": "Lời mời bị từ chối"
   },
   "history": {
     "title": "Lịch sử",
@@ -279,6 +287,13 @@
     "allFilter": "Tất cả",
     "debtFilter": "Bạn nợ",
     "receivableFilter": "Nhận tiền"
+    ,
+    "markedPaidSuccess": "Đã đánh dấu là đã trả.",
+    "markedPaidFailed": "Không thể đánh dấu đã trả.",
+    "confirmReceivedSuccess": "Đã xác nhận nhận tiền.",
+    "confirmReceivedFailed": "Không thể xác nhận đã nhận tiền.",
+    "remindSentSuccess": "Đã gửi nhắc nhở tới {name}",
+    "remindFailed": "Không thể gửi nhắc nhở."
   },
   "statistics": {
     "title": "Thống kê chi tiêu",
@@ -298,6 +313,23 @@
     "thisMonth": "Tháng này {month}",
     "month": "Tháng {month}",
     "year": "Năm {year}"
+  },
+  "actions": {
+    "loginSuccess": "Đăng nhập thành công",
+    "logoutSuccess": "Đăng xuất thành công",
+    "passwordResetSuccess": "Đổi mật khẩu thành công",
+    "passwordChangeSuccess": "Thay đổi mật khẩu thành công",
+    "sendOtpSuccess": "Đã gửi mã xác thực",
+    "verifyOtpSuccess": "Xác thực thành công",
+    "registerSuccess": "Đăng ký thành công",
+    "tripCreateSuccess": "Đã thêm chuyến đi mới.",
+    "tripUpdateSuccess": "Cập nhật chuyến đi thành công.",
+    "tripDeleteSuccess": "Đã xóa chuyến đi.",
+    "expenseCreateSuccess": "Đã thêm chi tiêu.",
+    "genericSuccess": "Thao tác thành công",
+    "generic": {
+      "error": "Thao tác thất bại"
+    }
   },
   "expense": {
     "title": "Chi tiêu",
@@ -396,6 +428,18 @@
     "avatarUploadFailed": "Không thể tải lên avatar. Vui lòng thử lại.",
     "updateSuccess": "Cập nhật thông tin thành công",
     "updateFailed": "Không thể cập nhật thông tin"
+  },
+  "setting": {
+    "languageNameVi": "Tiếng Việt",
+    "languageNameEn": "English",
+    "languageChangedVi": "Đã chuyển sang Tiếng Việt",
+    "languageChangedEn": "Đã chuyển sang English",
+    "language": "Ngôn ngữ",
+    "confirmLogout": "Bạn có chắc muốn đăng xuất không?",
+    "changePassword": "Đổi mật khẩu",
+    "changePasswordDesc": "Cập nhật mật khẩu tài khoản",
+    "viewHistory": "Xem lịch sử",
+    "historyDesc": "Xem hoạt động tài khoản của bạn"
   },
   "setting": {
     "title": "Cài đặt",

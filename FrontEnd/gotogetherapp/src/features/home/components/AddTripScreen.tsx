@@ -10,19 +10,20 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Alert,
 } from 'react-native';
 import DatePicker from 'react-native-date-picker';
 import ImagePicker from 'react-native-image-crop-picker';
-import { tripApi, createTripPayload } from '../api';
+import { Trip, tripApi, createTripPayload } from '../api';
 import { PRIMARY_COLOR, SECONDARY_COLOR } from '../../../constants/color';
 import { uploadService } from '../../../services/uploadService';
-import { showErrorToast, showSuccessToast } from '../../../utils/appToast';
+import { showErrorToast } from '../../../utils/appToast';
 import { useTranslation } from '../../../hooks/useTranslation';
 
 interface AddTripScreenProps {
   visible: boolean;
   onClose: () => void;
-  onSuccess: () => void;
+  onSuccess: (trip: Trip) => void;
 }
 
 const AddTripScreen: React.FC<AddTripScreenProps> = ({
@@ -109,10 +110,12 @@ const AddTripScreen: React.FC<AddTripScreenProps> = ({
       };
 
       const response = await tripApi.createTrip(payload);
-      if (response.status) {
-        showSuccessToast(t('common.success'), t('trip.addTripSuccess'));
+      const createdTrip = (response as any)?.data ?? response;
+
+      if (createdTrip?.id) {
+        Alert.alert(t('common.success'), t('trip.addTripSuccess'));
+        onSuccess(createdTrip);
         handleClose();
-        onSuccess();
       }
     } catch (error: any) {
       showErrorToast(

@@ -18,6 +18,13 @@ import { showErrorToast, showSuccessToast } from '../../../utils/appToast';
 import { Category, Member, tripDetailApi } from '../api';
 import { useTranslation } from '../../../hooks/useTranslation';
 
+const extractApiData = <T,>(response: any): T | undefined => {
+  if (response?.data !== undefined) {
+    return response.data as T;
+  }
+  return response as T;
+};
+
 interface AddExpenseScreenProps {
   route: {
     params: {
@@ -132,12 +139,14 @@ const AddExpenseScreen: React.FC<AddExpenseScreenProps> = ({
           tripDetailApi.getExpenseCategories(tripId),
         ]);
 
-        if (tripResponse.status) {
-          setMembers(tripResponse.data.members || []);
+        const tripData = extractApiData<{ members?: Member[] }>(tripResponse);
+        if (tripData?.members) {
+          setMembers(tripData.members || []);
         }
 
-        if (categoryResponse.status) {
-          const loadedCategories = categoryResponse.data || [];
+        const loadedCategories =
+          extractApiData<Category[]>(categoryResponse) || [];
+        if (loadedCategories.length) {
           setCategories(loadedCategories);
           if (loadedCategories[0]) {
             setSelectedCategoryId(loadedCategories[0].id);
@@ -253,7 +262,7 @@ const AddExpenseScreen: React.FC<AddExpenseScreenProps> = ({
         customSplits,
       });
 
-      if (response.status) {
+      if (response) {
         showSuccessToast(t('common.success'), t('expense.addSuccess'));
         onExpenseAdded?.();
         navigation.goBack();

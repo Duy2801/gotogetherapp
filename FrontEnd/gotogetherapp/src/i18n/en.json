@@ -186,6 +186,14 @@
     "deleteAllConfirm": "Are you sure you want to delete all notifications? This action cannot be undone.",
     "clearAll": "Clear all",
     "count": "{count} notifications"
+    ,
+    "paymentReminder": "Payment reminder",
+    "paymentMarked": "Payment marked",
+    "paymentConfirmed": "Payment confirmed",
+    "expenseCreated": "New expense",
+    "tripInvite": "Trip invitation",
+    "memberJoined": "New member joined",
+    "inviteRejected": "Invitation rejected"
   },
   "history": {
     "title": "History",
@@ -279,6 +287,13 @@
     "allFilter": "All",
     "debtFilter": "You owe",
     "receivableFilter": "Receive payment"
+    ,
+    "markedPaidSuccess": "Marked as paid.",
+    "markedPaidFailed": "Unable to mark as paid.",
+    "confirmReceivedSuccess": "Payment confirmed.",
+    "confirmReceivedFailed": "Unable to confirm receipt.",
+    "remindSentSuccess": "Reminder sent to {name}",
+    "remindFailed": "Unable to send reminder."
   },
   "statistics": {
     "title": "Spending statistics",
@@ -298,6 +313,23 @@
     "thisMonth": "This month {month}",
     "month": "Month {month}",
     "year": "Year {year}"
+  },
+  "actions": {
+    "loginSuccess": "Login successful",
+    "logoutSuccess": "Logout successful",
+    "passwordResetSuccess": "Password reset successful",
+    "passwordChangeSuccess": "Password changed successfully",
+    "sendOtpSuccess": "Verification OTP sent",
+    "verifyOtpSuccess": "Verification successful",
+    "registerSuccess": "Registration successful",
+    "tripCreateSuccess": "New trip added.",
+    "tripUpdateSuccess": "Trip updated successfully.",
+    "tripDeleteSuccess": "Trip deleted.",
+    "expenseCreateSuccess": "Expense added.",
+    "genericSuccess": "Operation successful",
+    "generic": {
+      "error": "Operation failed"
+    }
   },
   "expense": {
     "title": "Expenses",
@@ -396,6 +428,18 @@
     "avatarUploadFailed": "Unable to upload avatar. Please try again.",
     "updateSuccess": "Profile updated successfully",
     "updateFailed": "Failed to update profile"
+  },
+  "setting": {
+    "languageNameVi": "Vietnamese",
+    "languageNameEn": "English",
+    "languageChangedVi": "Language switched to Vietnamese",
+    "languageChangedEn": "Language switched to English",
+    "language": "Language",
+    "confirmLogout": "Are you sure you want to logout?",
+    "changePassword": "Change password",
+    "changePasswordDesc": "Update your account password",
+    "viewHistory": "View history",
+    "historyDesc": "View your account activity"
   },
   "setting": {
     "title": "Settings",

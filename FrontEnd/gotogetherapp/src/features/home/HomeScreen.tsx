@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
   StyleSheet,
   Text,
@@ -26,6 +26,24 @@ import TripTimeFilterModal from './components/TripTimeFilterModal';
 import { showErrorToast, showSuccessToast } from '../../utils/appToast';
 import { useTranslation } from '../../hooks/useTranslation';
 
+const normalizeDate = (value: string | Date) => {
+  const date = new Date(value);
+  date.setHours(0, 0, 0, 0);
+  return date;
+};
+
+const getTripStatusFromDates = (startDate: string, endDate: string) => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const start = normalizeDate(startDate);
+  const end = normalizeDate(endDate);
+
+  if (end < today) return 'COMPLETED';
+  if (start > today) return 'UPCOMING';
+  return 'ONGOING';
+};
+
 const HomeScreen = () => {
   const navigation = useNavigation();
   const user = useSelector((state: RootState) => state.login.user);
@@ -35,7 +53,7 @@ const HomeScreen = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState('ALL');
-  const [selectedMonthDate, setSelectedMonthDate] = useState(new Date());
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [showAddTrip, setShowAddTrip] = useState(false);
   const [invitationActionTripId, setInvitationActionTripId] = useState<
     string | null
@@ -44,12 +62,15 @@ const HomeScreen = () => {
   const fetchTrips = useCallback(async () => {
     try {
       setLoading(true);
-      const params = selectedFilter !== 'ALL' ? { status: selectedFilter } : {};
-      const response = await tripApi.getTrips(params);
+      const response = await tripApi.getTrips();
 
-      if (response.status) {
-        setTrips(response.data.trips);
-      }
+      const nextTrips = Array.isArray((response as any)?.trips)
+        ? (response as any).trips
+        : Array.isArray((response as any)?.data?.trips)
+          ? (response as any).data.trips
+          : [];
+
+      setTrips(nextTrips);
     } catch (error: any) {
       console.error('Error fetching trips:', error);
       showErrorToast(
@@ -59,7 +80,7 @@ const HomeScreen = () => {
     } finally {
       setLoading(false);
     }
-  }, [selectedFilter]);
+  }, []);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -81,53 +102,50 @@ const HomeScreen = () => {
     setShowAddTrip(true);
   };
 
+  const handleTripCreated = (trip: Trip) => {
+    if (!trip) {
+      return;
+    }
+
+    setTrips(prevTrips => [trip, ...prevTrips.filter(Boolean)]);
+  };
+
   const renderTripItem = ({ item }: { item: Trip }) => (
     <TripCard trip={item} onPress={handleTripPress} />
   );
 
-  const getCurrentInviteStatus = (trip: Trip) => {
+  const getCurrentInviteStatus = (trip?: Trip) => {
+    if (!trip) {
+      return 'ACCEPTED';
+    }
+
     if (!trip.members || trip.members.length === 0) {
       return 'ACCEPTED';
     }
     return trip.members[0].inviteStatus;
   };
 
-  const acceptedTrips = trips.filter(
+  const safeTrips = trips.filter((trip): trip is Trip => Boolean(trip));
+
+  const acceptedTrips = safeTrips.filter(
     trip => getCurrentInviteStatus(trip) === 'ACCEPTED',
   );
 
-  const availableTripYears = useMemo(() => {
-    const years = new Set<number>();
-
-    acceptedTrips.forEach(trip => {
-      const startYear = new Date(trip.startDate).getFullYear();
-      const endYear = new Date(trip.endDate).getFullYear();
-
-      for (let year = startYear; year <= endYear; year += 1) {
-        years.add(year);
-      }
-    });
-
-    return Array.from(years).sort((a, b) => b - a);
-  }, [acceptedTrips]);
-
   const filteredAcceptedTrips = useMemo(() => {
-    const month = selectedMonthDate.getMonth();
-    const year = selectedMonthDate.getFullYear();
-
     return acceptedTrips.filter(trip => {
-      const tripStart = new Date(trip.startDate);
-      const tripEnd = new Date(trip.endDate);
+      const tripStartMonth = new Date(trip.startDate).getMonth();
+      const tripEndMonth = new Date(trip.endDate).getMonth();
+      const matchesMonth =
+        tripStartMonth === selectedMonth || tripEndMonth === selectedMonth;
+      const matchesTab =
+        selectedFilter === 'ALL' ||
+        getTripStatusFromDates(trip.startDate, trip.endDate) === selectedFilter;
 
-      const rangeStart = new Date(year, month, 1);
-      const rangeEnd = new Date(year, month + 1, 0);
-      rangeEnd.setHours(23, 59, 59, 999);
-
-      return tripStart <= rangeEnd && tripEnd >= rangeStart;
+      return matchesMonth && matchesTab;
     });
-  }, [acceptedTrips, selectedMonthDate]);
+  }, [acceptedTrips, selectedMonth, selectedFilter]);
 
-  const pendingTrips = trips.filter(
+  const pendingTrips = safeTrips.filter(
     trip => getCurrentInviteStatus(trip) === 'PENDING',
   );
 
@@ -139,7 +157,7 @@ const HomeScreen = () => {
       setInvitationActionTripId(tripId);
       const response = await tripApi.respondInvitation(tripId, { status });
 
-      if (response.status) {
+      if ((response as any)?.status ?? (response as any)?.data?.status) {
         showSuccessToast(
           t('common.success'),
           status === 'ACCEPTED'
@@ -161,7 +179,7 @@ const HomeScreen = () => {
 
   const renderEmptyState = () => {
     if (loading) return null;
-    if (acceptedTrips.length && !filteredAcceptedTrips.length) {
+    if (safeTrips.length && !filteredAcceptedTrips.length) {
       return (
         <View style={styles.noResultWrap}>
           <Text style={styles.noResultText}>{t('home.noTripsInMonth')}</Text>
@@ -172,9 +190,7 @@ const HomeScreen = () => {
   };
 
   const now = new Date();
-  const isTimeFilterActive =
-    selectedMonthDate.getMonth() !== now.getMonth() ||
-    selectedMonthDate.getFullYear() !== now.getFullYear();
+  const isTimeFilterActive = selectedMonth !== now.getMonth();
 
   return (
     <View style={styles.container}>
@@ -208,9 +224,8 @@ const HomeScreen = () => {
             ]}
           >
             <TripTimeFilterModal
-              selectedDate={selectedMonthDate}
-              onDateChange={setSelectedMonthDate}
-              availableYears={availableTripYears}
+              selectedMonth={selectedMonth}
+              onMonthChange={setSelectedMonth}
             />
           </View>
         </View>
@@ -320,7 +335,7 @@ const HomeScreen = () => {
       <AddTripScreen
         visible={showAddTrip}
         onClose={() => setShowAddTrip(false)}
-        onSuccess={fetchTrips}
+        onSuccess={handleTripCreated}
       />
     </View>
   );

@@ -3,6 +3,24 @@ import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native';
 import { Trip } from '../api';
 import { useTranslation } from '../../../hooks/useTranslation';
 
+const normalizeDate = (value: string) => {
+  const date = new Date(value);
+  date.setHours(0, 0, 0, 0);
+  return date;
+};
+
+const getTripStatusFromDates = (startDate: string, endDate: string) => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const start = normalizeDate(startDate);
+  const end = normalizeDate(endDate);
+
+  if (end < today) return 'COMPLETED';
+  if (start > today) return 'UPCOMING';
+  return 'ONGOING';
+};
+
 interface TripCardProps {
   trip: Trip;
   onPress: (trip: Trip) => void;
@@ -11,6 +29,7 @@ interface TripCardProps {
 const TripCard: React.FC<TripCardProps> = ({ trip, onPress }) => {
   const { t } = useTranslation();
   const isOwner = trip.members?.[0]?.role === 'OWNER';
+  const status = getTripStatusFromDates(trip.startDate, trip.endDate);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -85,16 +104,16 @@ const TripCard: React.FC<TripCardProps> = ({ trip, onPress }) => {
           <View
             style={[
               styles.statusBadge,
-              { backgroundColor: getStatusColor(trip.status) + '20' },
+              { backgroundColor: getStatusColor(status) + '20' },
             ]}
           >
             <Text
               style={[
                 styles.statusText,
-                { color: getStatusColor(trip.status) },
+                { color: getStatusColor(status) },
               ]}
             >
-              {getStatusText(trip.status)}
+              {getStatusText(status)}
             </Text>
           </View>
         </View>

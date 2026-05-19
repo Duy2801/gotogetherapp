@@ -106,7 +106,8 @@ const SettingScreen = () => {
     {
       key: 'language',
       title: t('setting.language'),
-      subtitle: locale === 'vi' ? 'Tiếng Việt' : 'English',
+      subtitle:
+        locale === 'vi' ? t('setting.languageNameVi') : t('setting.languageNameEn'),
       icon: 'language',
       onPress: () => setShowLanguageModal(true),
     },

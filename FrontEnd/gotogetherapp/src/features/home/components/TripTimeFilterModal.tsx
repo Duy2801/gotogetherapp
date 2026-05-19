@@ -4,65 +4,46 @@ import {
   StyleSheet,
   TouchableOpacity,
   Modal,
-  ScrollView,
 } from 'react-native';
 import { Text } from 'react-native';
 import { SECONDARY_COLOR } from '../../../constants/color';
-import { useTranslation } from '../../../hooks/useTranslation';
 
 interface MonthSelectorProps {
-  selectedDate: Date;
-  onDateChange: (date: Date) => void;
-  availableYears?: number[];
+  selectedMonth: number;
+  onMonthChange: (month: number) => void;
 }
 
 const MonthSelector: React.FC<MonthSelectorProps> = ({
-  selectedDate,
-  onDateChange,
-  availableYears = [],
+  selectedMonth,
+  onMonthChange,
 }) => {
   const [modalVisible, setModalVisible] = useState(false);
-  const { t } = useTranslation();
-  const currentYear = new Date().getFullYear();
   const currentMonth = new Date().getMonth();
 
   const months = [
-    'Tháng 1',
-    'Tháng 2',
-    'Tháng 3',
-    'Tháng 4',
-    'Tháng 5',
-    'Tháng 6',
-    'Tháng 7',
-    'Tháng 8',
-    'Tháng 9',
-    'Tháng 10',
-    'Tháng 11',
-    'Tháng 12',
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
   ];
 
-  const years = Array.from(new Set(availableYears)).sort((a, b) => b - a);
-
-  const handleMonthSelect = (monthIndex: number, year: number) => {
-    const newDate = new Date(year, monthIndex, 1);
-    onDateChange(newDate);
+  const handleMonthSelect = (monthIndex: number) => {
+    onMonthChange(monthIndex);
     setModalVisible(false);
   };
 
-  const isCurrentMonth =
-    selectedDate.getMonth() === currentMonth &&
-    selectedDate.getFullYear() === currentYear;
-
-  const getButtonText = () => {
-    if (isCurrentMonth) {
-      return t('monthFilter.thisMonth', {
-        month: String(selectedDate.getMonth() + 1),
-      });
-    }
-    return t('monthFilter.month', {
-      month: String(selectedDate.getMonth() + 1),
-    });
-  };
+  const buttonText =
+    selectedMonth === currentMonth
+      ? `Tháng này • ${months[selectedMonth]}`
+      : months[selectedMonth];
 
   return (
     <>
@@ -70,7 +51,7 @@ const MonthSelector: React.FC<MonthSelectorProps> = ({
         onPress={() => setModalVisible(true)}
         style={styles.monthButton}
       >
-        <Text style={styles.monthButtonText}>{getButtonText()}</Text>
+        <Text style={styles.monthButtonText}>{buttonText}</Text>
         <Text style={styles.dropdownIcon}>▼</Text>
       </TouchableOpacity>
 
@@ -87,56 +68,37 @@ const MonthSelector: React.FC<MonthSelectorProps> = ({
         >
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>{t('monthFilter.title')}</Text>
+              <Text style={styles.modalTitle}>Select month</Text>
               <TouchableOpacity onPress={() => setModalVisible(false)}>
                 <Text style={styles.closeIcon}>✕</Text>
               </TouchableOpacity>
             </View>
 
-            <ScrollView showsVerticalScrollIndicator={false}>
-              {years.length === 0 ? (
-                <View style={styles.emptyWrap}>
-                  <Text style={styles.emptyText}>
-                    {t('monthFilter.noTrips')}
-                  </Text>
-                </View>
-              ) : (
-                years.map(year => (
-                  <View key={year} style={styles.yearSection}>
-                    <Text style={styles.yearText}>
-                      {t('monthFilter.year', { year: String(year) })}
-                    </Text>
-                    <View style={styles.monthGrid}>
-                      {months.map((month, index) => {
-                        const isSelected =
-                          selectedDate.getMonth() === index &&
-                          selectedDate.getFullYear() === year;
+            <View style={styles.monthGrid}>
+              {months.map((month, index) => {
+                const isSelected = selectedMonth === index;
 
-                        return (
-                          <TouchableOpacity
-                            key={`${year}-${index}`}
-                            style={[
-                              styles.monthItem,
-                              isSelected ? styles.monthItemSelected : {},
-                            ]}
-                            onPress={() => handleMonthSelect(index, year)}
-                          >
-                            <Text
-                              style={[
-                                styles.monthItemText,
-                                isSelected ? styles.monthItemTextSelected : {},
-                              ]}
-                            >
-                              {month}
-                            </Text>
-                          </TouchableOpacity>
-                        );
-                      })}
-                    </View>
-                  </View>
-                ))
-              )}
-            </ScrollView>
+                return (
+                  <TouchableOpacity
+                    key={month}
+                    style={[
+                      styles.monthItem,
+                      isSelected ? styles.monthItemSelected : {},
+                    ]}
+                    onPress={() => handleMonthSelect(index)}
+                  >
+                    <Text
+                      style={[
+                        styles.monthItemText,
+                        isSelected ? styles.monthItemTextSelected : {},
+                      ]}
+                    >
+                      {month}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
           </View>
         </TouchableOpacity>
       </Modal>
@@ -181,7 +143,6 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 20,
     paddingHorizontal: 20,
     paddingBottom: 30,
-    maxHeight: '80%',
   },
   modalHeader: {
     flexDirection: 'row',
@@ -196,19 +157,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#333',
   },
-  yearSection: {
-    marginTop: 20,
-  },
-  yearText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#666',
-    marginBottom: 10,
-  },
   monthGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 10,
+    paddingVertical: 8,
   },
   monthItem: {
     width: '30%',
@@ -228,15 +181,6 @@ const styles = StyleSheet.create({
   monthItemTextSelected: {
     color: '#fff',
     fontWeight: 'bold',
-  },
-  emptyWrap: {
-    paddingVertical: 28,
-    alignItems: 'center',
-  },
-  emptyText: {
-    fontSize: 14,
-    color: '#6B7280',
-    textAlign: 'center',
   },
 });
 

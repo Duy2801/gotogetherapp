@@ -169,11 +169,11 @@ const PaymentDetailScreen = ({ navigation }: { navigation: any }) => {
       setActionLoadingId(splitId);
       await spendingApi.markSplitAsPaid(splitId);
       await fetchData();
-      showSuccessToast('Thành công', 'Đã đánh dấu khoản này là đã trả.');
+      showSuccessToast(t('common.success'), t('spending.markedPaidSuccess'));
     } catch (error: any) {
       showErrorToast(
-        'Không thể cập nhật',
-        error?.error || error?.message || 'Không thể đánh dấu đã trả.',
+        t('common.error'),
+        error?.error || error?.message || t('spending.markedPaidFailed'),
       );
     } finally {
       setActionLoadingId(null);
@@ -185,11 +185,11 @@ const PaymentDetailScreen = ({ navigation }: { navigation: any }) => {
       setActionLoadingId(splitId);
       await spendingApi.confirmSplitReceived(splitId);
       await fetchData();
-      showSuccessToast('Thành công', 'Đã xác nhận nhận tiền.');
+      showSuccessToast(t('common.success'), t('spending.confirmReceivedSuccess'));
     } catch (error: any) {
       showErrorToast(
-        'Không thể xác nhận',
-        error?.error || error?.message || 'Không thể xác nhận đã nhận tiền.',
+        t('common.error'),
+        error?.error || error?.message || t('spending.confirmReceivedFailed'),
       );
     } finally {
       setActionLoadingId(null);
@@ -212,11 +212,14 @@ const PaymentDetailScreen = ({ navigation }: { navigation: any }) => {
         message,
         userData.splitId,
       );
-      showSuccessToast('Thành công', `Đã gửi nhắc nhở cho ${userData.name}`);
+      showSuccessToast(
+        t('common.success'),
+        t('spending.remindSentSuccess', { name: userData.name }),
+      );
     } catch (error: any) {
       showErrorToast(
-        'Không thể gửi nhắc nhở',
-        error?.error || error?.message || 'Vui lòng thử lại sau.',
+        t('common.error'),
+        error?.error || error?.message || t('spending.remindFailed'),
       );
     } finally {
       setActionLoadingId(null);

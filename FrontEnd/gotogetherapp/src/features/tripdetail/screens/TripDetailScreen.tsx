@@ -31,6 +31,13 @@ import {
 } from '../../../utils/appToast';
 import { useTranslation } from '../../../hooks/useTranslation';
 
+const extractApiData = <T,>(response: any): T | undefined => {
+  if (response?.data !== undefined) {
+    return response.data as T;
+  }
+  return response as T;
+};
+
 interface TripDetailScreenProps {
   route: any;
   navigation: any;
@@ -61,16 +68,20 @@ const TripDetailScreen: React.FC<TripDetailScreenProps> = ({
   const fetchTripDetail = async () => {
     try {
       const tripResponse = await tripDetailApi.getTripDetail(tripId);
+      const tripData = extractApiData<TripDetail>(tripResponse);
 
-      if (tripResponse.status) {
-        setTripDetail(tripResponse.data);
+      if (tripData) {
+        setTripDetail(tripData);
       }
       try {
         const expensesResponse = await tripDetailApi.getTripExpenses(tripId, {
           limit: 20,
         });
-        if (expensesResponse.status) {
-          setExpenses(expensesResponse.data.expenses);
+        const expenseData = extractApiData<{ expenses?: Expense[] }>(
+          expensesResponse,
+        );
+        if (expenseData?.expenses) {
+          setExpenses(expenseData.expenses);
         }
       } catch (expenseError: any) {}
     } catch (error: any) {
@@ -189,7 +200,7 @@ const TripDetailScreen: React.FC<TripDetailScreenProps> = ({
     try {
       const response = await tripDetailApi.inviteMember(tripId, { email });
 
-      if (response.status) {
+      if (response) {
         showSuccessToast(t('common.success'), t('trip.inviteSent', { email }));
         fetchTripDetail();
         return true;
@@ -270,7 +281,7 @@ const TripDetailScreen: React.FC<TripDetailScreenProps> = ({
             const response = await tripDetailApi.deleteTrip(tripId);
             setShowActionModal(false);
 
-            if (response.status) {
+            if (response) {
               showSuccessToast(t('common.success'), t('trip.deleteSuccess'));
               navigation.goBack();
               return;
@@ -343,8 +354,9 @@ const TripDetailScreen: React.FC<TripDetailScreenProps> = ({
         page: 1,
         limit: 200,
       });
-      if (response.status) {
-        setAllExpenses(response.data.expenses || []);
+      const expenseData = extractApiData<{ expenses?: Expense[] }>(response);
+      if (expenseData?.expenses) {
+        setAllExpenses(expenseData.expenses || []);
       }
     } catch (error: any) {
       setAllExpenses(expenses);
@@ -755,22 +767,30 @@ const TripDetailScreen: React.FC<TripDetailScreenProps> = ({
               </TouchableOpacity>
             )}
 
-            {canDeleteTrip ? (
-              <TouchableOpacity
-                style={styles.actionItem}
-                onPress={handleDeleteTrip}
-                disabled={actionLoading}
-              >
-                <FontAwesome6
-                  name="trash-can"
-                  size={13}
-                  color="#DC2626"
-                  iconStyle="solid"
-                />
-                <Text style={[styles.actionItemText, styles.actionDangerText]}>
-                  {t('trip.deleteTrip')}
-                </Text>
-              </TouchableOpacity>
+            {isCurrentUserOwner ? (
+              canDeleteTrip ? (
+                <TouchableOpacity
+                  style={styles.actionItem}
+                  onPress={handleDeleteTrip}
+                  disabled={actionLoading}
+                >
+                  <FontAwesome6
+                    name="trash-can"
+                    size={13}
+                    color="#DC2626"
+                    iconStyle="solid"
+                  />
+                  <Text style={[styles.actionItemText, styles.actionDangerText]}>
+                    {t('trip.deleteTrip')}
+                  </Text>
+                </TouchableOpacity>
+              ) : (
+                <View style={styles.actionHintBox}>
+                  <Text style={styles.actionHintText}>
+                    Chủ chuyến phải chuyển quyền trước khi rời nhóm.
+                  </Text>
+                </View>
+              )
             ) : (
               <TouchableOpacity
                 style={styles.actionItem}
@@ -1176,6 +1196,18 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: '#1F2937',
+  },
+  actionHintBox: {
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+    borderRadius: 10,
+    backgroundColor: '#F8FAFC',
+  },
+  actionHintText: {
+    fontSize: 13,
+    lineHeight: 18,
+    color: '#64748B',
+    fontWeight: '600',
   },
   actionDangerText: {
     color: '#B91C1C',

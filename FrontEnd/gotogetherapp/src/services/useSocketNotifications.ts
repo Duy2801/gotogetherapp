@@ -3,6 +3,7 @@ import React from 'react';
 import { useDispatch } from 'react-redux';
 import { useSocket } from './useSocket';
 import { addSocketNotification } from '../reducers/notificationSlice';
+import { useTranslation } from '../hooks/useTranslation';
 
 /**
  * Hook to set up socket event listeners for notifications
@@ -13,6 +14,7 @@ export const useSocketNotifications = () => {
   const { socket, isConnected } = useSocket();
   const dispatch = useDispatch();
   const listenersSetupRef = React.useRef(false);
+  const { t, locale } = useTranslation();
 
   useEffect(() => {
     if (!socket) {
@@ -50,7 +52,7 @@ export const useSocketNotifications = () => {
           addSocketNotification({
             id: data.id || `reminder-${Date.now()}`,
             type: 'SETTLEMENT_REMINDER',
-            title: data.title || 'Nhắc nhở thanh toán',
+            title: data.title || t('notification.paymentReminder'),
             message: data.message,
             refId: data.refId, // Include refId so navigation knows which payment to show
             senderId: data.senderId, // Include sender ID
@@ -75,7 +77,7 @@ export const useSocketNotifications = () => {
         addSocketNotification({
           id: data.id || `payment-marked-${Date.now()}`,
           type: 'PAYMENT_MARKED',
-          title: data.title || 'Thanh toán được đánh dấu',
+          title: data.title || t('notification.paymentMarked'),
           message: data.message,
           refId: data.splitId || data.refId,
           data: {
@@ -99,7 +101,7 @@ export const useSocketNotifications = () => {
         addSocketNotification({
           id: data.id || `payment-confirmed-${Date.now()}`,
           type: 'PAYMENT_CONFIRMED',
-          title: data.title || 'Thanh toán được xác nhận',
+          title: data.title || t('notification.paymentConfirmed'),
           message: data.message,
           refId: data.splitId || data.refId,
           data: {
@@ -123,7 +125,7 @@ export const useSocketNotifications = () => {
         addSocketNotification({
           id: data.id || `expense-${Date.now()}`,
           type: 'EXPENSE_CREATED',
-          title: data.title || 'Khoản chi phí mới',
+          title: data.title || t('notification.expenseCreated'),
           message: data.message,
           refId: data.expenseId || data.refId,
           data: {
@@ -145,7 +147,7 @@ export const useSocketNotifications = () => {
         addSocketNotification({
           id: data.id || `invite-${Date.now()}`,
           type: 'TRIP_INVITE',
-          title: data.title || 'Lời mời tham gia chuyến đi',
+          title: data.title || t('notification.tripInvite'),
           message: data.message,
           refId: data.tripId || data.refId,
           data: {
@@ -166,7 +168,7 @@ export const useSocketNotifications = () => {
         addSocketNotification({
           id: data.id || `member-joined-${Date.now()}`,
           type: 'MEMBER_JOINED',
-          title: data.title || 'Thành viên mới tham gia',
+          title: data.title || t('notification.memberJoined'),
           message: data.message,
           refId: data.tripId || data.refId,
           data: {
@@ -186,7 +188,7 @@ export const useSocketNotifications = () => {
         addSocketNotification({
           id: data.id || `invite-rejected-${Date.now()}`,
           type: 'INVITATION_REJECTED',
-          title: data.title || 'Lời mời bị từ chối',
+          title: data.title || t('notification.inviteRejected'),
           message: data.message,
           refId: data.tripId || data.refId,
           data: {
@@ -249,5 +251,5 @@ export const useSocketNotifications = () => {
       socket.off('disconnect', handleDisconnect);
       listenersSetupRef.current = false;
     };
-  }, [socket, isConnected, dispatch]); // Add isConnected to dependency
+  }, [socket, isConnected, dispatch, locale]); // Add isConnected and locale to dependency
 };

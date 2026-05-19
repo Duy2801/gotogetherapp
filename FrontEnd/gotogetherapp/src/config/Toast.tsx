@@ -18,18 +18,20 @@ import { Toast as ToastAsset } from '../assets';
  * Usage in App.tsx:
  * <Toast config={{ notification: CustomToastComponent }} />
  */
+import { useTranslation } from '../hooks/useTranslation';
+
 const TOAST_FALLBACK = {
   SUCCESS: {
     backgroundColor: '#10B981',
-    title: 'Thành công',
+    titleKey: 'common.success',
   },
   ERROR: {
     backgroundColor: '#EF4444',
-    title: 'Lỗi',
+    titleKey: 'common.error',
   },
   NOTIFICATION: {
     backgroundColor: '#3B82F6',
-    title: 'Thông báo',
+    titleKey: 'notification.title',
   },
 } as const;
 
@@ -53,6 +55,7 @@ const normalizeToastText = (value: unknown): string => {
 };
 
 export const CustomToastComponent = ({ text1, text2, props }: any) => {
+  const { t } = useTranslation();
   const toastAssetKey = (props?.toastAssetKey || 'NOTIFICATION') as
     | 'SUCCESS'
     | 'ERROR'
@@ -60,13 +63,15 @@ export const CustomToastComponent = ({ text1, text2, props }: any) => {
 
   const fallbackStyle =
     TOAST_FALLBACK[toastAssetKey] || TOAST_FALLBACK.NOTIFICATION;
-  const backgroundColor =
-    props?.backgroundColor || fallbackStyle.backgroundColor;
+  const backgroundColor = props?.backgroundColor || fallbackStyle.backgroundColor;
   const resolvedTitle =
     normalizeToastText(text1) ||
     normalizeToastText(props?.text1) ||
     normalizeToastText(props?.title);
-  const title = resolvedTitle || fallbackStyle.title;
+  const title =
+    resolvedTitle ||
+    (fallbackStyle.titleKey ? t(fallbackStyle.titleKey) : undefined) ||
+    '';
   const message =
     normalizeToastText(text2) ||
     normalizeToastText(props?.text2) ||

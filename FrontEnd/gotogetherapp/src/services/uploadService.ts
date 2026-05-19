@@ -33,17 +33,47 @@ export const uploadService = {
         name: filename,
       } as any);
 
-      // Let axios set the correct multipart boundary header automatically
-      const response = await api.post<UploadImageResponse>(`/upload/${type}`, formData);
+      // Let axios set the correct multipart boundary header automatically.
+      // If Axios fails with a React Native network error, retry using fetch.
+      try {
+        const response = await api.post<UploadImageResponse>(
+          `/upload/${type}`,
+          formData,
+        );
 
-      // response đã được interceptor xử lý, trả về response.data
-      const result = response as unknown as UploadImageResponse;
+        const result = response as unknown as UploadImageResponse;
 
-      if (result.status && result.data?.url) {
-        return result.data.url;
+        if (result.status && result.data?.url) {
+          return result.data.url;
+        }
+
+        throw new Error('Upload failed');
+      } catch (axiosError: any) {
+        console.warn('Axios upload failed, trying fetch fallback:', axiosError?.message);
+
+        const token = await getItem(KEY_STORAGE.token);
+        const uploadUrl = `${(api as any).defaults.baseURL}/upload/${type}`;
+
+        const headers: Record<string, string> = {};
+        if (token) {
+          headers.Authorization = `Bearer ${token}`;
+        }
+
+        const fetchResponse = await fetch(uploadUrl, {
+          method: 'POST',
+          headers,
+          body: formData as any,
+        });
+
+        const json = await fetchResponse.json();
+
+        if (json?.status && json?.data?.url) {
+          return json.data.url;
+        }
+
+        const serverMessage = json?.message || 'Không thể upload ảnh';
+        throw new Error(serverMessage);
       }
-
-      throw new Error('Upload failed');
     } catch (error: any) {
       console.error('Upload error:', error);
       console.error('Upload error response:', error?.response);

@@ -1,4 +1,6 @@
 import Toast from 'react-native-toast-message';
+import store from '../reducers/store';
+import { t as i18nT, Locale } from '../i18n';
 
 type ToastKind = 'success' | 'error' | 'info';
 
@@ -161,8 +163,10 @@ export const showActionSuccessMessage = (
   override?: string,
   duration?: number,
 ) => {
-  const message = override ?? ACTION_MESSAGES[actionKey] ?? ACTION_MESSAGES.genericSuccess;
-  return showSuccessToast('Thành công', message, duration);
+  const locale = store.getState().locale as Locale;
+  const message =
+    override ?? i18nT(locale, `actions.${actionKey}`) ?? ACTION_MESSAGES[actionKey] ?? i18nT(locale, 'common.success');
+  return showSuccessToast(i18nT(locale, 'common.success'), message, duration);
 };
 
 /**
@@ -174,7 +178,10 @@ export const showActionErrorMessage = (
   serverMessage?: string,
   duration?: number,
 ) => {
-  const defaultMsg = ACTION_MESSAGES[actionKey] ? `${ACTION_MESSAGES[actionKey]} thất bại.` : 'Thao tác thất bại.';
+  const locale = store.getState().locale as Locale;
+  const defaultMsg =
+    i18nT(locale, `actions.${actionKey}.error`) ||
+    (ACTION_MESSAGES[actionKey] ? `${ACTION_MESSAGES[actionKey]} thất bại.` : i18nT(locale, 'common.error'));
   const translated = translateErrorMessageToVi(serverMessage) ?? defaultMsg;
-  return showErrorToast('Lỗi', translated, duration);
+  return showErrorToast(i18nT(locale, 'common.error'), translated, duration);
 };
