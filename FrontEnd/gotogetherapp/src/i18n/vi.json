@@ -305,7 +305,8 @@
     "categoriesTitle": "Danh mục đã chi",
     "noCategoryData": "Chưa có dữ liệu danh mục cho chuyến đi này.",
     "loadFailed": "Không thể tải thống kê",
-    "loading": "Đang tải thống kê..."
+    "loading": "Đang tải thống kê...",
+    "selectMonth": "Chọn tháng"
   },
   "monthFilter": {
     "title": "Chọn tháng",

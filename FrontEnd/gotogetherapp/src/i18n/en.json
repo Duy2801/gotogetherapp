@@ -305,7 +305,8 @@
     "categoriesTitle": "Spent categories",
     "noCategoryData": "No category data for this trip.",
     "loadFailed": "Unable to load statistics",
-    "loading": "Loading statistics..."
+    "loading": "Loading statistics...",
+    "selectMonth": "Select month"
   },
   "monthFilter": {
     "title": "Choose month",

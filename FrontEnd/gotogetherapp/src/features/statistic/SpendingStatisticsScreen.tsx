@@ -1,29 +1,25 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  ActivityIndicator,
-  RefreshControl,
-  Image,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import FontAwesome6 from '@react-native-vector-icons/fontawesome6';
 import { PRIMARY_COLOR, SECONDARY_COLOR } from '../../constants/color';
 import { spendingApi, SpendingStatisticsResponse } from '../spending/api';
-import { formatCompactMoney, formatMoney } from '../../utils/format';
 import { useTranslation } from '../../hooks/useTranslation';
+import MonthYearPickerModal from './components/MonthYearPickerModal';
+import TripsSummarySection from './components/TripsSummarySection';
+import CategoriesSummarySection from './components/CategoriesSummarySection';
 
 const currentMonth = new Date().getMonth() + 1;
 const currentYear = new Date().getFullYear();
-
 const SpendingStatisticsScreen = ({ navigation }: { navigation: any }) => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [errorText, setErrorText] = useState('');
   const [selectedTripId, setSelectedTripId] = useState<string | null>(null);
+  const [selectedMonth, setSelectedMonth] = useState(currentMonth);
+  const [selectedYear, setSelectedYear] = useState(currentYear);
+  const [pickerYear, setPickerYear] = useState(currentYear);
+  const [showMonthPicker, setShowMonthPicker] = useState(false);
   const { t } = useTranslation();
   const [stats, setStats] = useState<SpendingStatisticsResponse>({
     totalAcrossTrips: 0,
@@ -32,98 +28,121 @@ const SpendingStatisticsScreen = ({ navigation }: { navigation: any }) => {
     categories: [],
   });
 
+  const [refreshKey, setRefreshKey] = useState(0);
+
   const safeTrips = stats.trips ?? [];
   const safeCategories = stats.categories ?? [];
 
-  const fetchStatistics = useCallback(async (tripId?: string) => {
-    try {
-      setErrorText('');
-      const response = await spendingApi.getSpendingStatistics(
-        tripId,
-        currentMonth,
-        currentYear,
-      );
-      setStats({
-        totalAcrossTrips: Number(response?.totalAcrossTrips ?? 0),
-        selectedTripId: response?.selectedTripId ?? null,
-        trips: Array.isArray(response?.trips) ? response.trips : [],
-        categories: Array.isArray(response?.categories)
-          ? response.categories
-          : [],
-      });
-
-      setSelectedTripId(
-        tripId ||
-          response?.selectedTripId ||
-          response?.trips?.[0]?.tripId ||
-          null,
-      );
-    } catch (error: any) {
-      setErrorText(
-        error?.error || error?.message || t('statistics.loadFailed'),
-      );
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, []);
-
+  // Fetch statistics when month/year changes or refresh
   useEffect(() => {
-    fetchStatistics();
-  }, [fetchStatistics]);
+    const fetchStatistics = async () => {
+      try {
+        setErrorText('');
+        setLoading(true);
+        const response = await spendingApi.getSpendingStatistics(
+          undefined,
+          selectedMonth,
+          selectedYear,
+        );
 
+        const trips = Array.isArray(response?.trips) ? response.trips : [];
+        const filteredTrips = trips.filter(
+          trip => Number(trip.totalAmount ?? 0) > 0 || Number(trip.expenseCount ?? 0) > 0,
+        );
+        const firstTrip = filteredTrips[0] ?? null;
+        const nextTripId = firstTrip?.tripId ?? null;
+
+        setStats({
+          totalAcrossTrips: Number(response?.totalAcrossTrips ?? 0),
+          selectedTripId: null,
+          trips: filteredTrips,
+          categories: Array.isArray(response?.categories)
+            ? response.categories
+            : [],
+        });
+
+        // Auto-select first trip that actually has data in this month
+        if (nextTripId) {
+          setSelectedTripId(nextTripId);
+        } else {
+          setSelectedTripId(null);
+        }
+      } catch (error: any) {
+        setErrorText(
+          error?.error || error?.message || t('statistics.loadFailed'),
+        );
+      } finally {
+        setLoading(false);
+        setRefreshing(false);
+      }
+    };
+
+    fetchStatistics();
+  }, [selectedMonth, selectedYear, refreshKey]);
+
+  // Fetch categories when trip selected
   useEffect(() => {
     if (!selectedTripId) {
       return;
     }
-    fetchStatistics(selectedTripId);
-  }, [selectedTripId, fetchStatistics]);
+
+    if (!safeTrips.some(trip => trip.tripId === selectedTripId)) {
+      return;
+    }
+
+    const fetchCategories = async () => {
+      try {
+        const response = await spendingApi.getSpendingStatistics(
+          selectedTripId,
+          selectedMonth,
+          selectedYear,
+        );
+
+        setStats(prev => ({
+          ...prev,
+          categories: Array.isArray(response?.categories)
+            ? response.categories
+            : [],
+        }));
+      } catch (error: any) {
+        // silently fail
+      }
+    };
+
+    fetchCategories();
+  }, [selectedTripId, selectedMonth, selectedYear]);
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
-    fetchStatistics(selectedTripId || undefined);
-  }, [fetchStatistics, selectedTripId]);
+    setRefreshKey(prev => prev + 1);
+  }, []);
 
-  const selectedTrip = useMemo(
-    () => safeTrips.find(item => item.tripId === selectedTripId),
+  const openMonthPicker = () => {
+    setPickerYear(selectedYear);
+    setShowMonthPicker(true);
+  };
+
+  const handleMonthSelect = (month: number) => {
+    setSelectedMonth(month);
+    setSelectedYear(pickerYear);
+    setSelectedTripId(null);
+    setStats({
+      totalAcrossTrips: 0,
+      selectedTripId: null,
+      trips: [],
+      categories: [],
+    });
+    setShowMonthPicker(false);
+  };
+
+  const changePickerYear = (delta: number) => {
+    setPickerYear(prev => prev + delta);
+  };
+
+  const selectedTripName = useMemo(
+    () => safeTrips.find(item => item.tripId === selectedTripId)?.tripName || '',
     [safeTrips, selectedTripId],
   );
-
-  const chartMaxAmount = useMemo(
-    () => Math.max(...safeTrips.map(item => Number(item.totalAmount ?? 0)), 0),
-    [safeTrips],
-  );
-
-  const chartTicks = useMemo(() => {
-    if (!chartMaxAmount) {
-      return [0, 0, 0, 0, 0];
-    }
-
-    return [1, 0.75, 0.5, 0.25, 0].map(ratio => chartMaxAmount * ratio);
-  }, [chartMaxAmount]);
-
-  const renderCategoryIcon = (item: (typeof safeCategories)[number]) => {
-    const iconValue = item.icon || '';
-    const isRemoteImage =
-      /^https?:\/\//i.test(iconValue) ||
-      iconValue.startsWith('file:') ||
-      iconValue.startsWith('data:');
-
-    if (isRemoteImage) {
-      return (
-        <Image source={{ uri: iconValue }} style={styles.categoryImageIcon} />
-      );
-    }
-
-    return (
-      <FontAwesome6
-        name={(iconValue || 'wallet') as any}
-        size={13}
-        color={item.color || '#4F46E5'}
-        iconStyle="solid"
-      />
-    );
-  };
 
   return (
     <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
@@ -143,6 +162,16 @@ const SpendingStatisticsScreen = ({ navigation }: { navigation: any }) => {
         <View style={styles.headerRightPlaceholder} />
       </View>
 
+      <MonthYearPickerModal
+        visible={showMonthPicker}
+        pickerYear={pickerYear}
+        selectedMonth={selectedMonth}
+        selectedYear={selectedYear}
+        onClose={() => setShowMonthPicker(false)}
+        onChangeYear={changePickerYear}
+        onSelectMonth={handleMonthSelect}
+      />
+
       <ScrollView
         contentContainerStyle={styles.container}
         refreshControl={
@@ -160,182 +189,19 @@ const SpendingStatisticsScreen = ({ navigation }: { navigation: any }) => {
           </View>
         ) : (
           <>
-            <View style={styles.sectionHeaderRow}>
-              <Text style={styles.sectionTitle}>
-                {t('statistics.monthlyTrips')}
-              </Text>
-              <Text style={styles.sectionSubTitle}>
-                {stats.monthLabel || `${currentMonth}/${currentYear}`}
-              </Text>
-            </View>
+            <TripsSummarySection
+              selectedMonth={selectedMonth}
+              selectedYear={selectedYear}
+              trips={safeTrips}
+              selectedTripId={selectedTripId}
+              onSelectTrip={setSelectedTripId}
+              onOpenMonthPicker={openMonthPicker}
+            />
 
-            {safeTrips.length ? (
-              <View style={styles.chartCard}>
-                <View style={styles.chartTopRow}>
-                  <View>
-                    <Text style={styles.chartTitle}>
-                      {t('statistics.barChart')}
-                    </Text>
-                    <Text style={styles.chartSubtitle}>
-                      {t('statistics.barChartDesc')}
-                    </Text>
-                  </View>
-                  <View style={styles.chartLegend}>
-                    <View style={styles.legendDot} />
-                    <Text style={styles.legendText}>
-                      {t('statistics.amount')}
-                    </Text>
-                  </View>
-                </View>
-
-                <View style={styles.chartBody}>
-                  <View style={styles.chartYAxis}>
-                    {chartTicks.map((value, index) => (
-                      <Text key={index} style={styles.chartYAxisLabel}>
-                        {formatCompactMoney(value)}
-                      </Text>
-                    ))}
-                  </View>
-
-                  <ScrollView
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={styles.chartScrollContent}
-                  >
-                    <View
-                      style={[
-                        styles.chartPlotArea,
-                        {
-                          width: Math.max(safeTrips.length * 84, 280),
-                        },
-                      ]}
-                    >
-                      <View style={styles.chartGrid}>
-                        {chartTicks.slice(1, 4).map((value, index) => (
-                          <View key={index} style={styles.chartGridLine} />
-                        ))}
-                      </View>
-
-                      <View style={styles.chartColumnsRow}>
-                        {safeTrips.map(trip => {
-                          const isActive = trip.tripId === selectedTripId;
-                          const barHeight = chartMaxAmount
-                            ? Math.max(
-                                10,
-                                (Number(trip.totalAmount ?? 0) /
-                                  chartMaxAmount) *
-                                  148,
-                              )
-                            : 10;
-
-                          return (
-                            <TouchableOpacity
-                              key={trip.tripId}
-                              style={styles.chartColumn}
-                              activeOpacity={0.8}
-                              onPress={() => setSelectedTripId(trip.tripId)}
-                            >
-                              <View style={styles.chartBarWrap}>
-                                <View style={styles.chartBarTrack}>
-                                  <View
-                                    style={[
-                                      styles.chartBarFill,
-                                      { height: barHeight },
-                                      isActive && styles.chartBarFillActive,
-                                    ]}
-                                  />
-                                </View>
-                                <Text
-                                  style={styles.chartValueText}
-                                  numberOfLines={1}
-                                >
-                                  {formatCompactMoney(trip.totalAmount)}
-                                </Text>
-                              </View>
-                              <Text
-                                style={[
-                                  styles.chartTripLabel,
-                                  isActive && styles.chartTripLabelActive,
-                                ]}
-                                numberOfLines={2}
-                              >
-                                {trip.tripName}
-                              </Text>
-                            </TouchableOpacity>
-                          );
-                        })}
-                      </View>
-                    </View>
-                  </ScrollView>
-                </View>
-              </View>
-            ) : (
-              <View style={styles.emptyCard}>
-                <FontAwesome6
-                  name="chart-column"
-                  size={24}
-                  color="#D1D5DB"
-                  iconStyle="solid"
-                />
-                <Text style={styles.emptyText}>{t('statistics.noTrips')}</Text>
-              </View>
-            )}
-
-            <View style={styles.sectionHeaderRow}>
-              <Text style={styles.sectionTitle}>
-                {t('statistics.categoriesTitle')}
-              </Text>
-              {!!selectedTrip && (
-                <Text style={styles.selectedTripText} numberOfLines={1}>
-                  {selectedTrip.tripName}
-                </Text>
-              )}
-            </View>
-
-            {safeCategories.length ? (
-              <View style={styles.categoryList}>
-                {safeCategories.map(item => (
-                  <View key={item.categoryId} style={styles.categoryRow}>
-                    <View
-                      style={[
-                        styles.categoryIconWrap,
-                        {
-                          backgroundColor:
-                            item.color && item.color.startsWith('#')
-                              ? `${item.color}22`
-                              : '#EEF2FF',
-                        },
-                      ]}
-                    >
-                      {renderCategoryIcon(item)}
-                    </View>
-                    <View style={styles.categoryMeta}>
-                      <Text style={styles.categoryName}>
-                        {item.categoryName}
-                      </Text>
-                      <Text style={styles.categorySubText}>
-                        {item.expenseCount} khoản • {item.percentage}%
-                      </Text>
-                    </View>
-                    <Text style={styles.categoryAmount}>
-                      {formatMoney(item.totalAmount)}
-                    </Text>
-                  </View>
-                ))}
-              </View>
-            ) : (
-              <View style={styles.emptyCard}>
-                <FontAwesome6
-                  name="chart-pie"
-                  size={24}
-                  color="#D1D5DB"
-                  iconStyle="solid"
-                />
-                <Text style={styles.emptyText}>
-                  {t('statistics.noCategoryData')}
-                </Text>
-              </View>
-            )}
+            <CategoriesSummarySection
+              categories={safeCategories}
+              selectedTripName={selectedTripName || null}
+            />
 
             {!!errorText && <Text style={styles.errorText}>{errorText}</Text>}
           </>
@@ -416,254 +282,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: 10,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#111827',
-  },
-  sectionSubTitle: {
-    fontSize: 12,
-    color: '#6B7280',
-    fontWeight: '600',
-  },
-  chartCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 18,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    padding: 14,
-    gap: 12,
-  },
-  chartTopRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 12,
-  },
-  chartTitle: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#111827',
-  },
-  chartSubtitle: {
-    marginTop: 3,
-    fontSize: 12,
-    color: '#6B7280',
-  },
-  chartLegend: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    backgroundColor: '#F8FAFC',
-    borderRadius: 999,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-  },
-  legendDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: PRIMARY_COLOR,
-  },
-  legendText: {
-    fontSize: 12,
-    color: '#334155',
-    fontWeight: '600',
-  },
-  chartBody: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 8,
-  },
-  chartYAxis: {
-    width: 56,
-    height: 210,
-    justifyContent: 'space-between',
-    paddingTop: 6,
-    paddingBottom: 24,
-  },
-  chartYAxisLabel: {
-    fontSize: 11,
-    color: '#6B7280',
-    textAlign: 'right',
-  },
-  chartScrollContent: {
-    paddingRight: 8,
-  },
-  chartPlotArea: {
-    height: 210,
-    paddingTop: 6,
-    paddingBottom: 0,
-  },
-  chartGrid: {
-    ...StyleSheet.absoluteFillObject,
-    justifyContent: 'space-between',
-    paddingTop: 16,
-    paddingBottom: 34,
-  },
-  chartGridLine: {
-    height: 1,
-    backgroundColor: '#EEF2F7',
-  },
-  chartColumnsRow: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    gap: 10,
-    paddingBottom: 6,
-  },
-  chartColumn: {
-    width: 74,
-    height: '100%',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    gap: 4,
-  },
-  chartBarWrap: {
-    width: '100%',
-    height: 150,
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-  },
-  chartBarTrack: {
-    width: 40,
-    height: 148,
-    borderRadius: 10,
-    backgroundColor: '#E5E7EB',
-    justifyContent: 'flex-end',
-    overflow: 'hidden',
-  },
-  chartBarFill: {
-    width: '100%',
-    borderRadius: 10,
-    backgroundColor: '#93C5FD',
-  },
-  chartBarFillActive: {
-    backgroundColor: SECONDARY_COLOR,
-  },
-  chartValueText: {
-    marginTop: 8,
-    fontSize: 11,
-    color: '#111827',
-    fontWeight: '700',
-  },
-  chartTripLabel: {
-    width: '100%',
-    minHeight: 24,
-    fontSize: 11,
-    color: '#334155',
-    textAlign: 'center',
-    fontWeight: '600',
-  },
-  chartTripLabelActive: {
-    color: PRIMARY_COLOR,
-  },
-  selectedTripText: {
-    flex: 1,
-    textAlign: 'right',
-    color: '#6B7280',
-    fontSize: 12,
-  },
-  tripListContent: {
-    gap: 10,
-    paddingRight: 16,
-  },
-  tripCard: {
-    width: 168,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    padding: 12,
-    gap: 5,
-  },
-  tripCardActive: {
-    borderColor: '#111827',
-    backgroundColor: '#F8FAFC',
-  },
-  tripName: {
-    fontSize: 13,
-    color: '#374151',
-    fontWeight: '700',
-  },
-  tripNameActive: {
-    color: '#111827',
-  },
-  tripAmount: {
-    fontSize: 20,
-    color: '#111827',
-    fontWeight: '700',
-  },
-  tripAmountActive: {
-    color: PRIMARY_COLOR,
-  },
-  tripExpenseCount: {
-    fontSize: 12,
-    color: '#6B7280',
-  },
-  tripExpenseCountActive: {
-    color: '#374151',
-  },
-  categoryList: {
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    borderRadius: 14,
-    paddingHorizontal: 12,
-  },
-  categoryRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
-  },
-  categoryIconWrap: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    justifyContent: 'center',
-    alignItems: 'center',
-    overflow: 'hidden',
-  },
-  categoryImageIcon: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
-  },
-  categoryMeta: {
-    flex: 1,
-  },
-  categoryName: {
-    fontSize: 14,
-    color: '#111827',
-    fontWeight: '600',
-  },
-  categorySubText: {
-    marginTop: 2,
-    fontSize: 12,
-    color: '#6B7280',
-  },
-  categoryAmount: {
-    fontSize: 14,
-    color: '#111827',
-    fontWeight: '700',
-  },
-  emptyCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    padding: 20,
-    alignItems: 'center',
-    gap: 8,
-  },
-  emptyText: {
-    fontSize: 13,
-    color: '#6B7280',
-    textAlign: 'center',
   },
   errorText: {
     color: '#DC2626',
