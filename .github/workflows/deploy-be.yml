@@ -21,4 +21,4 @@ jobs:
             git pull origin master
             npm install
             npm run build
-            sudo systemctl restart gotogether
+            sudo systemctl restart gotogetherserver
