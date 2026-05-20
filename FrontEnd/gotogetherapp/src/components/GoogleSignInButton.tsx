@@ -1,21 +1,44 @@
 import React from 'react';
-import {StyleSheet, Text, TouchableOpacity, View, ViewStyle} from 'react-native';
-import {Image} from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome';
+import {
+  ActivityIndicator,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  ViewStyle,
+} from 'react-native';
 import {ICONGOOGLE} from '../assets';
 
 type Props = {
   onPress?: () => void;
   style?: ViewStyle;
+  loading?: boolean;
+  disabled?: boolean;
 };
 
-export default function GoogleSignInButton({onPress, style}: Props) {
+export default function GoogleSignInButton({
+  onPress,
+  style,
+  loading,
+  disabled,
+}: Props) {
   return (
-    <TouchableOpacity activeOpacity={0.85} style={[styles.button, style]} onPress={onPress}>
+    <TouchableOpacity
+      activeOpacity={0.85}
+      style={[styles.button, (loading || disabled) && styles.buttonDisabled, style]}
+      onPress={onPress}
+      disabled={loading || disabled}
+    >
       <View style={styles.content}>
-        {/* use project asset for multicolor Google logo when available */}
-        <Image source={ICONGOOGLE.GOOGLE} style={styles.googleImage} />
-        <Text style={styles.text}>Đăng nhập bằng Google</Text>
+        {loading ? (
+          <ActivityIndicator size="small" color="#222" />
+        ) : (
+          <>
+            <Image source={ICONGOOGLE.GOOGLE} style={styles.googleImage} />
+            <Text style={styles.text}>Đăng nhập bằng Google</Text>
+          </>
+        )}
       </View>
     </TouchableOpacity>
   );
@@ -37,6 +60,9 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     shadowOffset: {width: 0, height: 1},
     elevation: 1,
+  },
+  buttonDisabled: {
+    opacity: 0.65,
   },
   content: {
     flexDirection: 'row',

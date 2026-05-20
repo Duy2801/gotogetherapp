@@ -29,8 +29,6 @@ import ChangePasswordScreen from '../features/setting/screens/ChangePasswordScre
 import HistoryScreen from '../features/setting/screens/HistoryScreen';
 import { CustomToastComponent } from '../config/Toast';
 import NotificationToast from '../components/NotificationToast';
-import store from '../reducers/store';
-import { login } from '../reducers/loginReducer';
 const Stack = createNativeStackNavigator();
 
 type AppRouteItem = {

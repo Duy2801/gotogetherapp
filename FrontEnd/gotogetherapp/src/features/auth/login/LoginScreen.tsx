@@ -1,4 +1,4 @@
-import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import Body from '../../../components/Layout/Body';
 import { LOGO } from '../../../assets';
 import React from 'react';
@@ -9,15 +9,19 @@ import { SCREEN_NAME } from '../../../constants/screenName';
 import Toast from 'react-native-toast-message';
 import {showSuccessToast, showErrorToast} from '../../../utils/appToast';
 import { apiLogin } from './api';
+import { apiGoogleLogin } from './api';
 import { useDispatch } from 'react-redux';
 import { login } from '../../../reducers/loginReducer';
 import { ApiError } from '../../../api';
 import { useTranslation } from '../../../hooks/useTranslation';
+import { getGoogleSignin, getGoogleSignInStatusCodes } from '../../../services/googleSignin';
+
 const LoginScreen = () => {
   const navigation = useNavigation<any>();
   const [showPassword, setShowPassword] = React.useState(false);
   const [email, setEmail] = React.useState('user1@gotogether.com');
   const [password, setPassword] = React.useState('password123');
+  const [googleLoading, setGoogleLoading] = React.useState(false);
 
   const dispatch = useDispatch();
   const { t } = useTranslation();
@@ -105,6 +109,92 @@ const LoginScreen = () => {
     });
   };
 
+  const navigateAfterLogin = React.useCallback(
+    (user: any) => {
+      const isInfoComplete = checkInfoUser(user);
+      setTimeout(() => {
+        if (isInfoComplete) {
+          navigation.navigate(SCREEN_NAME.TABS);
+        } else {
+          navigation.replace(SCREEN_NAME.UPDATE_INFO, {
+            fromAuthFlow: true,
+          });
+        }
+      }, 300);
+    },
+    [navigation],
+  );
+
+  const handleGoogleLogin = async () => {
+    console.log('[Auth] Google sign-in pressed');
+    setGoogleLoading(true);
+    const statusCodes = getGoogleSignInStatusCodes();
+    try {
+      const googleSignin = getGoogleSignin();
+      console.log('[Auth] getGoogleSignin ->', !!googleSignin);
+      if (!googleSignin?.hasPlayServices || !googleSignin?.signIn) {
+        throw new Error('Google Sign-In module could not be loaded');
+      }
+
+      console.log('[Auth] checking play services');
+      Toast.show({ type: 'info', text1: 'Đang mở Google Sign-In...' });
+      await googleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+      console.log('[Auth] calling signIn()');
+      const signInResult = await googleSignin.signIn();
+      console.log('[Auth] signIn result:', signInResult);
+      const tokens = googleSignin.getTokens ? await googleSignin.getTokens() : null;
+      console.log('[Auth] tokens:', tokens);
+      const idToken = signInResult?.idToken || tokens?.idToken;
+
+      if (!idToken) {
+        throw new Error(t('auth.invalidResponse'));
+      }
+
+      const response = (await apiGoogleLogin({ idToken })) as any;
+
+      if (response?.accessToken) {
+        showSuccessToast(t('common.success'), t('auth.loginSuccess'));
+        dispatch(
+          login({
+            user: response.user,
+            accessToken: response.accessToken,
+            refreshToken: response.refreshToken,
+            startDate: response.startDate,
+          }),
+        );
+
+        navigateAfterLogin(response.user);
+      } else {
+        showErrorToast(
+          t('common.error'),
+          response && typeof response === 'object'
+            ? JSON.stringify(response)
+            : t('auth.invalidResponse'),
+        );
+      }
+    } catch (error: any) {
+      if (
+        error?.code === statusCodes.SIGN_IN_CANCELLED ||
+        error?.code === 'SIGN_IN_CANCELLED'
+      ) {
+        return;
+      }
+
+      if (
+        error?.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE ||
+        error?.code === 'PLAY_SERVICES_NOT_AVAILABLE'
+      ) {
+        showErrorToast(t('common.error'), t('auth.loginFailed'));
+        return;
+      }
+
+      const err = error as ApiError;
+      showErrorToast(t('common.error'), err.message || t('auth.loginFailed'));
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
+
   // Google sign-in handling removed — visual-only button remains
 
   
@@ -116,7 +206,11 @@ const LoginScreen = () => {
           <Text style={styles.title}>{t('auth.login')}</Text>
         </View>
           <View style={styles.containerGoogle}>
-            <GoogleSignInButton />
+            <GoogleSignInButton
+              onPress={handleGoogleLogin}
+              loading={googleLoading}
+              disabled={googleLoading}
+            />
           </View>
         <View>
           <TextInput
