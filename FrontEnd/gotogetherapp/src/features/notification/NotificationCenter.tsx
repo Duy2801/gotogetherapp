@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   StyleSheet,
@@ -10,6 +10,8 @@ import {
   Alert,
   RefreshControl,
   ActivityIndicator,
+  Animated,
+  Easing,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -53,6 +55,30 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
   const [selectedForDelete, setSelectedForDelete] = useState<string | null>(
     null,
   );
+
+  // Animated slide-from-top handling
+  const [internalVisible, setInternalVisible] = useState<boolean>(visible);
+  const slideAnim = useRef(new Animated.Value(-420)).current;
+
+  useEffect(() => {
+    if (visible) {
+      setInternalVisible(true);
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+        easing: Easing.out(Easing.cubic),
+      }).start();
+    } else if (!visible && internalVisible) {
+      Animated.timing(slideAnim, {
+        toValue: -420,
+        duration: 220,
+        useNativeDriver: true,
+        easing: Easing.in(Easing.cubic),
+      }).start(() => setInternalVisible(false));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visible]);
 
   // Auto refetch when notification center opens (failsafe if socket event missed)
   React.useEffect(() => {
@@ -277,27 +303,22 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
 
   return (
     <Modal
-      visible={visible}
+      visible={internalVisible}
       transparent
-      animationType="slide"
+      animationType="none"
       onRequestClose={onClose}
+      statusBarTranslucent
     >
-      <Pressable style={styles.overlay} onPress={onClose}>
-        <Pressable
-          style={styles.modalContent}
-          onPress={e => e.stopPropagation()}
+      <View style={styles.overlayTop}>
+        <Pressable style={styles.overlayTouchArea} onPress={onClose} />
+        <Animated.View
+          style={[styles.modalContentTop, { transform: [{ translateY: slideAnim }] }]}
         >
           {/* Header */}
-          <View style={styles.header}>
-            <View style={styles.dragHandle} />
-            <Text style={styles.headerTitle}>{t('notification.title')}</Text>
+          <View style={styles.headerTop}>
+            <Text style={styles.headerTitleTop}>{t('notification.title')}</Text>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-              <FontAwesome6
-                name="xmark"
-                size={18}
-                color="#111827"
-                iconStyle="solid"
-              />
+              <FontAwesome6 name="xmark" size={18} color="#111827" iconStyle="solid" />
             </TouchableOpacity>
           </View>
 
@@ -356,26 +377,33 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
               }
             />
           )}
-        </Pressable>
-      </Pressable>
+        </Animated.View>
+      </View>
     </Modal>
   );
 };
 
 const styles = StyleSheet.create({
-  overlay: {
+  overlayTop: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    justifyContent: 'flex-start',
   },
-  modalContent: {
-    backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
+  overlayTouchArea: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  modalContentTop: {
+    // semi-transparent so underlying screen is visible
+    backgroundColor: 'rgba(255, 255, 255, 0.92)',
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
     maxHeight: '90%',
-    paddingTop: 12,
+    paddingBottom: 12,
+    paddingTop: 14,
+    width: '100%',
+    zIndex: 2,
   },
-  header: {
+  headerTop: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -384,18 +412,10 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#F3F4F6',
   },
-  dragHandle: {
-    width: 40,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: '#E5E7EB',
-    position: 'absolute',
-    top: 8,
-  },
-  headerTitle: {
+  headerTitleTop: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#111827',
+    color: '#0F172A',
   },
   closeButton: {
     position: 'absolute',
@@ -471,7 +491,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#374151',
+    color: '#0F172A',
   },
   titleUnread: {
     fontWeight: '700',
@@ -479,7 +499,7 @@ const styles = StyleSheet.create({
   },
   message: {
     fontSize: 12,
-    color: '#6B7280',
+    color: '#374151',
     lineHeight: 16,
   },
   timestamp: {

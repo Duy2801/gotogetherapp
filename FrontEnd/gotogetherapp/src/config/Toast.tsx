@@ -78,12 +78,13 @@ export const CustomToastComponent = ({ text1, text2, props }: any) => {
     normalizeToastText(props?.message) ||
     normalizeToastText(props?.data?.message);
   const onClose = props?.onClose || (() => Toast.hide());
+  const onPress = props?.onPress || (() => {});
   const imageSource =
     ToastAsset[toastAssetKey as keyof typeof ToastAsset] ||
     ToastAsset.NOTIFICATION;
 
   return (
-    <View style={[styles.container, { backgroundColor }]}>
+    <TouchableOpacity activeOpacity={0.9} onPress={onPress} style={[styles.container, { backgroundColor }]}>      
       <View style={styles.content}>
         <Image
           source={imageSource}
@@ -113,7 +114,7 @@ export const CustomToastComponent = ({ text1, text2, props }: any) => {
           />
         </TouchableOpacity>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 

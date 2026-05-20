@@ -1,11 +1,20 @@
-import React, { useCallback, useEffect } from 'react';
-import { View, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  View,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  Modal,
+  Animated,
+  Easing,
+} from 'react-native';
 import { useDispatch } from 'react-redux';
 import Toast from 'react-native-toast-message';
 import FontAwesome6 from '@react-native-vector-icons/fontawesome6';
 import {
   addNotification,
   removeNotification,
+  markAsRead,
 } from '../reducers/notificationSlice';
 import { getToastConfig } from '../config';
 import { useSocket } from '../services/useSocket';
@@ -18,12 +27,14 @@ const NotificationToast = () => {
   const dispatch = useDispatch();
   const { socket } = useSocket();
 
+  // Modal state for sliding detail
+  const [modalVisible, setModalVisible] = useState(false);
+  const [activeNotification, setActiveNotification] = useState<any>(null);
+  const slideAnim = useRef(new Animated.Value(-320)).current;
+
   useEffect(() => {
     if (!socket) return;
 
-    /**
-     * Handle incoming notification from socket
-     */
     const handleNotification = (data: any) => {
       const notification = {
         id: `${Date.now()}-${Math.random()}`,
@@ -42,7 +53,6 @@ const NotificationToast = () => {
       showNotificationToast(notification);
     };
 
-    // Subscribe to all notification events
     const events = [
       'trip:payment-marked',
       'trip:payment-confirmed',
@@ -53,27 +63,41 @@ const NotificationToast = () => {
       'trip:reminder',
     ];
 
-    events.forEach(event => {
-      socket.on(event, handleNotification);
-    });
+    events.forEach(event => socket.on(event, handleNotification));
 
-    return () => {
-      // Cleanup
-      events.forEach(event => {
-        socket.off(event, handleNotification);
-      });
-    };
+    return () => events.forEach(event => socket.off(event, handleNotification));
   }, [socket, dispatch]);
 
-  /**
-   * Show toast based on notification type using config
-   */
+  const openDetail = (notification: any) => {
+    Toast.hide();
+    dispatch(markAsRead(notification.id));
+    setActiveNotification(notification);
+    setModalVisible(true);
+    Animated.timing(slideAnim, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
+      easing: Easing.out(Easing.cubic),
+    }).start();
+  };
+
+  const closeDetail = () => {
+    Animated.timing(slideAnim, {
+      toValue: -320,
+      duration: 220,
+      useNativeDriver: true,
+      easing: Easing.in(Easing.cubic),
+    }).start(() => {
+      setModalVisible(false);
+      setActiveNotification(null);
+    });
+  };
+
   const showNotificationToast = useCallback(
     (notification: any) => {
       const { type, title, message, id } = notification;
       const config = getToastConfig(type);
 
-      // Show Toast
       Toast.show({
         type: 'notification',
         position: 'top',
@@ -86,9 +110,8 @@ const NotificationToast = () => {
           icon: config.icon,
           toastAssetKey: config.toastAssetKey,
           notificationId: id,
-          onClose: () => {
-            dispatch(removeNotification(id));
-          },
+          onClose: () => dispatch(removeNotification(id)),
+          onPress: () => openDetail(notification),
         },
       });
 
@@ -100,18 +123,38 @@ const NotificationToast = () => {
     [dispatch],
   );
 
-  return null;
+  return (
+    <>
+      <Modal visible={modalVisible} transparent animationType="none">
+        <Animated.View
+          style={[
+            styles.detailModal,
+            { transform: [{ translateY: slideAnim }] },
+          ]}
+        >
+          <View style={styles.detailHeader}>
+            <Text style={styles.detailTitle}>{activeNotification?.title}</Text>
+            <TouchableOpacity onPress={closeDetail}>
+              <FontAwesome6 name="xmark" size={16} color="#fff" />
+            </TouchableOpacity>
+          </View>
+          <View style={styles.detailBody}>
+            <Text style={styles.detailMessage}>{activeNotification?.message}</Text>
+          </View>
+        </Animated.View>
+      </Modal>
+    </>
+  );
 };
 
 /**
  * Custom Toast component for notifications
  */
 export const CustomNotificationToast = ({ props }: any) => {
-  const { backgroundColor, icon, text1, text2, notificationId, onClose } =
-    props;
+  const { backgroundColor, icon, text1, text2, notificationId, onClose, onPress } = props;
 
   return (
-    <View style={[styles.container, { backgroundColor }]}>
+    <TouchableOpacity activeOpacity={0.9} onPress={() => onPress && onPress()} style={[styles.container, { backgroundColor }]}> 
       <View style={styles.content}>
         <FontAwesome6
           name={icon}
@@ -129,15 +172,10 @@ export const CustomNotificationToast = ({ props }: any) => {
           </Text>
         </View>
         <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-          <FontAwesome6
-            name="xmark"
-            size={14}
-            color="#FFFFFF"
-            iconStyle="solid"
-          />
+          <FontAwesome6 name="xmark" size={14} color="#FFFFFF" iconStyle="solid" />
         </TouchableOpacity>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 
@@ -159,26 +197,30 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 10,
   },
-  icon: {
-    flexShrink: 0,
+  icon: { flexShrink: 0 },
+  textContainer: { flex: 1, gap: 2 },
+  title: { fontSize: 14, fontWeight: '700', color: '#FFFFFF' },
+  message: { fontSize: 12, color: 'rgba(255, 255, 255, 0.9)' },
+  closeButton: { padding: 4, flexShrink: 0 },
+
+  // detail modal
+  detailModal: {
+    backgroundColor: '#0F172A',
+    paddingTop: 40,
+    paddingBottom: 20,
+    paddingHorizontal: 16,
+    borderBottomLeftRadius: 12,
+    borderBottomRightRadius: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 8,
   },
-  textContainer: {
-    flex: 1,
-    gap: 2,
-  },
-  title: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-  message: {
-    fontSize: 12,
-    color: 'rgba(255, 255, 255, 0.9)',
-  },
-  closeButton: {
-    padding: 4,
-    flexShrink: 0,
-  },
+  detailHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  detailTitle: { color: '#fff', fontWeight: '700', fontSize: 16 },
+  detailBody: { marginTop: 12 },
+  detailMessage: { color: 'rgba(255,255,255,0.95)' },
 });
 
 export default NotificationToast;

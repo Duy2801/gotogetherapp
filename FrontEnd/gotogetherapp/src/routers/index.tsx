@@ -28,6 +28,7 @@ import SpendingStatisticsScreen from '../features/statistic/SpendingStatisticsSc
 import ChangePasswordScreen from '../features/setting/screens/ChangePasswordScreen';
 import HistoryScreen from '../features/setting/screens/HistoryScreen';
 import { CustomToastComponent } from '../config/Toast';
+import NotificationToast from '../components/NotificationToast';
 import store from '../reducers/store';
 import { login } from '../reducers/loginReducer';
 const Stack = createNativeStackNavigator();
@@ -135,6 +136,8 @@ function ApplicationNavigator() {
         </Stack.Navigator>
       </NavigationContainer>
       <Toast config={toastConfig as any} />
+      {/* NotificationToast listens to socket and opens sliding modal on press */}
+      <NotificationToast />
     </>
   );
 }
