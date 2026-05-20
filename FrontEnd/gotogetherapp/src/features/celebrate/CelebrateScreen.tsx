@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
 import {
   ActivityIndicator,
   Dimensions,
@@ -21,7 +21,9 @@ import ImagePicker from 'react-native-image-crop-picker';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import SimpleFloatingButton from '../../components/SimpleFloatingButton';
 import { PRIMARY_COLOR, SECONDARY_COLOR } from '../../constants/color';
-import { celebrateApi, CelebrateItem } from './api';
+import { celebrateApi, CelebrateItem, CelebrateComment, CelebrateReaction, ReactionSummary } from './api';
+import { socket_url } from '../../api/constant';
+import io from 'socket.io-client';
 import { tripApi, Trip } from '../home/api';
 import { uploadService } from '../../services/uploadService';
 import {
@@ -44,10 +46,19 @@ function CelebrateScreen() {
   const [selectedDetail, setSelectedDetail] = useState<CelebrateItem | null>(
     null,
   );
+
+  // Comments & reactions for selected detail
+  const [comments, setComments] = useState<CelebrateComment[]>([]);
+  const [commentsLoading, setCommentsLoading] = useState(false);
+  const [commentText, setCommentText] = useState('');
+  const [reactions, setReactions] = useState<ReactionSummary | null>(null);
+  const [reactionsLoading, setReactionsLoading] = useState(false);
+  const [reacting, setReacting] = useState(false);
   const [editingCelebrateId, setEditingCelebrateId] = useState<string | null>(
     null,
   );
   const [createLoading, setCreateLoading] = useState(false);
+  const socketRef = useRef<any>(null);
   const [selectedTripId, setSelectedTripId] = useState('');
   const [celebrationSearchText, setCelebrationSearchText] = useState('');
   const [tripSearchText, setTripSearchText] = useState('');
@@ -93,8 +104,42 @@ function CelebrateScreen() {
   };
 
   useEffect(() => {
+    // setup socket connection for realtime updates
+    try {
+      const sock = io(socket_url, { path: '/ws/celebrate', transports: ['websocket'] });
+      socketRef.current = sock;
+
+      sock.on('connect', () => {
+        // console.log('socket connected');
+      });
+
+      sock.on('celebrate.comment.created', (payload: any) => {
+        const { celebrateId, comment } = payload || {};
+        if (!celebrateId) return;
+        setComments(prev => {
+          if (!selectedDetail || selectedDetail.id !== celebrateId) return prev;
+          return [comment, ...(prev || [])];
+        });
+      });
+
+      sock.on('celebrate.reaction.toggled', (payload: any) => {
+        const { celebrateId, summary } = payload || {};
+        if (!celebrateId) return;
+        if (!selectedDetail || selectedDetail.id !== celebrateId) return;
+        setReactions(summary || { counts: {}, userReactions: [] });
+      });
+    } catch (err) {
+      // ignore socket errors
+    }
+
     setLoading(true);
     fetchCelebrations();
+
+    return () => {
+      try {
+        socketRef.current?.disconnect?.();
+      } catch {}
+    };
   }, []);
 
   const onRefresh = () => {
@@ -187,6 +232,103 @@ function CelebrateScreen() {
     );
   };
 
+  // Load comments and reactions when a detail is opened
+  useEffect(() => {
+    const loadDetailExtras = async () => {
+      if (!selectedDetail) {
+        setComments([]);
+        setReactions(null);
+        return;
+      }
+
+      setCommentsLoading(true);
+      setReactionsLoading(true);
+
+      try {
+        const [c, r] = await Promise.all([
+          celebrateApi.getComments(selectedDetail.id),
+          celebrateApi.getReactions(selectedDetail.id),
+        ]);
+        setComments(Array.isArray(c) ? c : []);
+        setReactions(r || { counts: {}, userReactions: [] });
+      } catch (err) {
+        // ignore failures for now
+      } finally {
+        setCommentsLoading(false);
+        setReactionsLoading(false);
+      }
+    };
+
+    loadDetailExtras();
+  }, [selectedDetail]);
+
+  const handleAddComment = async () => {
+    const text = commentText.trim();
+    if (!selectedDetail || !text) return;
+
+    // optimistic append
+    const tempId = `temp-${Date.now()}`;
+    const me = { id: 'me', fullName: 'You', avatar: undefined } as any;
+    const tempComment: CelebrateComment = {
+      id: tempId,
+      celebrateId: selectedDetail.id,
+      userId: me.id,
+      content: text,
+      createdAt: new Date().toISOString(),
+      user: me,
+    };
+
+    setComments(prev => [tempComment, ...prev]);
+    setCommentText('');
+
+    try {
+      const created = await celebrateApi.createComment(selectedDetail.id, text);
+      // replace temp with real
+      setComments(prev => prev.map(it => (it.id === tempId ? created : it)));
+    } catch (err: any) {
+      // rollback
+      setComments(prev => prev.filter(it => it.id !== tempId));
+      showErrorToast(t('common.error'), err?.error || err?.message || t('celebrate.addFailed'));
+    }
+  };
+
+  const EMOJIS = ['👍', '❤️', '😂', '😮', '😢'];
+
+  const handleToggleReaction = async (emoji: string) => {
+    if (!selectedDetail || reacting) return;
+    setReacting(true);
+
+    // optimistic update locally
+    setReactions(prev => {
+      const p = prev || { counts: {}, userReactions: [] };
+      const counts = { ...p.counts };
+      const userReactions = new Set(p.userReactions || []);
+      const reacted = userReactions.has(emoji);
+      if (reacted) {
+        // remove reaction
+        counts[emoji] = Math.max(0, (counts[emoji] || 1) - 1);
+        userReactions.delete(emoji);
+      } else {
+        counts[emoji] = (counts[emoji] || 0) + 1;
+        userReactions.add(emoji);
+      }
+      return { counts, userReactions: Array.from(userReactions) };
+    });
+
+    try {
+      const updated = await celebrateApi.toggleReaction(selectedDetail.id, emoji);
+      setReactions(updated || { counts: {}, userReactions: [] });
+    } catch (err) {
+      // revert by reloading reactions
+      try {
+        const r = await celebrateApi.getReactions(selectedDetail.id);
+        setReactions(r || { counts: {}, userReactions: [] });
+      } catch {}
+    } finally {
+      setReacting(false);
+    }
+  };
+
   const renderItem = ({ item }: { item: CelebrateItem }) => {
     const gallery = getItemImages(item);
 
@@ -215,7 +357,9 @@ function CelebrateScreen() {
                   color="#0A7B45"
                   iconStyle="solid"
                 />
-                <Text style={styles.photoCountText}>{gallery.length} ảnh</Text>
+                <Text style={styles.photoCountText}>
+                  {gallery.length} {t('celebrate.photoUnit')}
+                </Text>
               </View>
             )}
           </View>
@@ -351,14 +495,16 @@ function CelebrateScreen() {
         selectedImageUris.map(uri => uploadService.uploadPhoto(uri)),
       );
 
+      let resultItem: any = null;
+
       if (editingCelebrateId) {
-        await celebrateApi.updateCelebrate(editingCelebrateId, {
+        resultItem = await celebrateApi.updateCelebrate(editingCelebrateId, {
           date: celebrateDate,
           description: description.trim(),
           images: [...existingImageUrls, ...uploadedImageUrls],
         });
       } else {
-        await celebrateApi.createCelebrate({
+        resultItem = await celebrateApi.createCelebrate({
           tripId: selectedTripId,
           date: celebrateDate,
           description: description.trim(),
@@ -372,7 +518,26 @@ function CelebrateScreen() {
       setExistingImageUrls([]);
       setDescription('');
       setSelectedImageUris([]);
-      await fetchCelebrations();
+
+      // Optimistically update local list so new/updated memory shows immediately.
+      if (resultItem) {
+        const withTrip = {
+          ...resultItem,
+          trip: resultItem.trip || trips.find(t => t.id === resultItem.tripId),
+          images: resultItem.images || [],
+        } as any;
+
+        setItems(prev => {
+          if (editingCelebrateId) {
+            return prev.map(it => (it.id === withTrip.id ? withTrip : it));
+          }
+          return [withTrip, ...prev];
+        });
+
+        // Refresh in background to fully sync server-side relations (trip/user)
+        fetchCelebrations().catch(() => {});
+      }
+
       showSuccessToast(
         t('common.success'),
         editingCelebrateId
@@ -573,6 +738,76 @@ function CelebrateScreen() {
                     {t('celebrate.photoCount')}{' '}
                     {selectedDetail ? getItemImages(selectedDetail).length : 0}
                   </Text>
+                </View>
+                {/* Reactions */}
+                <View style={styles.reactionRow}>
+                  {reactionsLoading ? (
+                    <ActivityIndicator size="small" color={PRIMARY_COLOR} />
+                  ) : (
+                    EMOJIS.map(e => {
+                      const count = reactions?.counts?.[e] ?? 0;
+                      const active = (reactions?.userReactions || []).includes(e);
+                      return (
+                        <TouchableOpacity
+                          key={e}
+                          style={[styles.reactionPill, active && styles.reactionPillActive]}
+                          onPress={() => handleToggleReaction(e)}
+                        >
+                          <Text style={styles.reactionEmoji}>{e}</Text>
+                          <Text style={[styles.reactionCount, active && styles.reactionCountActive]}>{count > 0 ? String(count) : ''}</Text>
+                        </TouchableOpacity>
+                      );
+                    })
+                  )}
+                </View>
+
+                {/* Comments */}
+                <View style={styles.commentsSection}>
+                  <Text style={styles.commentsTitle}>{t('celebrate.comments')}</Text>
+                  {commentsLoading ? (
+                    <ActivityIndicator size="small" color={PRIMARY_COLOR} />
+                  ) : comments.length === 0 ? (
+                    <Text style={styles.noCommentsText}>{t('celebrate.noComments')}</Text>
+                  ) : (
+                    comments.map(c => (
+                      <View key={c.id} style={styles.commentRow}>
+                        {c.user?.avatar ? (
+                          <Image source={{ uri: c.user.avatar }} style={styles.commentAvatar} />
+                        ) : (
+                          <View style={[styles.commentAvatar, styles.avatarPlaceholder]}>
+                            <Text style={styles.avatarPlaceholderText}>
+                              {(c.user?.fullName || t('common.user'))
+                                .slice(0, 1)
+                                .toUpperCase()}
+                            </Text>
+                          </View>
+                        )}
+                        <View style={styles.commentBody}>
+                          <Text style={styles.commentAuthor}>{c.user?.fullName || t('common.user')}</Text>
+                          <Text style={styles.commentContent}>{c.content}</Text>
+                          <Text style={styles.commentTime}>
+                            {new Date(c.createdAt || '').toLocaleString(
+                              locale === 'en' ? 'en-US' : 'vi-VN',
+                            )}
+                          </Text>
+                        </View>
+                      </View>
+                    ))
+                  )}
+
+                  <View style={styles.addCommentRow}>
+                    <TextInput
+                      value={commentText}
+                      onChangeText={setCommentText}
+                      placeholder={t('celebrate.writeComment')}
+                      style={styles.commentInput}
+                      returnKeyType="send"
+                      onSubmitEditing={handleAddComment}
+                    />
+                    <TouchableOpacity style={styles.sendButton} onPress={handleAddComment}>
+                      <Text style={styles.sendButtonText}>{t('common.send')}</Text>
+                    </TouchableOpacity>
+                  </View>
                 </View>
               </View>
             </ScrollView>
@@ -1209,6 +1444,41 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '700',
   },
+  reactionRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 12,
+    marginBottom: 8,
+  },
+  reactionPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 20,
+    backgroundColor: '#F3F4F6',
+  },
+  reactionPillActive: {
+    backgroundColor: `${SECONDARY_COLOR}20`,
+    borderWidth: 1,
+    borderColor: SECONDARY_COLOR,
+  },
+  reactionEmoji: { fontSize: 16 },
+  reactionCount: { marginLeft: 6, fontSize: 12, color: '#334155' },
+  reactionCountActive: { color: SECONDARY_COLOR, fontWeight: '700' },
+  commentsSection: { marginTop: 12, paddingTop: 8, borderTopWidth: 1, borderTopColor: '#EEF2F7' },
+  commentsTitle: { fontSize: 14, fontWeight: '700', color: '#111827', marginBottom: 8 },
+  noCommentsText: { color: '#6B7280' },
+  commentRow: { flexDirection: 'row', gap: 10, marginBottom: 12, alignItems: 'flex-start' },
+  commentAvatar: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#E6EEF3' },
+  commentBody: { flex: 1 },
+  commentAuthor: { fontSize: 13, fontWeight: '700', color: '#0F172A' },
+  commentContent: { marginTop: 2, color: '#334155' },
+  commentTime: { marginTop: 4, fontSize: 11, color: '#94A3B8' },
+  addCommentRow: { flexDirection: 'row', gap: 8, marginTop: 8, alignItems: 'center' },
+  commentInput: { flex: 1, borderWidth: 1, borderColor: '#E5E7EB', borderRadius: 12, paddingHorizontal: 12, paddingVertical: 8, backgroundColor: '#fff' },
+  sendButton: { paddingHorizontal: 12, paddingVertical: 8, backgroundColor: SECONDARY_COLOR, borderRadius: 10 },
+  sendButtonText: { color: '#fff', fontWeight: '700' },
 });
 
 export default CelebrateScreen;

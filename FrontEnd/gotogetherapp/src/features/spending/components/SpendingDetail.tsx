@@ -188,7 +188,7 @@ const SpendingDetail = ({ navigation, route }: { navigation: any; route: any }) 
   if (!tripDataList || tripDataList.length === 0) {
     return (
       <SafeAreaView style={styles.screen} edges={["top", "left", "right"]}>
-        <Text style={styles.errorText}>Không thể tải dữ liệu chuyến đi</Text>
+        <Text style={styles.errorText}>{t('spending.loadingDetailFailedTrip')}</Text>
       </SafeAreaView>
     );
   }
@@ -202,7 +202,9 @@ const SpendingDetail = ({ navigation, route }: { navigation: any; route: any }) 
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
           <FontAwesome6 name="chevron-left" size={20} color="#111827" iconStyle="solid" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>{tripCount > 1 ? `${tripCount} chuyến đi` : primaryTrip.name}</Text>
+        <Text style={styles.headerTitle}>
+          {tripCount > 1 ? t('spending.tripTimeAmount', { count: String(tripCount) }) : primaryTrip.name}
+        </Text>
         <View style={styles.headerPlaceholder} />
       </View>
 
@@ -210,9 +212,9 @@ const SpendingDetail = ({ navigation, route }: { navigation: any; route: any }) 
         {(['info', 'expenses', 'settlement'] as TabType[]).map(tab => (
           <TouchableOpacity key={tab} style={[styles.tab, selectedTab === tab && styles.tabActive]} onPress={() => setSelectedTab(tab)}>
             <Text style={[styles.tabText, selectedTab === tab && styles.tabTextActive]}>
-              {tab === 'info' && 'Thông tin'}
-              {tab === 'expenses' && 'Chi phí'}
-              {tab === 'settlement' && 'Chia tiền'}
+              {tab === 'info' && t('spending.infoTab')}
+              {tab === 'expenses' && t('spending.expenseTab')}
+              {tab === 'settlement' && t('spending.settlementTab')}
             </Text>
           </TouchableOpacity>
         ))}
@@ -228,29 +230,31 @@ const SpendingDetail = ({ navigation, route }: { navigation: any; route: any }) 
 };
 
 // Trip Info Tab - display single trip info
-const TripInfoTab = ({ trip, memberBreakdown }: { trip: TripDetail; memberBreakdown: Array<{ paid: number; owes: number; member: Member }> }) => (
+const TripInfoTab = ({ trip, memberBreakdown }: { trip: TripDetail; memberBreakdown: Array<{ paid: number; owes: number; member: Member }> }) => {
+  const { t } = useTranslation();
+  return (
   <View style={styles.tabContent}>
     <View style={styles.card}>
       <View style={styles.cardHeader}>
-        <Text style={styles.cardTitle}>Thông tin chuyến đi</Text>
+        <Text style={styles.cardTitle}>{t('spending.tripInfoTitle')}</Text>
       </View>
       <View style={styles.cardBody}>
         <View style={styles.infoRow}>
-          <Text style={styles.infoLabel}>Tên chuyến đi:</Text>
+          <Text style={styles.infoLabel}>{t('spending.tripNameLabel')}</Text>
           <Text style={styles.infoValue}>{trip.name}</Text>
         </View>
         <View style={styles.infoRow}>
-          <Text style={styles.infoLabel}>Thời gian:</Text>
+          <Text style={styles.infoLabel}>{t('spending.timeLabel')}</Text>
           <Text style={styles.infoValue}>{formatDate(trip.startDate)} - {formatDate(trip.endDate)}</Text>
         </View>
         <View style={styles.infoRow}>
-          <Text style={styles.infoLabel}>Trạng thái:</Text>
+          <Text style={styles.infoLabel}>{t('spending.statusLabel')}</Text>
           <View style={[styles.statusBadge, { backgroundColor: getStatusColor(trip.status) }]}>
             <Text style={styles.statusText}>{translateStatus(trip.status)}</Text>
           </View>
         </View>
         <View style={styles.infoRow}>
-          <Text style={styles.infoLabel}>Tổng ngân sách:</Text>
+          <Text style={styles.infoLabel}>{t('spending.totalBudgetLabel')}</Text>
           <Text style={styles.infoValue}>{formatMoney(trip.totalBudget || 0)}</Text>
         </View>
       </View>
@@ -259,14 +263,14 @@ const TripInfoTab = ({ trip, memberBreakdown }: { trip: TripDetail; memberBreakd
     <View style={styles.card}>
       <View style={styles.cardHeader}>
         <FontAwesome6 name="users" size={16} color={SECONDARY_COLOR} iconStyle="solid" />
-        <Text style={styles.cardTitle}>Thành viên & Tính toán ({trip.memberCount})</Text>
+        <Text style={styles.cardTitle}>{t('spending.membersAndCalculation', { count: String(trip.memberCount) })}</Text>
       </View>
       <View style={styles.cardBody}>
         <View style={styles.breakdownHeader}>
-          <Text style={styles.breakdownLabel}>Người</Text>
-          <Text style={styles.breakdownLabel}>Đã trả</Text>
-          <Text style={styles.breakdownLabel}>Nợ</Text>
-          <Text style={styles.breakdownLabel}>Chênh lệch</Text>
+          <Text style={styles.breakdownLabel}>{t('spending.personLabel')}</Text>
+          <Text style={styles.breakdownLabel}>{t('spending.paidLabel')}</Text>
+          <Text style={styles.breakdownLabel}>{t('spending.debtLabel')}</Text>
+          <Text style={styles.breakdownLabel}>{t('spending.balanceLabel')}</Text>
         </View>
 
         {memberBreakdown.map((item, idx) => {
@@ -287,7 +291,8 @@ const TripInfoTab = ({ trip, memberBreakdown }: { trip: TripDetail; memberBreakd
       </View>
     </View>
   </View>
-);
+  );
+};
 
 // Multi Trip Info Tab
 const MultiTripInfoTab = ({ tripDataList, memberBreakdown }: { tripDataList: TripDetail[]; memberBreakdown: Array<{ paid: number; owes: number; member: Member }> }) => {
@@ -298,9 +303,9 @@ const MultiTripInfoTab = ({ tripDataList, memberBreakdown }: { tripDataList: Tri
         <View key={trip.id} style={styles.card}>
           <View style={styles.cardHeader}><Text style={styles.cardTitle}>{trip.name}</Text></View>
           <View style={styles.cardBody}>
-            <View style={styles.infoRow}><Text style={styles.infoLabel}>Thời gian:</Text><Text style={styles.infoValue}>{formatDate(trip.startDate)} - {formatDate(trip.endDate)}</Text></View>
-            <View style={styles.infoRow}><Text style={styles.infoLabel}>Trạng thái:</Text><View style={[styles.statusBadge, { backgroundColor: getStatusColor(trip.status) }]}><Text style={styles.statusText}>{translateStatus(trip.status)}</Text></View></View>
-            <View style={styles.infoRow}><Text style={styles.infoLabel}>Tổng ngân sách:</Text><Text style={styles.infoValue}>{formatMoney(trip.totalBudget || 0)}</Text></View>
+            <View style={styles.infoRow}><Text style={styles.infoLabel}>{t('spending.timeLabel')}</Text><Text style={styles.infoValue}>{formatDate(trip.startDate)} - {formatDate(trip.endDate)}</Text></View>
+            <View style={styles.infoRow}><Text style={styles.infoLabel}>{t('spending.statusLabel')}</Text><View style={[styles.statusBadge, { backgroundColor: getStatusColor(trip.status) }]}><Text style={styles.statusText}>{translateStatus(trip.status)}</Text></View></View>
+            <View style={styles.infoRow}><Text style={styles.infoLabel}>{t('spending.totalBudgetLabel')}</Text><Text style={styles.infoValue}>{formatMoney(trip.totalBudget || 0)}</Text></View>
           </View>
         </View>
       ))}
@@ -308,7 +313,7 @@ const MultiTripInfoTab = ({ tripDataList, memberBreakdown }: { tripDataList: Tri
       <View style={styles.card}>
         <View style={styles.cardHeader}><FontAwesome6 name="users" size={16} color={SECONDARY_COLOR} iconStyle="solid" /><Text style={styles.cardTitle}>{t('spending.allTripsSummary')}</Text></View>
         <View style={styles.cardBody}>
-          <View style={styles.breakdownHeader}><Text style={styles.breakdownLabel}>{t('spending.personLabel')}</Text><Text style={styles.breakdownLabel}>{t('spending.paidLabel')}</Text><Text style={styles.breakdownLabel}>{t('spending.debtLabel')}</Text><Text style={styles.breakdownLabel}>Chênh lệch</Text></View>
+          <View style={styles.breakdownHeader}><Text style={styles.breakdownLabel}>{t('spending.personLabel')}</Text><Text style={styles.breakdownLabel}>{t('spending.paidLabel')}</Text><Text style={styles.breakdownLabel}>{t('spending.debtLabel')}</Text><Text style={styles.breakdownLabel}>{t('spending.balanceLabel')}</Text></View>
           {memberBreakdown.map((item, idx) => {
             const balance = item.paid - item.owes;
             const isPositive = balance > 0;

@@ -22,7 +22,8 @@ import { SCREEN_NAME } from '../../constants/screenName';
 import AddTripScreen from './components/AddTripScreen';
 import SimpleFloatingButton from '../../components/SimpleFloatingButton';
 import NotificationButton from '../../components/NotificationButton';
-import TripTimeFilterModal from './components/TripTimeFilterModal';
+import MonthYearFilter from '../../components/MonthYearFilter';
+import MonthFilterButton from '../../components/MonthFilterButton';
 import { showErrorToast, showSuccessToast } from '../../utils/appToast';
 import { useTranslation } from '../../hooks/useTranslation';
 
@@ -54,6 +55,7 @@ const HomeScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState('ALL');
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [showAddTrip, setShowAddTrip] = useState(false);
   const [invitationActionTripId, setInvitationActionTripId] = useState<
     string | null
@@ -223,9 +225,22 @@ const HomeScreen = () => {
               isTimeFilterActive && styles.calendarButtonActive,
             ]}
           >
-            <TripTimeFilterModal
-              selectedMonth={selectedMonth}
-              onMonthChange={setSelectedMonth}
+            <MonthYearFilter
+              month={selectedMonth + 1}
+              year={selectedYear}
+              onChange={(m, y) => {
+                setSelectedMonth(m - 1);
+                setSelectedYear(y);
+              }}
+              renderButton={(open) => (
+                <MonthFilterButton
+                  month={selectedMonth + 1}
+                  year={selectedYear}
+                  onPress={open}
+                  style={styles.monthButtonCustom}
+                  textStyle={styles.monthButtonTextCustom}
+                />
+              )}
             />
           </View>
         </View>
@@ -405,6 +420,18 @@ const styles = StyleSheet.create({
   calendarIconActive: {
     color: '#047857',
   },
+  monthButtonCustom: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E6F0EA',
+  },
+  monthButtonTextCustom: { color: SECONDARY_COLOR, fontWeight: '700' },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',

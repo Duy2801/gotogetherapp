@@ -78,7 +78,7 @@ const PaymentDetailScreen = ({ navigation }: { navigation: any }) => {
       setGroups(result);
     } catch (error: any) {
       setErrorText(
-        error?.error || error?.message || 'Không thể tải chi tiết thanh toán',
+        error?.error || error?.message || t('spending.loadingDetailFailed'),
       );
     } finally {
       setLoading(false);
@@ -204,9 +204,10 @@ const PaymentDetailScreen = ({ navigation }: { navigation: any }) => {
     amount: number;
     splitId: string;
   }) => {
-    const message = `Nhắc bạn chuyển cho tôi ${formatMoney(
-      userData.amount,
-    )} cho khoản chi phí chuyến đi. Cảm ơn ${userData.name}.`;
+    const message = t('spending.remindMessage', {
+      amount: formatMoney(userData.amount),
+      name: userData.name,
+    });
     try {
       setActionLoadingId(`remind-${userData.userId}`);
       await spendingApi.sendReminder(
@@ -308,7 +309,9 @@ const PaymentDetailScreen = ({ navigation }: { navigation: any }) => {
                   {group.counterpartyName}
                 </Text>
                 <Text style={styles.modalPersonSub}>
-                  {type === 'debt' ? 'Bạn nợ người này' : 'Người này nợ bạn'}
+                  {type === 'debt'
+                    ? t('spending.debtToThisPerson')
+                    : t('spending.personOwesYou')}
                 </Text>
               </View>
               <Text
@@ -398,9 +401,12 @@ const PaymentDetailScreen = ({ navigation }: { navigation: any }) => {
                   color="#6B7280"
                   iconStyle="solid"
                 />
-                  <Text style={styles.modalSummaryText}>
-                    Tổng cộng {items.length} khoản từ {tripBreakdowns.length} chuyến đi
-                  </Text>
+                <Text style={styles.modalSummaryText}>
+                  {t('spending.summaryNote', {
+                    itemCount: String(items.length),
+                    tripCount: String(tripBreakdowns.length),
+                  })}
+                </Text>
               </View>
             </ScrollView>
             <TouchableOpacity
@@ -408,13 +414,10 @@ const PaymentDetailScreen = ({ navigation }: { navigation: any }) => {
               onPress={() => {
                 setDetailModalGroup(null);
                 // Get all unique trip IDs from items
-                  const tripIds = [...new Set(items.map((item: any) => item.tripId))];
-                  if (tripIds.length > 0) {
-                    navigation.navigate(SCREEN_NAME.SPENDING_DETAIL, { tripIds });
-                  } else {
-                    // No trips available to show — give user feedback
-                    // Keep modal closed; show no navigation
-                  }
+                const tripIds = [...new Set(items.map((item: any) => item.tripId))];
+                if (tripIds.length > 0) {
+                  navigation.navigate(SCREEN_NAME.SPENDING_DETAIL, { tripIds });
+                }
               }}
             >
               <FontAwesome6
@@ -424,7 +427,7 @@ const PaymentDetailScreen = ({ navigation }: { navigation: any }) => {
                 iconStyle="solid"
               />
               <Text style={styles.modalViewDetailsText}>
-                Xem chi tiết chia tiền chuyến đi
+                {t('spending.viewTripSplitDetail')}
               </Text>
             </TouchableOpacity>
           </Pressable>
@@ -510,10 +513,14 @@ const PaymentDetailScreen = ({ navigation }: { navigation: any }) => {
 
         <Text style={styles.personDescription}>
           {canConfirm
-            ? `Đã gửi tiền cho bạn`
+            ? t('spending.paidToYou')
             : type === 'debt'
-            ? `Đã ứng trước ${primaryItem?.description || 'tiền'}`
-            : `Giao dịch: ${primaryItem?.description || 'Thanh toán'}`}
+            ? t('spending.paidAdvance', {
+                description: primaryItem?.description || 'tiền',
+              })
+            : t('spending.transactionLabel', {
+                description: primaryItem?.description || 'Thanh toán',
+              })}
         </Text>
 
         <View style={styles.detailList}>
@@ -546,7 +553,9 @@ const PaymentDetailScreen = ({ navigation }: { navigation: any }) => {
                   <ActivityIndicator size="small" color="#FFFFFF" />
                 ) : (
                   <Text style={styles.primaryActionText}>
-                    {primaryItem?.isPaid ? 'Chờ xác nhận' : 'Đánh dấu đã trả'}
+                    {primaryItem?.isPaid
+                      ? t('spending.waitingConfirm')
+                      : t('spending.markAsPaid')}
                   </Text>
                 )}
               </TouchableOpacity>
@@ -680,7 +689,7 @@ const PaymentDetailScreen = ({ navigation }: { navigation: any }) => {
               <>
                 <View style={styles.sectionHeader}>
                   <View style={[styles.dot, styles.debtDot]} />
-                  <Text style={styles.sectionTitle}>Bạn nợ</Text>
+                  <Text style={styles.sectionTitle}>{t('spending.debtsTitle')}</Text>
                   <Text style={styles.sectionDebtAmount}>
                     -{formatCompactMoney(debtTotal)}
                   </Text>
@@ -700,8 +709,8 @@ const PaymentDetailScreen = ({ navigation }: { navigation: any }) => {
                     />
                     <Text style={styles.emptyText}>
                       {selectedTripId
-                        ? 'Không có khoản nợ nào cho chuyến đi này.'
-                        : 'Hiện tại bạn không có khoản nợ nào.'}
+                        ? t('spending.noDebtTrip')
+                        : t('spending.noDebt')}
                     </Text>
                   </View>
                 )}
@@ -713,7 +722,9 @@ const PaymentDetailScreen = ({ navigation }: { navigation: any }) => {
               <>
                 <View style={styles.sectionHeader}>
                   <View style={[styles.dot, styles.receiveDot]} />
-                  <Text style={styles.sectionTitle}>Người khác nợ bạn</Text>
+                  <Text style={styles.sectionTitle}>
+                    {t('spending.receivablesTitle')}
+                  </Text>
                   <Text style={styles.sectionReceiveAmount}>
                     +{formatCompactMoney(receivableTotal)}
                   </Text>
@@ -733,7 +744,7 @@ const PaymentDetailScreen = ({ navigation }: { navigation: any }) => {
                     />
                     <Text style={styles.emptyText}>
                       {selectedTripId
-                        ? 'Không có khoản nhận tiền nào cho chuyến đi này.'
+                        ? t('spending.noReceivableTrip')
                         : t('spending.noReceivable')}
                     </Text>
                   </View>

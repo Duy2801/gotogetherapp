@@ -8,6 +8,8 @@ import {
 } from 'react-native';
 import FontAwesome6 from '@react-native-vector-icons/fontawesome6';
 import { PRIMARY_COLOR, SECONDARY_COLOR } from '../../../constants/color';
+import MonthYearFilter from '../../../components/MonthYearFilter';
+import MonthFilterButton from '../../../components/MonthFilterButton';
 import { formatCompactMoney } from '../../../utils/format';
 import { SpendingStatisticsTrip } from '../../spending/api';
 import { useTranslation } from '../../../hooks/useTranslation';
@@ -18,7 +20,7 @@ type Props = {
   trips: SpendingStatisticsTrip[];
   selectedTripId: string | null;
   onSelectTrip: (tripId: string) => void;
-  onOpenMonthPicker: () => void;
+  onChangeMonthYear: (month: number, year: number) => void;
 };
 
 const TripsSummarySection = ({
@@ -27,7 +29,7 @@ const TripsSummarySection = ({
   trips,
   selectedTripId,
   onSelectTrip,
-  onOpenMonthPicker,
+  onChangeMonthYear,
 }: Props) => {
   const { t } = useTranslation();
 
@@ -48,20 +50,20 @@ const TripsSummarySection = ({
     <>
       <View style={styles.sectionHeaderRow}>
         <Text style={styles.sectionTitle}>{t('statistics.monthlyTrips')}</Text>
-        <TouchableOpacity
-          style={styles.monthFilterButton}
-          onPress={onOpenMonthPicker}
-        >
-          <FontAwesome6
-            name="calendar"
-            size={14}
-            color={SECONDARY_COLOR}
-            iconStyle="solid"
-          />
-          <Text style={styles.monthFilterText}>
-            {selectedMonth}/{selectedYear}
-          </Text>
-        </TouchableOpacity>
+        <MonthYearFilter
+          month={selectedMonth}
+          year={selectedYear}
+          onChange={onChangeMonthYear}
+          renderButton={(open) => (
+            <MonthFilterButton
+              month={selectedMonth}
+              year={selectedYear}
+              onPress={open}
+              style={styles.monthFilterButton}
+              textStyle={styles.monthFilterText}
+            />
+          )}
+        />
       </View>
 
       {trips.length ? (

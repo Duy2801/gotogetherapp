@@ -28,6 +28,8 @@ model User {
   notifications     Notification[]
   budgets           Budget[]
   celebrates        Celebrate[]
+  celebrateComments CelebrateComment[]
+  celebrateReactions CelebrateReaction[]
   devices           Device[]
   expenseSplits     ExpenseSplit[]
   expenses          Expense[]      @relation("PaidBy")
@@ -247,6 +249,8 @@ model Celebrate {
   date        DateTime
   createdAt   DateTime         @default(now())
   images      CelebrateImage[]
+  comments    CelebrateComment[]
+  reactions   CelebrateReaction[]
   trip        Trip             @relation(fields: [tripId], references: [id], onDelete: Cascade)
   user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -262,6 +266,37 @@ model CelebrateImage {
 
   @@index([celebrateId])
   @@map("celebrate_images")
+}
+
+model CelebrateComment {
+  id          String    @id @default(uuid())
+  celebrateId String
+  userId      String
+  content     String
+  createdAt   DateTime  @default(now())
+
+  celebrate   Celebrate  @relation(fields: [celebrateId], references: [id], onDelete: Cascade)
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([celebrateId])
+  @@index([userId])
+  @@map("celebrate_comments")
+}
+
+model CelebrateReaction {
+  id          String    @id @default(uuid())
+  celebrateId String
+  userId      String
+  emoji       String
+  createdAt   DateTime  @default(now())
+
+  celebrate   Celebrate  @relation(fields: [celebrateId], references: [id], onDelete: Cascade)
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([celebrateId, userId, emoji])
+  @@index([celebrateId])
+  @@index([userId])
+  @@map("celebrate_reactions")
 }
 
 enum UserStatus {

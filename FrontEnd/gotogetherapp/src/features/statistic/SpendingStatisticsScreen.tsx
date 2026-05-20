@@ -5,7 +5,7 @@ import FontAwesome6 from '@react-native-vector-icons/fontawesome6';
 import { PRIMARY_COLOR, SECONDARY_COLOR } from '../../constants/color';
 import { spendingApi, SpendingStatisticsResponse } from '../spending/api';
 import { useTranslation } from '../../hooks/useTranslation';
-import MonthYearPickerModal from './components/MonthYearPickerModal';
+// month/year filter is now a shared component used inside TripsSummarySection
 import TripsSummarySection from './components/TripsSummarySection';
 import CategoriesSummarySection from './components/CategoriesSummarySection';
 
@@ -18,8 +18,7 @@ const SpendingStatisticsScreen = ({ navigation }: { navigation: any }) => {
   const [selectedTripId, setSelectedTripId] = useState<string | null>(null);
   const [selectedMonth, setSelectedMonth] = useState(currentMonth);
   const [selectedYear, setSelectedYear] = useState(currentYear);
-  const [pickerYear, setPickerYear] = useState(currentYear);
-  const [showMonthPicker, setShowMonthPicker] = useState(false);
+  
   const { t } = useTranslation();
   const [stats, setStats] = useState<SpendingStatisticsResponse>({
     totalAcrossTrips: 0,
@@ -117,14 +116,9 @@ const SpendingStatisticsScreen = ({ navigation }: { navigation: any }) => {
     setRefreshKey(prev => prev + 1);
   }, []);
 
-  const openMonthPicker = () => {
-    setPickerYear(selectedYear);
-    setShowMonthPicker(true);
-  };
-
-  const handleMonthSelect = (month: number) => {
+  const handleMonthChange = (month: number, year: number) => {
     setSelectedMonth(month);
-    setSelectedYear(pickerYear);
+    setSelectedYear(year);
     setSelectedTripId(null);
     setStats({
       totalAcrossTrips: 0,
@@ -132,11 +126,6 @@ const SpendingStatisticsScreen = ({ navigation }: { navigation: any }) => {
       trips: [],
       categories: [],
     });
-    setShowMonthPicker(false);
-  };
-
-  const changePickerYear = (delta: number) => {
-    setPickerYear(prev => prev + delta);
   };
 
   const selectedTripName = useMemo(
@@ -162,15 +151,7 @@ const SpendingStatisticsScreen = ({ navigation }: { navigation: any }) => {
         <View style={styles.headerRightPlaceholder} />
       </View>
 
-      <MonthYearPickerModal
-        visible={showMonthPicker}
-        pickerYear={pickerYear}
-        selectedMonth={selectedMonth}
-        selectedYear={selectedYear}
-        onClose={() => setShowMonthPicker(false)}
-        onChangeYear={changePickerYear}
-        onSelectMonth={handleMonthSelect}
-      />
+      
 
       <ScrollView
         contentContainerStyle={styles.container}
@@ -195,7 +176,7 @@ const SpendingStatisticsScreen = ({ navigation }: { navigation: any }) => {
               trips={safeTrips}
               selectedTripId={selectedTripId}
               onSelectTrip={setSelectedTripId}
-              onOpenMonthPicker={openMonthPicker}
+              onChangeMonthYear={handleMonthChange}
             />
 
             <CategoriesSummarySection
