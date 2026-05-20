@@ -73,13 +73,14 @@ function CelebrateScreen() {
       ]);
 
       setItems(celebrateData);
-      setTrips(tripData.data.trips);
+      const tripsArr = (tripData as any)?.data?.trips ?? (tripData as any)?.trips ?? [];
+      setTrips(tripsArr);
 
       setSelectedTripId(prev => {
-        if (prev || tripData.data.trips.length === 0) {
+        if (prev || tripsArr.length === 0) {
           return prev;
         }
-        return tripData.data.trips[0].id;
+        return tripsArr[0].id;
       });
 
       setCelebrateDate(prev => (prev ? prev : getTodayString()));

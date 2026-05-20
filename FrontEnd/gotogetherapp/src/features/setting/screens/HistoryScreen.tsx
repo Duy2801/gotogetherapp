@@ -36,9 +36,8 @@ const HistoryScreen = () => {
         limit: 50,
       });
 
-      if (tripResponse.status) {
-        const completedTrips = tripResponse.data.trips || [];
-        setTrips(completedTrips);
+      const completedTrips = (tripResponse as any)?.data?.trips ?? (tripResponse as any)?.trips ?? [];
+      setTrips(completedTrips);
 
         // Fetch expenses for each trip
         const expensesMap = new Map<string, Expense[]>();
@@ -49,17 +48,16 @@ const HistoryScreen = () => {
               { page: 1, limit: 100 },
             );
             if (
-              expenseResponse.status &&
-              expenseResponse.data?.expenses?.length > 0
+              ((expenseResponse as any)?.data?.expenses ?? (expenseResponse as any)?.expenses ?? []).length > 0
             ) {
-              expensesMap.set(trip.id, expenseResponse.data.expenses);
+              const expenses = (expenseResponse as any)?.data?.expenses ?? (expenseResponse as any)?.expenses ?? [];
+              expensesMap.set(trip.id, expenses);
             }
           } catch (error) {
             console.log(`Failed to fetch expenses for trip ${trip.id}:`, error);
           }
         }
         setTripExpensesMap(expensesMap);
-      }
     } catch (error: any) {
       showErrorToast(
         t('common.error'),

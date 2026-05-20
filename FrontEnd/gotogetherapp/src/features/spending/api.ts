@@ -1,5 +1,5 @@
 import { ApiError, api } from '../../api';
-import { tripApi } from '../home/api';
+import { tripApi, Trip } from '../home/api';
 import { tripDetailApi, Expense } from '../tripdetail/api';
 
 const GLOBAL_TRIP_SCOPE = 'all';
@@ -172,10 +172,19 @@ export const spendingApi = {
         ) as Promise<NumberApiResponse>,
       ]);
 
+      // `api` interceptor normalizes responses and may return the inner data directly
+      const unwrapNumber = (res: any) => {
+        if (res === null || res === undefined) return 0;
+        if (typeof res === 'number') return res;
+        // support wrapped responses like { status: boolean, data: number }
+        if (typeof res === 'object') return Number(res.data ?? 0);
+        return Number(res) || 0;
+      };
+
       return {
-        totalSpent: Number(spentRes.data ?? 0),
-        totalDebt: Number(debtRes.data ?? 0),
-        totalReceived: Number(receivedRes.data ?? 0),
+        totalSpent: Number(unwrapNumber(spentRes) ?? 0),
+        totalDebt: Number(unwrapNumber(debtRes) ?? 0),
+        totalReceived: Number(unwrapNumber(receivedRes) ?? 0),
       };
     } catch (error) {
       throw error as ApiError;
@@ -185,7 +194,9 @@ export const spendingApi = {
   getBudgetSummary: async (): Promise<SpendingBudgetSummary> => {
     try {
       const firstPage = await tripApi.getTrips({ page: 1, limit: 1 });
-      const totalTrips = Number(firstPage.data.total ?? 0);
+      const totalTrips = Number(
+        (firstPage as any)?.data?.total ?? (firstPage as any)?.total ?? 0,
+      );
 
       if (!totalTrips) {
         return {
@@ -194,11 +205,9 @@ export const spendingApi = {
         };
       }
 
-      const allTripsRes = await tripApi.getTrips({
-        page: 1,
-        limit: totalTrips,
-      });
-      const totalBudget = allTripsRes.data.trips.reduce((sum, trip) => {
+      const allTripsRes = await tripApi.getTrips({ page: 1, limit: totalTrips });
+      const tripsArray = (allTripsRes as any)?.data?.trips ?? (allTripsRes as any)?.trips ?? [];
+      const totalBudget = tripsArray.reduce((sum: number, trip: any) => {
         const rawBudget = trip.totalBudget;
         const budget = Number(rawBudget ?? 0);
         return sum + (Number.isFinite(budget) ? budget : 0);
@@ -216,7 +225,9 @@ export const spendingApi = {
   getPaymentDetailGroups: async (userId: string) => {
     try {
       const firstPage = await tripApi.getTrips({ page: 1, limit: 1 });
-      const totalTrips = Number(firstPage.data.total ?? 0);
+      const totalTrips = Number(
+        (firstPage as any)?.data?.total ?? (firstPage as any)?.total ?? 0,
+      );
 
       if (!totalTrips) {
         return {
@@ -225,14 +236,17 @@ export const spendingApi = {
         };
       }
 
-      const tripsResponse = await tripApi.getTrips({
-        page: 1,
-        limit: totalTrips,
-      });
-      const trips = tripsResponse.data.trips || [];
+      const tripsResponse = await tripApi.getTrips({ page: 1, limit: totalTrips });
+      const trips = (tripsResponse as any)?.data?.trips ?? (tripsResponse as any)?.trips ?? [];
+
+      type TripExpensesEntry = {
+        tripId: string;
+        tripName: string;
+        expenses: Expense[];
+      };
 
       const expenseResponses = await Promise.all(
-        trips.map(async trip => {
+        trips.map(async (trip: Trip): Promise<TripExpensesEntry> => {
           const response = await tripDetailApi.getTripExpenses(trip.id, {
             page: 1,
             limit: 200,
@@ -241,19 +255,14 @@ export const spendingApi = {
           return {
             tripId: trip.id,
             tripName: trip.name,
-            expenses: response.data.expenses || [],
+            expenses: (response as any)?.data?.expenses ?? (response as any)?.expenses ?? [],
           };
         }),
       );
 
-      const items = expenseResponses.flatMap(entry =>
-        entry.expenses.flatMap(expense =>
-          buildPaymentItemsFromExpense(
-            expense,
-            entry.tripId,
-            entry.tripName,
-            userId,
-          ),
+      const items = expenseResponses.flatMap((entry: TripExpensesEntry) =>
+        entry.expenses.flatMap((expense: Expense) =>
+          buildPaymentItemsFromExpense(expense, entry.tripId, entry.tripName, userId),
         ),
       );
 

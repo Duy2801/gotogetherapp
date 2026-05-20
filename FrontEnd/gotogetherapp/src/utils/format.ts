@@ -1,14 +1,22 @@
 /**
  * Format số tiền VND theo dạng đầy đủ với dấu phân cách: 1.500.000 đ
  */
+const formatNumberSmart = (value: number): string => {
+  const v = Number(value || 0);
+  // If integer, show no decimals; otherwise show up to 2 decimals (trim trailing zeros)
+  if (Number.isInteger(v)) {
+    return v.toLocaleString('vi-VN');
+  }
+  return v.toLocaleString('vi-VN', { maximumFractionDigits: 2 });
+};
+
 export const formatCurrency = (value: number): string =>
-  `${Math.round(value).toLocaleString('vi-VN')} đ`;
+  `${formatNumberSmart(value)} đ`;
 
 /**
  * Format số tiền VND không có khoảng trắng trước "đ": 1.500.000đ
  */
-export const formatMoney = (value: number): string =>
-  `${Math.round(value).toLocaleString('vi-VN')}đ`;
+export const formatMoney = (value: number): string => `${formatNumberSmart(value)}đ`;
 
 /**
  * Format số tiền gọn: 1.5M, 500k, 1.2B, v.v.
@@ -16,15 +24,21 @@ export const formatMoney = (value: number): string =>
 export const formatCompactMoney = (value: number): string => {
   const abs = Math.abs(value);
   if (abs >= 1_000_000_000) {
-    return `${(value / 1_000_000_000).toFixed(1).replace('.0', '')}B`;
+    return `${Number(value / 1_000_000_000).toLocaleString('vi-VN', {
+      maximumFractionDigits: 2,
+    })}B`;
   }
   if (abs >= 1_000_000) {
-    return `${(value / 1_000_000).toFixed(1).replace('.0', '')}M`;
+    return `${Number(value / 1_000_000).toLocaleString('vi-VN', {
+      maximumFractionDigits: 2,
+    })}M`;
   }
   if (abs >= 1_000) {
-    return `${(value / 1_000).toFixed(0)}k`;
+    return `${Number(value / 1_000).toLocaleString('vi-VN', {
+      maximumFractionDigits: 2,
+    })}k`;
   }
-  return `${Math.round(value)}`;
+  return formatNumberSmart(value);
 };
 
 /**

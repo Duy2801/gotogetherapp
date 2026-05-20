@@ -115,7 +115,8 @@ const PaymentDetailScreen = ({ navigation }: { navigation: any }) => {
     return groups.debtGroups
       .map(group => {
         if (!selectedTripId) return group;
-        const filteredItems = group.items.filter(
+        const items = group.items ?? [];
+        const filteredItems = items.filter(
           (item: any) => item.tripId === selectedTripId,
         );
         if (!filteredItems.length) return null;
@@ -133,7 +134,8 @@ const PaymentDetailScreen = ({ navigation }: { navigation: any }) => {
     return groups.receivableGroups
       .map(group => {
         if (!selectedTripId) return group;
-        const filteredItems = group.items.filter(
+        const items = group.items ?? [];
+        const filteredItems = items.filter(
           (item: any) => item.tripId === selectedTripId,
         );
         if (!filteredItems.length) return null;
@@ -251,7 +253,8 @@ const PaymentDetailScreen = ({ navigation }: { navigation: any }) => {
   const renderDetailModal = () => {
     if (!detailModalGroup) return null;
     const { group, type } = detailModalGroup;
-    const tripBreakdowns = groupItemsByTrip(group.items);
+    const items = group.items ?? [];
+    const tripBreakdowns = groupItemsByTrip(items);
 
     return (
       <Modal
@@ -395,10 +398,9 @@ const PaymentDetailScreen = ({ navigation }: { navigation: any }) => {
                   color="#6B7280"
                   iconStyle="solid"
                 />
-                <Text style={styles.modalSummaryText}>
-                  Tổng cộng {group.items.length} khoản từ{' '}
-                  {tripBreakdowns.length} chuyến đi
-                </Text>
+                  <Text style={styles.modalSummaryText}>
+                    Tổng cộng {items.length} khoản từ {tripBreakdowns.length} chuyến đi
+                  </Text>
               </View>
             </ScrollView>
             <TouchableOpacity
@@ -406,12 +408,13 @@ const PaymentDetailScreen = ({ navigation }: { navigation: any }) => {
               onPress={() => {
                 setDetailModalGroup(null);
                 // Get all unique trip IDs from items
-                const tripIds = [
-                  ...new Set(group.items.map((item: any) => item.tripId)),
-                ];
-                if (tripIds.length > 0) {
-                  navigation.navigate(SCREEN_NAME.SPENDING_DETAIL, { tripIds });
-                }
+                  const tripIds = [...new Set(items.map((item: any) => item.tripId))];
+                  if (tripIds.length > 0) {
+                    navigation.navigate(SCREEN_NAME.SPENDING_DETAIL, { tripIds });
+                  } else {
+                    // No trips available to show — give user feedback
+                    // Keep modal closed; show no navigation
+                  }
               }}
             >
               <FontAwesome6
@@ -431,16 +434,15 @@ const PaymentDetailScreen = ({ navigation }: { navigation: any }) => {
   };
 
   const renderGroupCard = (group: any, type: 'debt' | 'receivable') => {
-    const primaryItem = group.items[0];
+    const items = group.items ?? [];
+    const primaryItem = items[0] ?? ({} as any);
     const canConfirm = type === 'receivable' && primaryItem?.isPaid;
     const canMarkAsPaid = type === 'debt' && !primaryItem?.isPaid;
     const actionLoading = actionLoadingId === primaryItem?.splitId;
 
-    const tripIds = [
-      ...new Set(group.items.map((i: any) => i.tripId)),
-    ] as string[];
+    const tripIds = [...new Set(items.map((i: any) => i.tripId))] as string[];
     const tripNames = tripIds
-      .map(tid => group.items.find((i: any) => i.tripId === tid)?.tripName)
+      .map(tid => items.find((i: any) => i.tripId === tid)?.tripName)
       .filter(Boolean);
 
     return (
@@ -515,7 +517,7 @@ const PaymentDetailScreen = ({ navigation }: { navigation: any }) => {
         </Text>
 
         <View style={styles.detailList}>
-          {group.items.slice(0, 3).map((item: any) => (
+          {(group.items ?? []).slice(0, 3).map((item: any) => (
             <View key={item.splitId} style={styles.detailRow}>
               <Text style={styles.detailLabel} numberOfLines={1}>
                 • {item.description}
