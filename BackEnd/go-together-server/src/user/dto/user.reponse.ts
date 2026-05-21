@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Expose } from "class-transformer";
-import { UserStatus } from "prisma/generated/enums";
+import { UserStatus } from "prisma/generated/client";
 export class UserReponse {
   @ApiProperty()
   @Expose()

@@ -1,3 +1,13 @@
+.next
+node_modules
+dist
+coverage
+*.log
+.DS_Store
+tsconfig.tsbuildinfo
+.env.local
+.env
+
 # OSX
 #
 .DS_Store
@@ -74,4 +84,4 @@ yarn-error.log
 !.yarn/sdks
 !.yarn/versions
 
-src/api/constant.ts
+api/constant.ts
