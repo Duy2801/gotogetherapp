@@ -5,10 +5,10 @@
   "main": "index.js",
   "scripts": {
     "build": "nest build",
-    "start": "node dist/main.js",
+    "start": "node dist/src/main.js",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
-    "start:prod": "node dist/main",
+    "start:prod": "node dist/src/main.js",
     "db:transfer": "tsx prisma/transfer-data.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
