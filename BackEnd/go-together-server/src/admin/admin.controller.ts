@@ -52,48 +52,19 @@ export class AdminController {
     return this.adminService.updateUserStatus(id, status);
   }
 
-  @Get("trips")
-  getTrips(
-    @Query("status") status = "",
-    @Query("page") page = "1",
-    @Query("limit") limit = "10",
-  ) {
-    return this.adminService.getTrips(status, Number(page), Number(limit));
+  @Post("users")
+  createUser(@Body() body: any) {
+    return this.adminService.createUser(body);
   }
 
-  @Get("trips/:id")
-  getTripDetail(@Param("id") id: string) {
-    return this.adminService.getTripDetail(id);
+  @Put("users/:id")
+  updateUser(@Param("id") id: string, @Body() body: any) {
+    return this.adminService.updateUser(id, body);
   }
 
-  @Get("categories")
-  getCategories() {
-    return this.adminService.getCategories();
-  }
-
-  @Post("categories")
-  createCategory(@Body() body: any) {
-    return this.adminService.createCategory(body);
-  }
-
-  @Put("categories/:id")
-  updateCategory(@Param("id") id: string, @Body() body: any) {
-    return this.adminService.updateCategory(id, body);
-  }
-
-  @Delete("categories/:id")
-  deleteCategory(@Param("id") id: string) {
-    return this.adminService.deleteCategory(id);
-  }
-
-  @Get("destinations")
-  getDestinations() {
-    return this.adminService.getDestinations();
-  }
-
-  @Get("destinations/:id")
-  getDestinationDetail(@Param("id") id: string) {
-    return this.adminService.getDestinationDetail(id);
+  @Delete("users/:id")
+  deleteUser(@Param("id") id: string) {
+    return this.adminService.deleteUser(id);
   }
 
   @Get("settings")

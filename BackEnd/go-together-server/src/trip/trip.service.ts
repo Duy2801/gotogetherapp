@@ -16,6 +16,21 @@ import { tripAmountQuantityResponse } from "./dto/trip-amoutQuantity-reponse";
 export class TripService {
   constructor(private prisma: PrismaService) {}
 
+  private mapAdminTripSummary(trip: any, expenseTotal: number) {
+    return {
+      id: trip.id,
+      name: trip.name,
+      startDate: trip.startDate.toISOString(),
+      endDate: trip.endDate.toISOString(),
+      status: trip.status,
+      memberCount: trip.members?.length ?? trip._count?.members ?? 0,
+      expenseTotal,
+      totalBudget: trip.totalBudget ? Number(trip.totalBudget) : null,
+      createdAt: trip.createdAt.toISOString(),
+      images: trip.images ?? null,
+    };
+  }
+
   private async syncTripStatusesForUser(userId: string) {
     const memberships = await this.prisma.tripMember.findMany({
       where: {
@@ -246,6 +261,125 @@ export class TripService {
       quantity,
     };
   }
+
+  async getAdminTrips(query = "", status = "", page = 1, limit = 10) {
+    const validPage = page > 0 ? page : 1;
+    const validLimit = limit > 0 ? limit : 10;
+    const where: any = {};
+    if (query) where.name = { contains: query, mode: "insensitive" };
+    if (status && status !== "ALL") where.status = status;
+
+    const [trips, total] = await Promise.all([
+      this.prisma.trip.findMany({
+        where,
+        skip: (validPage - 1) * validLimit,
+        take: validLimit,
+        orderBy: { createdAt: "desc" },
+        include: {
+          members: { where: { inviteStatus: "ACCEPTED" }, select: { id: true } },
+          expenses: { select: { amount: true } },
+        },
+      }),
+      this.prisma.trip.count({ where }),
+    ]);
+
+    return {
+      items: trips.map((trip: any) =>
+        this.mapAdminTripSummary(
+          trip,
+          trip.expenses.reduce((sum: number, item: any) => sum + Number(item.amount ?? 0), 0),
+        ),
+      ),
+      total,
+      page: validPage,
+      limit: validLimit,
+    };
+  }
+
+  async getAdminTripDetail(id: string) {
+    const trip = await this.prisma.trip.findUnique({
+      where: { id },
+      include: {
+        members: {
+          include: {
+            user: { select: { id: true, fullName: true, avatar: true } },
+          },
+        },
+        expenses: {
+          include: {
+            category: { select: { name: true } },
+            paidBy: { select: { fullName: true, email: true } },
+          },
+          orderBy: { date: "desc" },
+          take: 10,
+        },
+      },
+    });
+    if (!trip) throw new NotFoundException("Trip not found");
+    const expenseTotal = trip.expenses.reduce((sum: number, item: any) => sum + Number(item.amount ?? 0), 0);
+
+    return {
+      ...this.mapAdminTripSummary(trip, expenseTotal),
+      members: trip.members.map((item: any) => ({
+        id: item.id,
+        userId: item.userId,
+        fullName: item.user?.fullName ?? "Unknown",
+        avatar: item.user?.avatar ?? null,
+        role: item.role,
+        inviteStatus: item.inviteStatus,
+      })),
+      expenses: trip.expenses.map((item: any) => ({
+        id: item.id,
+        amount: Number(item.amount ?? 0),
+        description: item.description,
+        categoryName: item.category?.name ?? "Khác",
+        paidByName: item.paidBy?.fullName ?? item.paidBy?.email ?? "Unknown",
+        date: item.date.toISOString(),
+      })),
+    };
+  }
+
+  async createAdminTrip(payload: any) {
+    const startDate = payload.startDate ? new Date(payload.startDate) : new Date();
+    const endDate = payload.endDate ? new Date(payload.endDate) : startDate;
+    const trip = await this.prisma.trip.create({
+      data: {
+        name: payload.name,
+        startDate,
+        endDate,
+        totalBudget: payload.totalBudget ?? 0,
+        status: payload.status,
+        images: payload.images ?? null,
+      },
+      include: { members: { where: { inviteStatus: "ACCEPTED" }, select: { id: true } } },
+    });
+
+    return this.mapAdminTripSummary(trip, 0);
+  }
+
+  async updateAdminTrip(id: string, payload: any) {
+    const trip = await this.prisma.trip.update({
+      where: { id },
+      data: {
+        name: payload.name,
+        startDate: payload.startDate ? new Date(payload.startDate) : undefined,
+        endDate: payload.endDate ? new Date(payload.endDate) : undefined,
+        totalBudget: payload.totalBudget ?? undefined,
+        status: payload.status,
+        images: payload.images ?? null,
+      },
+      include: { members: { where: { inviteStatus: "ACCEPTED" }, select: { id: true } } },
+    });
+
+    const expenseTotal = await this.prisma.expense.aggregate({ where: { tripId: id }, _sum: { amount: true } });
+    return this.mapAdminTripSummary(trip, Number(expenseTotal._sum.amount ?? 0));
+  }
+
+  async deleteAdminTrip(id: string) {
+    await this.prisma.trip.delete({ where: { id } });
+    return { message: "trip.deleted" };
+  }
+
   async deleteTrip(userId: string, tripId: string) {
     const ownerMember = await this.prisma.tripMember.findUnique({
       where: {

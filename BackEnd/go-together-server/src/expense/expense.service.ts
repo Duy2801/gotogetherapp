@@ -14,6 +14,30 @@ export class ExpenseService {
     private notificationService: NotificationService,
   ) {}
 
+  private mapAdminExpenseSummary(expense: any) {
+    return {
+      id: expense.id,
+      tripId: expense.tripId,
+      tripName: expense.trip?.name ?? "Unknown trip",
+      tripImage: expense.trip?.images ?? null,
+      amount: Number(expense.amount ?? 0),
+      currency: expense.currency,
+      categoryId: expense.categoryId,
+      categoryName: expense.category?.name ?? "Khác",
+      categoryIcon: expense.category?.icon ?? null,
+      categoryColor: expense.category?.color ?? null,
+      description: expense.description,
+      paidById: expense.paidById,
+      paidByName: expense.paidBy?.fullName ?? expense.paidBy?.email ?? "Unknown",
+      paidByAvatar: expense.paidBy?.avatar ?? null,
+      type: expense.type,
+      date: expense.date.toISOString(),
+      receipt: expense.receipt,
+      isConfirmed: expense.isConfirmed,
+      createdAt: expense.createdAt.toISOString(),
+    };
+  }
+
   async getExpenseCategories(userId: string, tripId: string) {
     await this.tripMember.ensureTripMember(userId, tripId);
 
@@ -243,6 +267,100 @@ export class ExpenseService {
     });
 
     return this.toExpenseResponse(created);
+  }
+
+  async getAdminExpenses(query = "", tripId = "", categoryId = "", page = 1, limit = 10) {
+    const validPage = page > 0 ? page : 1;
+    const validLimit = limit > 0 ? limit : 10;
+    const where: any = {};
+
+    if (query) {
+      where.OR = [
+        { description: { contains: query, mode: "insensitive" } },
+        { trip: { name: { contains: query, mode: "insensitive" } } },
+        { paidBy: { fullName: { contains: query, mode: "insensitive" } } },
+        { paidBy: { email: { contains: query, mode: "insensitive" } } },
+      ];
+    }
+    if (tripId && tripId !== "ALL") where.tripId = tripId;
+    if (categoryId && categoryId !== "ALL") where.categoryId = categoryId;
+
+    const [items, total] = await Promise.all([
+      this.prisma.expense.findMany({
+        where,
+        skip: (validPage - 1) * validLimit,
+        take: validLimit,
+        orderBy: { date: "desc" },
+        include: {
+          trip: { select: { id: true, name: true, images: true } },
+          category: { select: { id: true, name: true, icon: true, color: true } },
+          paidBy: { select: { id: true, fullName: true, email: true, avatar: true } },
+        },
+      }),
+      this.prisma.expense.count({ where }),
+    ]);
+
+    return {
+      items: items.map((item: any) => this.mapAdminExpenseSummary(item)),
+      total,
+      page: validPage,
+      limit: validLimit,
+    };
+  }
+
+  async createAdminExpense(payload: any) {
+    const created = await this.prisma.expense.create({
+      data: {
+        tripId: payload.tripId,
+        categoryId: payload.categoryId,
+        paidById: payload.paidById,
+        amount: payload.amount ?? 0,
+        currency: payload.currency ?? "VND",
+        description: payload.description ?? null,
+        type: payload.type ?? "SHARED",
+        date: payload.date ? new Date(payload.date) : new Date(),
+        receipt: payload.receipt ?? null,
+        isConfirmed: Boolean(payload.isConfirmed),
+      },
+      include: {
+        trip: { select: { id: true, name: true, images: true } },
+        category: { select: { id: true, name: true, icon: true, color: true } },
+        paidBy: { select: { id: true, fullName: true, email: true, avatar: true } },
+      },
+    });
+
+    return this.mapAdminExpenseSummary(created);
+  }
+
+  async updateAdminExpense(id: string, payload: any) {
+    const updated = await this.prisma.expense.update({
+      where: { id },
+      data: {
+        tripId: payload.tripId,
+        categoryId: payload.categoryId,
+        paidById: payload.paidById,
+        amount: payload.amount,
+        currency: payload.currency,
+        description: payload.description ?? null,
+        type: payload.type,
+        date: payload.date ? new Date(payload.date) : undefined,
+        receipt: payload.receipt ?? null,
+        isConfirmed: payload.isConfirmed !== undefined ? Boolean(payload.isConfirmed) : undefined,
+      },
+      include: {
+        trip: { select: { id: true, name: true, images: true } },
+        category: { select: { id: true, name: true, icon: true, color: true } },
+        paidBy: { select: { id: true, fullName: true, email: true, avatar: true } },
+      },
+    });
+
+    return this.mapAdminExpenseSummary(updated);
+  }
+
+  async deleteAdminExpense(id: string) {
+    await this.prisma.expenseSplit.deleteMany({ where: { expenseId: id } });
+    await this.prisma.expense.delete({ where: { id } });
+    return { message: "expense.deleted" };
   }
 
   private toExpenseResponse(expense: any) {

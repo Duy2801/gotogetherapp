@@ -3,157 +3,18 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import {
-  faCreditCard,
-  faCommentDots,
-  faMapLocationDot,
+  faCalendarDays,
+  faChartLine,
+  faChevronRight,
+  faFolderTree,
   faMoneyBillTrendUp,
-  faRoute,
-  faTags,
-  faUserPlus,
+  faPlaneDeparture,
   faUsers,
 } from "@fortawesome/free-solid-svg-icons";
-import { Card } from "@/components/ui/Card";
-import { PageHeader } from "@/components/layout/PageHeader";
-import { fetchCategories, fetchDashboard, fetchDestinations, fetchTrips, fetchUsers } from "@/api";
-import { formatCurrency, formatShortDate } from "@/lib/format";
-import type { CategoryItem, DashboardSummary, DestinationItem, TripListItem, UserListItem } from "@/lib/types";
-
-function compactNumber(value: number) {
-  return new Intl.NumberFormat("en-US", { notation: "compact", maximumFractionDigits: 1 }).format(value);
-}
-
-function shortCompact(value: number) {
-  return new Intl.NumberFormat("en-US", { notation: "compact", maximumFractionDigits: 1 }).format(value);
-}
-
-function StatCard({ label, value, footer, tone, icon }: { label: string; value: string; footer: string; tone: string; icon: IconDefinition }) {
-  return (
-    <article className="stat-card">
-      <div className={`stat-card__icon ${tone}`} aria-hidden="true">
-        <FontAwesomeIcon icon={icon} />
-      </div>
-      <div className="stat-card__label">{label}</div>
-      <div className="stat-card__value">{value}</div>
-      <div className="stat-card__footer">{footer}</div>
-    </article>
-  );
-}
-
-function summaryTotal(items: Array<{ value: number }>) {
-  return items.reduce((sum, item) => sum + item.value, 0);
-}
-
-function SparklineChart({ points }: { points: number[] }) {
-  const width = 100;
-  const height = 60;
-  const max = Math.max(...points, 1);
-  const min = Math.min(...points, 0);
-  const range = Math.max(1, max - min);
-  const coordinates = points.map((value, index) => {
-    const x = (index / Math.max(1, points.length - 1)) * width;
-    const y = height - ((value - min) / range) * (height - 10) - 5;
-    return `${x},${y}`;
-  });
-  const fillPath = `M ${coordinates[0]} ${coordinates.slice(1).join(" ")} L ${width},${height} L 0,${height} Z`;
-
-  return (
-    <svg className="sparkline" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" role="img" aria-label="Biểu đồ xu hướng 30 ngày">
-      <defs>
-        <linearGradient id="sparklineFill" x1="0" x2="0" y1="0" y2="1">
-          <stop offset="0%" stopColor="rgba(15,118,110,0.26)" />
-          <stop offset="100%" stopColor="rgba(15,118,110,0.02)" />
-        </linearGradient>
-      </defs>
-      {[0, 1, 2, 3].map((line) => (
-        <line key={line} x1="0" y1={(height / 4) * line} x2={width} y2={(height / 4) * line} className="sparkline__grid" />
-      ))}
-      <path d={fillPath} fill="url(#sparklineFill)" />
-      <polyline points={coordinates.join(" ")} className="sparkline__line" />
-      {coordinates.map((point, index) => {
-        const [x, y] = point.split(",").map(Number);
-        return <circle key={index} cx={x} cy={y} r="1.8" className="sparkline__dot" />;
-      })}
-    </svg>
-  );
-}
-
-function DonutChart({ items }: { items: Array<{ label: string; value: number; color: string }> }) {
-  const total = summaryTotal(items) || 1;
-  const radius = 34;
-  const circumference = 2 * Math.PI * radius;
-  let offset = 0;
-
-  return (
-    <div className="donut-card">
-      <svg viewBox="0 0 100 100" className="donut-chart" role="img" aria-label="Cơ cấu chi tiêu">
-        <circle cx="50" cy="50" r={radius} className="donut-chart__track" />
-        {items.map((item) => {
-          const dash = (item.value / total) * circumference;
-          const circle = (
-            <circle
-              key={item.label}
-              cx="50"
-              cy="50"
-              r={radius}
-              className="donut-chart__segment"
-              stroke={item.color}
-              strokeDasharray={`${dash} ${circumference - dash}`}
-              strokeDashoffset={-offset}
-            />
-          );
-          offset += dash;
-          return circle;
-        })}
-        <text x="50" y="47" textAnchor="middle" className="donut-chart__value">{shortCompact(total)}</text>
-        <text x="50" y="59" textAnchor="middle" className="donut-chart__label">TOTAL</text>
-      </svg>
-
-      <div className="donut-legend">
-        {items.map((item) => (
-          <div key={item.label} className="donut-legend__item">
-            <span className="donut-legend__swatch" style={{ background: item.color }} />
-            <span>{item.label}</span>
-            <strong>{Math.round((item.value / total) * 100)}%</strong>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function ActivityItem({ title, detail, time, tone, icon }: { title: string; detail: string; time: string; tone: string; icon: IconDefinition }) {
-  return (
-    <div className="activity-item">
-      <div className={`activity-item__avatar ${tone}`} aria-hidden="true">
-        <FontAwesomeIcon icon={icon} />
-      </div>
-      <div className="activity-item__body">
-        <strong>{title}</strong>
-        <div className="muted">{detail}</div>
-        <span>{time}</span>
-      </div>
-    </div>
-  );
-}
-
-function makeTrendPoints(summary: DashboardSummary) {
-  const budget = Math.max(summary.totalBudget, summary.totalExpenses, 1);
-  const tripLoad = summary.topTrips[0]?.expenseTotal ?? summary.totalExpenses / 4;
-  return [0.62, 0.71, 0.83, 0.78, 0.91, 1].map((factor, index) => {
-    const tripInfluence = index < 3 ? tripLoad * 0.08 : tripLoad * 0.12;
-    return Math.max(0.18, ((summary.totalExpenses * factor + tripInfluence) / budget) * 12);
-  });
-}
-
-type DashboardData = {
-  summary: DashboardSummary;
-  users: UserListItem[];
-  categories: CategoryItem[];
-  trips: TripListItem[];
-  destinations: DestinationItem[];
-};
+import { fetchCategories, fetchDashboard, fetchExpenses, fetchTrips, fetchUsers } from "@/api";
+import { formatCurrency, formatLongDate } from "@/lib/format";
+import type { CategoryItem, DashboardSummary, ExpenseItem, TripListItem, UserListItem } from "@/lib/types";
 
 const emptySummary: DashboardSummary = {
   month: new Date().getMonth() + 1,
@@ -166,176 +27,227 @@ const emptySummary: DashboardSummary = {
   totalBudget: 0,
   topTrips: [],
   topCategories: [],
-  destinations: [],
 };
 
+function initial(value?: string | null) {
+  return (value || "G").slice(0, 1).toUpperCase();
+}
+
+function chartBars(expenses: ExpenseItem[], total: number) {
+  const seed = expenses.slice(0, 6).map((expense) => expense.amount);
+  const values = seed.length ? seed : [total * 0.32, total * 0.55, total * 0.24, total * 0.82, total * 0.48, total * 0.2];
+  const max = Math.max(...values, 1);
+  return values.slice(0, 6).map((value) => Math.max(12, Math.round((value / max) * 100)));
+}
+
 export default function DashboardPage() {
-  const [data, setData] = useState<DashboardData | null>(null);
+  const [summary, setSummary] = useState<DashboardSummary>(emptySummary);
+  const [users, setUsers] = useState<UserListItem[]>([]);
+  const [trips, setTrips] = useState<TripListItem[]>([]);
+  const [categories, setCategories] = useState<CategoryItem[]>([]);
+  const [expenses, setExpenses] = useState<ExpenseItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    let mounted = true;
-
-    Promise.all([fetchDashboard(), fetchUsers("", 1, 3), fetchCategories(), fetchTrips("", 1, 3), fetchDestinations()])
-      .then(([summary, users, categories, trips, destinations]) => {
-        if (!mounted) return;
-
-        setData({
-          summary,
-          users: users.items,
-          categories,
-          trips: trips.items,
-          destinations,
-        });
+    Promise.all([
+      fetchDashboard(),
+      fetchUsers("", 1, 5, "ALL"),
+      fetchTrips("", "ALL", 1, 5),
+      fetchCategories(),
+      fetchExpenses("", "ALL", "ALL", 1, 5),
+    ])
+      .then(([dashboard, userResult, tripResult, categoryResult, expenseResult]) => {
+        setSummary(dashboard);
+        setUsers(userResult.items);
+        setTrips(tripResult.items);
+        setCategories(categoryResult);
+        setExpenses(expenseResult.items);
+        setError(null);
       })
-      .catch(() => {
-        if (mounted) setError("Không tải được dữ liệu thật từ API.");
-      });
-
-    return () => {
-      mounted = false;
-    };
+      .catch((err) => setError(err instanceof Error ? err.message : "Không tải được dữ liệu thật từ API."))
+      .finally(() => setLoading(false));
   }, []);
 
-  const summary = data?.summary ?? emptySummary;
-  const users = data?.users ?? [];
-  const categories = data?.categories ?? [];
-  const trips = data?.trips ?? [];
-  const destinations = data?.destinations ?? [];
-  const hasMeaningfulData =
-    summary.totalUsers > 0 ||
-    summary.activeUsers > 0 ||
-    summary.totalTrips > 0 ||
-    summary.ongoingTrips > 0 ||
-    summary.totalExpenses > 0 ||
-    summary.totalBudget > 0 ||
-    summary.topTrips.length > 0 ||
-    summary.topCategories.length > 0 ||
-    summary.destinations.length > 0 ||
-    users.length > 0 ||
-    categories.length > 0 ||
-    trips.length > 0 ||
-    destinations.length > 0;
-
-  const trendPoints = useMemo(() => (hasMeaningfulData ? makeTrendPoints(summary) : [0, 0, 0, 0, 0, 0]), [hasMeaningfulData, summary]);
-  const categoryItems = useMemo(
-    () =>
-      hasMeaningfulData
-        ? categories.slice(0, 3).map((category, index) => ({
-            label: category.name,
-            value: category.totalAmount,
-            color: ["#0f766e", "#6366f1", "#f59e0b"][index % 3],
-          }))
-        : [],
-    [categories, hasMeaningfulData],
-  );
-
-  const activityFeed = useMemo(
-    () =>
-      hasMeaningfulData
-        ? [
-            {
-              title: `${users[0]?.fullName ?? "Người dùng"} đã được đồng bộ`,
-              detail: users[0]?.email ? `${users[0].email} đang là dữ liệu người dùng mới nhất.` : "Dữ liệu người dùng đang được tải từ API.",
-              time: users[0]?.createdAt ? formatShortDate(users[0].createdAt) : "Mới đây",
-              icon: faUserPlus,
-              tone: "activity-item__avatar--teal",
-            },
-            {
-              title: `${trips[0]?.name ?? "Chuyến đi"} đang có phát sinh`,
-              detail: `${formatCurrency(trips[0]?.expenseTotal ?? summary.topTrips[0]?.expenseTotal ?? 0)} đã được ghi nhận trong chuyến đi gần nhất.`,
-              time: trips[0]?.createdAt ? formatShortDate(trips[0].createdAt) : "15 phút trước",
-              icon: faCreditCard,
-              tone: "activity-item__avatar--orange",
-            },
-            {
-              title: `${destinations[0]?.label ?? "Điểm đến"} vừa cập nhật`,
-              detail: `${categories[0]?.name ?? "Danh mục"} đang dẫn đầu về số liệu chi tiêu.`,
-              time: destinations[0]?.latestTripAt ? formatShortDate(destinations[0].latestTripAt) : "45 phút trước",
-              icon: faCommentDots,
-              tone: "activity-item__avatar--blue",
-            },
-          ]
-        : [],
-    [categories, destinations, hasMeaningfulData, summary.topTrips, trips, users],
-  );
-
-  const quickActions = [
-    { href: "/users", title: "Người dùng", description: "Xem và quản lý tài khoản", icon: faUsers },
-    { href: "/categories", title: "Danh mục", description: "Kiểm tra nhóm chi tiêu", icon: faTags },
-    { href: "/expenses", title: "Chi tiêu", description: "Theo dõi dòng tiền", icon: faMoneyBillTrendUp },
-    { href: "/trips", title: "Chuyến đi", description: "Mở danh sách chuyến", icon: faRoute },
-  ] as const;
+  const bars = useMemo(() => chartBars(expenses, summary.totalExpenses), [expenses, summary.totalExpenses]);
+  const activeBudget = Math.max(summary.totalBudget, summary.totalExpenses, 1);
+  const budgetPercent = Math.min(100, Math.round((summary.totalExpenses / activeBudget) * 100));
+  const visibleCategories = (summary.topCategories.length
+    ? summary.topCategories.map((category) => ({
+        id: category.id,
+        name: category.name,
+        color: category.color ?? null,
+        icon: null,
+        totalAmount: category.totalAmount,
+      }))
+    : categories.slice(0, 6).map((category) => ({
+        id: category.id,
+        name: category.name,
+        color: category.color ?? null,
+        icon: category.icon ?? null,
+        totalAmount: category.totalAmount,
+      })));
 
   return (
-    <div className="page-stack dashboard-page">
-      <PageHeader
-        title="Tổng quan hệ thống"
-        description="Theo dõi người dùng, chuyến đi, chi tiêu và điểm đến nổi bật trong một màn hình."
-        actionLabel="Mở danh sách người dùng"
-        actionHref="/users"
-      />
+    <section className="admin-dashboard">
+      <div className="admin-dashboard__ambient admin-dashboard__ambient--top" />
+      <div className="admin-dashboard__ambient admin-dashboard__ambient--bottom" />
 
-      {!hasMeaningfulData ? (
-        <Card title={data ? "Chưa có dữ liệu" : "Đang tải dữ liệu thật"} subtitle={error ?? (data ? "API đã phản hồi nhưng chưa có bản ghi nào để hiển thị." : "Kết nối API và chờ phản hồi từ hệ thống.")}>
-          <div className="empty-state empty-state--dashboard">
-            <p>{error ?? (data ? "Không có dữ liệu thật từ API." : "Đang lấy dữ liệu thật từ API...")}</p>
+      <header className="admin-dashboard__header">
+        <div>
+          <h1>Tổng Quan Hệ Thống</h1>
+          <p>Chào mừng trở lại. Đây là dữ liệu mới nhất cho GoTogether.</p>
+        </div>
+        <div className="admin-dashboard__period">
+          <FontAwesomeIcon icon={faCalendarDays} />
+          <span>Tháng {summary.month}, {summary.year}</span>
+        </div>
+      </header>
+
+      {error ? <div className="admin-dashboard__error">{error}</div> : null}
+      {loading ? <div className="admin-dashboard__empty">Đang tải dữ liệu thật...</div> : null}
+
+      <section className="admin-dashboard__stats">
+        <article className="dashboard-glass-card dashboard-stat">
+          <div className="dashboard-stat__top">
+            <span><FontAwesomeIcon icon={faUsers} /></span>
+            <small>+12%</small>
           </div>
-        </Card>
-      ) : (
-        <>
-          <section className="metrics-grid">
-            <StatCard tone="stat-card__icon--teal" icon={faUsers} label="Tổng người dùng" value={compactNumber(summary.totalUsers)} footer={`${summary.activeUsers.toLocaleString()} đang hoạt động`} />
-            <StatCard tone="stat-card__icon--blue" icon={faRoute} label="Chuyến đi hoạt động" value={summary.ongoingTrips.toString()} footer={`${summary.totalTrips.toLocaleString()} chuyến trong hệ thống`} />
-            <StatCard tone="stat-card__icon--orange" icon={faMoneyBillTrendUp} label="Tổng chi tiêu" value={shortCompact(summary.totalExpenses)} footer={`${shortCompact(summary.totalBudget)} ngân sách theo dõi`} />
-            <StatCard tone="stat-card__icon--violet" icon={faMapLocationDot} label="Điểm đến nổi bật" value={destinations[0]?.label ?? summary.destinations[0]?.label ?? "N/A"} footer="Trending hiện tại" />
-          </section>
+          <p>Người dùng</p>
+          <strong>{summary.totalUsers.toLocaleString()}</strong>
+        </article>
+        <article className="dashboard-glass-card dashboard-stat">
+          <div className="dashboard-stat__top dashboard-stat__top--purple">
+            <span><FontAwesomeIcon icon={faPlaneDeparture} /></span>
+            <small>Mới</small>
+          </div>
+          <p>Chuyến đi</p>
+          <strong>{summary.totalTrips.toLocaleString()}</strong>
+        </article>
+        <article className="dashboard-glass-card dashboard-stat dashboard-stat--highlight">
+          <div className="dashboard-stat__top">
+            <span><FontAwesomeIcon icon={faMoneyBillTrendUp} /></span>
+            <small>Info</small>
+          </div>
+          <p>Chi tiêu tháng</p>
+          <strong>{formatCurrency(summary.totalExpenses)}</strong>
+        </article>
+        <article className="dashboard-glass-card dashboard-stat">
+          <div className="dashboard-stat__top dashboard-stat__top--plain">
+            <span><FontAwesomeIcon icon={faFolderTree} /></span>
+            <small>Ổn định</small>
+          </div>
+          <p>Danh mục</p>
+          <strong>{categories.length.toLocaleString()}</strong>
+        </article>
+      </section>
 
-          <section className="dashboard-grid dashboard-grid--hero">
-            <Card title="Xu hướng chuyến đi" subtitle={`Hiệu suất 30 ngày gần nhất - ${summary.month}/${summary.year}`}>
-              <div className="card-toolbar">
-                <button className="chip chip--muted" type="button">CSV</button>
-                <button className="chip chip--accent" type="button">Theo tuần</button>
+      <section className="admin-dashboard__main-grid">
+        <div className="admin-dashboard__left">
+          <article className="dashboard-glass-card dashboard-chart">
+            <div className="dashboard-chart__icon"><FontAwesomeIcon icon={faChartLine} /></div>
+            <div className="dashboard-card-head">
+              <div>
+                <h2>Xu Hướng Chi Tiêu</h2>
+                <p>Theo dõi biến động chi phí theo thời gian</p>
               </div>
-              <SparklineChart points={trendPoints} />
-              <div className="chart-axis">
-                {['May 01', 'May 07', 'May 14', 'May 21', 'May 28', 'Jun 01'].map((label) => (
-                  <span key={label}>{label}</span>
-                ))}
-              </div>
-            </Card>
+              <select aria-label="Khoảng thời gian">
+                <option>7 ngày qua</option>
+                <option>30 ngày qua</option>
+              </select>
+            </div>
+            <div className="dashboard-chart__plot">
+              <div className="dashboard-chart__grid" />
+              {bars.map((height, index) => (
+                <div className="dashboard-chart__bar" style={{ height: `${height}%` }} key={`${height}-${index}`} />
+              ))}
+            </div>
+            <div className="dashboard-chart__axis">
+              <span>T2</span><span>T3</span><span>T4</span><span>T5</span><span>T6</span><span>T7</span>
+            </div>
+          </article>
 
-            <Card title="Cơ cấu chi tiêu" subtitle="Phân bổ theo danh mục thực tế">
-              {categoryItems.length > 0 ? <DonutChart items={categoryItems} /> : <div className="empty-state empty-state--dashboard"><p>Chưa có danh mục để hiển thị.</p></div>}
-            </Card>
-          </section>
+          <article className="dashboard-glass-card dashboard-table-card">
+            <div className="dashboard-card-head">
+              <h2>Chuyến Đi Gần Đây</h2>
+              <Link href="/trips">Xem tất cả</Link>
+            </div>
+            <div className="dashboard-trip-list">
+              {trips.map((trip) => (
+                <Link className="dashboard-trip-row" href={`/trips/${trip.id}`} key={trip.id}>
+                  <div className="dashboard-trip-row__name">
+                    {trip.images ? <img src={trip.images} alt={trip.name} /> : <span>{initial(trip.name)}</span>}
+                    <div>
+                      <strong>{trip.name}</strong>
+                      <small>{trip.status}</small>
+                    </div>
+                  </div>
+                  <span>{formatLongDate(trip.createdAt)}</span>
+                  <b>{formatCurrency(trip.expenseTotal)}</b>
+                </Link>
+              ))}
+            </div>
+          </article>
+        </div>
 
-          <section className="dashboard-grid dashboard-grid--secondary">
-            <Card title="Lối tắt quản trị" subtitle="Đi nhanh tới các trang chính">
-              <div className="action-grid">
-                {quickActions.map((item) => (
-                  <Link key={item.href} href={item.href} className="action-tile">
-                    <span className="action-tile__icon" aria-hidden="true">
-                      <FontAwesomeIcon icon={item.icon} />
-                    </span>
-                    <span className="action-tile__title">{item.title}</span>
-                    <span className="action-tile__desc">{item.description}</span>
-                  </Link>
-                ))}
-              </div>
-            </Card>
-
-            <Card title="Hoạt động gần đây" subtitle="Dữ liệu thật từ API" className="sticky-panel">
-              <div className="activity-list">
-                {activityFeed.length > 0 ? activityFeed.map((item) => <ActivityItem key={item.title} {...item} />) : <div className="empty-state empty-state--dashboard"><p>Không có hoạt động để hiển thị.</p></div>}
-              </div>
-              <Link className="link-list__view-all" href="/analysis">
-                Xem tất cả
+        <aside className="dashboard-glass-card dashboard-users-card">
+          <div className="dashboard-users-card__head">
+            <h2>Người Dùng Mới</h2>
+            <p>Danh sách tài khoản mới nhất</p>
+          </div>
+          <div className="dashboard-users-list">
+            {users.map((user) => (
+              <Link className="dashboard-user-row" href={`/users/${user.id}`} key={user.id}>
+                <div>
+                  {user.avatar ? <img src={user.avatar} alt={user.fullName ?? user.email} /> : <span>{initial(user.fullName || user.email)}</span>}
+                  <div>
+                    <strong>{user.fullName || "Chưa có tên"}</strong>
+                    <small>{user.email}</small>
+                  </div>
+                </div>
+                <FontAwesomeIcon icon={faChevronRight} />
               </Link>
-            </Card>
-          </section>
-        </>
-      )}
-    </div>
+            ))}
+          </div>
+          <Link className="dashboard-users-card__all" href="/users">Quản lý tất cả</Link>
+        </aside>
+      </section>
+
+      <section className="admin-dashboard__bottom-grid">
+        <article className="dashboard-glass-card dashboard-categories">
+          <h2>Phân Bổ Danh Mục</h2>
+          <div className="dashboard-category-grid">
+            {visibleCategories.map((category, index) => (
+              <div className="dashboard-category" key={category.id}>
+                <span style={{ background: category.color ?? ["rgba(0,219,233,.12)", "rgba(182,0,248,.12)", "rgba(235,178,255,.12)"][index % 3] }}>
+                  {category.icon || category.name.slice(0, 1)}
+                </span>
+                <div>
+                  <small>{category.name}</small>
+                  <strong>{formatCurrency(category.totalAmount)}</strong>
+                </div>
+              </div>
+            ))}
+          </div>
+        </article>
+
+        <article className="dashboard-glass-card dashboard-budget">
+          <div>
+            <h2>Hạn Mức Ngân Sách</h2>
+            <p>Hạn mức chi tiêu toàn hệ thống tháng này.</p>
+          </div>
+          <div>
+            <div className="dashboard-budget__meta">
+              <span>{budgetPercent}% đã dùng</span>
+              <span>{formatCurrency(summary.totalExpenses)} / {formatCurrency(activeBudget)}</span>
+            </div>
+            <div className="dashboard-budget__track">
+              <div style={{ width: `${budgetPercent}%` }} />
+            </div>
+          </div>
+          <Link href="/expenses">Xem chi tiêu</Link>
+        </article>
+      </section>
+    </section>
   );
 }

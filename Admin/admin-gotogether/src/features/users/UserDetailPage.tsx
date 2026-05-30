@@ -6,18 +6,25 @@ import { Card } from "@/components/ui/Card";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { fetchUserDetail } from "@/lib/api";
 import { formatCurrency, formatLongDate, formatShortDate } from "@/lib/format";
-import { mockUserDetail } from "@/lib/mock-data";
 import type { UserDetail } from "@/lib/types";
 
 export default function UserDetailPage() {
   const params = useParams<{ id: string }>();
-  const [user, setUser] = useState<UserDetail>(mockUserDetail);
+  const [user, setUser] = useState<UserDetail | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (params?.id) {
-      fetchUserDetail(params.id).then(setUser).catch(() => setUser(mockUserDetail));
-    }
+    if (!params?.id) return;
+    fetchUserDetail(params.id)
+      .then((data) => {
+        setUser(data);
+        setError(null);
+      })
+      .catch((err) => setError(err instanceof Error ? err.message : "Không tải được người dùng."));
   }, [params?.id]);
+
+  if (error) return <div className="empty-state">{error}</div>;
+  if (!user) return <div className="empty-state">Đang tải dữ liệu thật...</div>;
 
   return (
     <div className="page-stack">
@@ -26,6 +33,7 @@ export default function UserDetailPage() {
       <div className="grid-2">
         <Card title="Hồ sơ" subtitle="Thông tin nhận diện và trạng thái tài khoản">
           <div className="detail-card__body">
+            {user.avatar ? <img className="data-thumb" src={user.avatar} alt={user.fullName ?? user.email} /> : null}
             <p><strong>Trạng thái:</strong> {user.status}</p>
             <p><strong>Xác thực:</strong> {user.isVerified ? "Đã xác minh" : "Chưa xác minh"}</p>
             <p><strong>Tham gia:</strong> {formatShortDate(user.createdAt)}</p>
@@ -43,9 +51,7 @@ export default function UserDetailPage() {
                   <strong>{trip.tripName}</strong>
                   <div className="muted">{trip.role}</div>
                 </div>
-                <div className="span-6">
-                  <span className="chip">{trip.inviteStatus}</span>
-                </div>
+                <div className="span-6"><span className="chip">{trip.inviteStatus}</span></div>
               </div>
             ))}
           </div>
@@ -54,12 +60,6 @@ export default function UserDetailPage() {
 
       <Card title="Chi tiêu gần đây" subtitle="Các khoản thanh toán mới nhất của tài khoản này">
         <div className="table">
-          <div className="table__row table__row--header">
-            <div className="span-4">Chuyến đi</div>
-            <div className="span-3">Mô tả</div>
-            <div className="span-2">Số tiền</div>
-            <div className="span-3">Ngày</div>
-          </div>
           {user.recentExpenses.map((expense) => (
             <div key={expense.id} className="table__row">
               <div className="span-4">{expense.tripName}</div>

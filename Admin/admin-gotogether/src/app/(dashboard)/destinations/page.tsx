@@ -1,1 +1,5 @@
-export { default } from "@/features/destinations/DestinationsPage";
+import { redirect } from "next/navigation";
+
+export default function RemovedDestinationsPage() {
+  redirect("/");
+}

@@ -35,7 +35,7 @@ export type DashboardSummary = {
     color?: string | null;
     totalAmount: number;
   }>;
-  destinations: Array<{
+  destinations?: Array<{
     id: string;
     label: string;
     tripCount: number;
@@ -86,6 +86,7 @@ export type TripListItem = {
   expenseTotal: number;
   totalBudget?: number | null;
   createdAt: string;
+  images?: string | null;
 };
 
 export type TripDetail = TripListItem & {
@@ -139,4 +140,26 @@ export type AppSettings = {
   notificationsEnabled: boolean;
   autoLockMinutes: number;
   currency: string;
+};
+
+export type ExpenseItem = {
+  id: string;
+  tripId: string;
+  tripName: string;
+  tripImage?: string | null;
+  amount: number;
+  currency: string;
+  categoryId: string;
+  categoryName: string;
+  categoryIcon?: string | null;
+  categoryColor?: string | null;
+  description?: string | null;
+  paidById: string;
+  paidByName: string;
+  paidByAvatar?: string | null;
+  type: string;
+  date: string;
+  receipt?: string | null;
+  isConfirmed: boolean;
+  createdAt: string;
 };

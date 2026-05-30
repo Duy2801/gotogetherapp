@@ -6,6 +6,13 @@ import {
   TripSpendingItemDto,
 } from "./dto/spending-statistics.dto";
 
+type CategorySummary = {
+  id: string;
+  name: string;
+  icon: string | null;
+  color: string | null;
+};
+
 @Injectable()
 export class StatisticsService {
   constructor(private prisma: PrismaService) {}
@@ -182,7 +189,7 @@ export class StatisticsService {
     }
 
     const categoryIds = categoryStats.map((item) => item.categoryId);
-    const categories = await this.prisma.category.findMany({
+    const categories = (await this.prisma.category.findMany({
       where: {
         id: {
           in: categoryIds,
@@ -194,9 +201,11 @@ export class StatisticsService {
         icon: true,
         color: true,
       },
-    });
+    })) as CategorySummary[];
 
-    const categoryMap = new Map(categories.map((item) => [item.id, item]));
+    const categoryMap = new Map<string, CategorySummary>(
+      categories.map((item) => [item.id, item]),
+    );
     const selectedTripTotal =
       trips.find((item) => item.tripId === selectedTripId)?.totalAmount ?? 0;
 

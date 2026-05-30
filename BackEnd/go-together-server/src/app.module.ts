@@ -17,6 +17,7 @@ import { NotificationModule } from "./notification/notification.module";
 import { StatisticsModule } from "./statistics/statistics.module";
 import { I18nModule } from "./i18n/i18n.module";
 import { AdminModule } from "./admin/admin.module";
+import { CategoryModule } from "./category/category.module";
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { AdminModule } from "./admin/admin.module";
     BudgetModule,
     NotificationModule,
     StatisticsModule,
+    CategoryModule,
     AdminModule,
   ],
   controllers: [AppController],

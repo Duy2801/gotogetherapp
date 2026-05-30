@@ -10,9 +10,7 @@ import {
   faBell,
   faChartColumn,
   faGear,
-  faMapLocationDot,
   faMoneyBillTrendUp,
-  faPlus,
   faRightFromBracket,
   faRoute,
   faSearch,
@@ -26,12 +24,10 @@ import type { SessionUser } from "@/lib/types";
 const NAV_ICONS: Record<string, typeof faChartColumn> = {
   "/": faChartColumn,
   "/users": faUsers,
-  "/categories": faTags,
   "/trips": faRoute,
+  "/categories": faTags,
   "/expenses": faMoneyBillTrendUp,
-  "/destinations": faMapLocationDot,
   "/settings": faGear,
-  "/analysis": faChartColumn,
 };
 
 type AdminShellProps = {
@@ -69,7 +65,6 @@ export function AdminShell({ user, children }: AdminShellProps) {
               );
             })}
           </nav>
-
 
           <button
             className="btn btn--ghost sidebar__logout"

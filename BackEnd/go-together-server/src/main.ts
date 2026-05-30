@@ -3,9 +3,13 @@ import { AppModule } from "./app.module";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { ResponseInterceptor } from "./common/interceptors/response.interceptor";
 import { ValidationPipe, VersioningType } from "@nestjs/common";
+import { json, urlencoded } from "express";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  app.use(json({ limit: "10mb" }));
+  app.use(urlencoded({ extended: true, limit: "10mb" }));
 
   app.setGlobalPrefix("api");
   app.enableVersioning({
@@ -21,7 +25,7 @@ async function bootstrap() {
     },
     credentials: true,
     allowedHeaders: ["Content-Type", "Authorization"],
-    methods: ["GET", "POST", "OPTIONS"],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   });
 
   const config = new DocumentBuilder()
