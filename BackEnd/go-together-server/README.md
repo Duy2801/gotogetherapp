@@ -111,7 +111,7 @@ GoTogether/
 
 - Node.js >= 20.x
 - PostgreSQL >= 14.x
-- Redis >= 7.x
+- Hosted Redis >= 7.x
 - Docker & Docker Compose (optional)
 - npm / yarn / pnpm
 
@@ -166,10 +166,10 @@ API Documentation (Swagger): `http://localhost:3000/api`
 
 ---
 
-## 🐳 Docker Setup (Recommended)
+## 🐳 Docker Setup (PostgreSQL only)
 
 ```bash
-# Build và start tất cả services
+# Start local PostgreSQL
 docker-compose up -d
 
 # View logs
@@ -183,7 +183,7 @@ Services:
 
 - **API**: http://localhost:3000
 - **PostgreSQL**: localhost:5432
-- **Redis**: localhost:6379
+- **Redis**: hosted service from `.env`
 
 ---
 
@@ -246,8 +246,12 @@ JWT_REFRESH_SECRET=your-refresh-secret-key
 JWT_REFRESH_EXPIRES_IN=7d
 
 # Redis
-REDIS_HOST=localhost
+REDIS_URL=rediss://your-redis-name:your-redis-password@your-region-redis.render.com:6379
+REDIS_USERNAME=your-redis-name
+REDIS_HOST=your-region-redis.render.com
 REDIS_PORT=6379
+REDIS_PASSWORD=your-hosted-redis-password
+REDIS_TLS=true
 
 # Email
 MAIL_HOST=smtp.gmail.com

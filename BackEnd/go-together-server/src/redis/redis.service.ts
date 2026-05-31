@@ -1,22 +1,58 @@
-import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import Redis from 'ioredis';
+import Redis, { RedisOptions } from 'ioredis';
 
 @Injectable()
 export class RedisService implements OnModuleInit, OnModuleDestroy {
+  private readonly logger = new Logger(RedisService.name);
   private client: Redis;
   constructor(private configService: ConfigService) {}
 
-  onModuleInit() {
-    this.client = new Redis({
-      host: this.configService.get('REDIS_HOST'),
-      port: Number(this.configService.get('REDIS_PORT')),
-      password: this.configService.get('REDIS_PASSWORD'),
+  async onModuleInit() {
+    const redisUrl = this.configService.get<string>('REDIS_URL');
+
+    if (redisUrl) {
+      this.client = new Redis(redisUrl, this.getCommonRedisOptions());
+      this.logger.log('Connecting to Redis with REDIS_URL');
+    } else {
+      this.client = new Redis(this.getRedisOptionsFromEnv());
+      this.logger.log(
+        `Connecting to Redis at ${this.configService.get('REDIS_HOST')}:${this.configService.get('REDIS_PORT')}`,
+      );
+    }
+
+    this.client.on('error', (error) => {
+      this.logger.error(`Redis connection error: ${error.message}`);
     });
+
+    await this.client.ping();
+    this.logger.log('Redis connected');
   }
 
   onModuleDestroy() {
-    return this.client.quit();
+    return this.client?.quit();
+  }
+
+  private getCommonRedisOptions(): RedisOptions {
+    return {
+      connectTimeout: 5000,
+      maxRetriesPerRequest: 1,
+      retryStrategy: () => null,
+    };
+  }
+
+  private getRedisOptionsFromEnv(): RedisOptions {
+    const port = Number(this.configService.get('REDIS_PORT') || 6379);
+    const useTls = this.configService.get('REDIS_TLS') === 'true';
+
+    return {
+      ...this.getCommonRedisOptions(),
+      username: this.configService.get('REDIS_USERNAME'),
+      host: this.configService.get('REDIS_HOST'),
+      port,
+      password: this.configService.get('REDIS_PASSWORD'),
+      tls: useTls ? {} : undefined,
+    };
   }
 
   /* ========================
