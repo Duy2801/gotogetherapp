@@ -9,16 +9,18 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
   constructor(private configService: ConfigService) {}
 
   async onModuleInit() {
-    const redisUrl = this.configService.get<string>('REDIS_URL');
+    const redisUrl = this.getEnv('REDIS_URL');
 
     if (redisUrl) {
       this.client = new Redis(redisUrl, this.getCommonRedisOptions());
-      this.logger.log('Connecting to Redis with REDIS_URL');
+      this.logger.log(`Connecting to Redis with REDIS_URL (${this.getSafeRedisTarget(redisUrl)})`);
     } else {
-      this.client = new Redis(this.getRedisOptionsFromEnv());
+      const options = this.getRedisOptionsFromEnv();
+      this.assertNotLocalRedis(options.host);
       this.logger.log(
-        `Connecting to Redis at ${this.configService.get('REDIS_HOST')}:${this.configService.get('REDIS_PORT')}`,
+        `Connecting to Redis with REDIS_HOST (${options.host}:${options.port})`,
       );
+      this.client = new Redis(options);
     }
 
     this.client.on('error', (error) => {
@@ -42,17 +44,52 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
   }
 
   private getRedisOptionsFromEnv(): RedisOptions {
-    const port = Number(this.configService.get('REDIS_PORT') || 6379);
-    const useTls = this.configService.get('REDIS_TLS') === 'true';
+    const host = this.getEnv('REDIS_HOST');
+    const password = this.getEnv('REDIS_PASSWORD');
+    const port = Number(this.getEnv('REDIS_PORT') || 6379);
+    const useTls = this.getEnv('REDIS_TLS') === 'true' || host?.includes('upstash.io');
+
+    if (!host) {
+      throw new Error('Missing Redis config: set REDIS_URL or REDIS_HOST.');
+    }
+
+    if (!Number.isInteger(port)) {
+      throw new Error('Invalid Redis config: REDIS_PORT must be a number.');
+    }
 
     return {
       ...this.getCommonRedisOptions(),
-      username: this.configService.get('REDIS_USERNAME'),
-      host: this.configService.get('REDIS_HOST'),
+      username: this.getEnv('REDIS_USERNAME'),
+      host,
       port,
-      password: this.configService.get('REDIS_PASSWORD'),
+      password,
       tls: useTls ? {} : undefined,
     };
+  }
+
+  private getEnv(key: string): string | undefined {
+    const value = this.configService.get<string>(key)?.trim();
+    return value || undefined;
+  }
+
+  private assertNotLocalRedis(host?: string) {
+    const allowLocal = this.getEnv('REDIS_ALLOW_LOCAL') === 'true';
+    const isLocal = host === '127.0.0.1' || host === 'localhost' || host === '::1';
+
+    if (isLocal && !allowLocal) {
+      throw new Error(
+        'Redis is configured to use local Redis. Set REDIS_URL to your Upstash rediss:// URL, or set REDIS_HOST to your Upstash host.',
+      );
+    }
+  }
+
+  private getSafeRedisTarget(redisUrl: string): string {
+    try {
+      const url = new URL(redisUrl);
+      return `${url.protocol}//${url.hostname}:${url.port || 6379}`;
+    } catch {
+      return 'configured URL';
+    }
   }
 
   /* ========================
